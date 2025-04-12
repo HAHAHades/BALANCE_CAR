@@ -186,27 +186,20 @@ void C8_6T6_Test(void)
 	/****************************************/
 	RCC_ClocksTypeDef get_rcc_clock;   
 	RCC_GetClocksFreq(&get_rcc_clock); 
-	
+
+	#if UART_Printtf
 	UsartPrintf(USART_DEBUG, "HCLK_Frequency:%d\n", get_rcc_clock.HCLK_Frequency);
 	UsartPrintf(USART_DEBUG, "PCLK1_Frequency:%d\n", get_rcc_clock.PCLK1_Frequency);
 	UsartPrintf(USART_DEBUG, "PCLK2_Frequency:%d\n", get_rcc_clock.PCLK2_Frequency);
 	UsartPrintf(USART_DEBUG, "SYSCLK_Frequency:%d\n", get_rcc_clock.SYSCLK_Frequency);
-
+    #endif //UART_Printtf
 }
-
-
-
-
 
 
 int main(void)
 {
-	
 	Hardware_Init();//初始化外围硬件
 	C8_6T6_Test();//核心板外设测试例程
-	
-	
-
 	
 	//1.板载LED以1Hz的频率闪烁3次；
 	for(uint8_t count=0;count<3;count++)
@@ -218,12 +211,9 @@ int main(void)
 	}
 	
 	//2.开始控制小车
-	
 	#if CONTROL_CAR_IN_IT
 	while(1)
 	{
-		
-		
 //		OLED_Display_XxX_ASCII( 0, 0,  8, 12, 1, "euler:R,P,Y\n");
 		OLED_Display_XxX_ASCII( 0, 16,  8, 12, 1, "%5.2f %5.2f %5.2f\n", G_Euler_RPY[0], G_Euler_RPY[1], G_Euler_RPY[2]);
 		OLED_Refresh();

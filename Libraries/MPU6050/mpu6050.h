@@ -8,13 +8,13 @@
 #define MPU6050_SLAVE_ADDRESS  (0x68)      //MPU6050器件读地址
 
 //INT引脚的GPIO宏定义
-#define RCC_INT_GPIO_PORT             RCC_APB2Periph_GPIOB
-#define MPU6050_INT_Pin               GPIO_Pin_5
-#define MPU6050_INT_GPIO_Port         GPIOB
-#define MPU6050_INT_EXTI_IRQn         EXTI9_5_IRQn
-#define MPU6050_INT_EXTI_LINE         EXTI_Line5
-#define MPU6050_INT_EXTI_PORTSOURCE   GPIO_PortSourceGPIOB
-#define MPU6050_INT_EXTI_PINSOURCE    GPIO_PinSource5
+#define RCC_INT_GPIO_PORT             RCC_APB2Periph_GPIOA //RCC_APB2Periph_GPIOB
+#define MPU6050_INT_Pin               GPIO_Pin_15 //GPIO_Pin_5
+#define MPU6050_INT_GPIO_Port         GPIOA //GPIOB
+#define MPU6050_INT_EXTI_IRQn         EXTI15_10_IRQn //EXTI9_5_IRQn
+#define MPU6050_INT_EXTI_LINE         EXTI_Line15 //EXTI_Line5
+#define MPU6050_INT_EXTI_PORTSOURCE   GPIO_PortSourceGPIOA //GPIO_PortSourceGPIOB
+#define MPU6050_INT_EXTI_PINSOURCE    GPIO_PinSource15 //GPIO_PinSource5
 
 #define MPU6050_WHO_AM_I        0x75
 #define MPU6050_SMPLRT_DIV      0  //8000Hz

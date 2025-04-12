@@ -274,15 +274,18 @@ void EXTI15_10_IRQHandler(void)
 	}
 	EXTI_ClearITPendingBit(EXTI_Line13);//完成中断后清除中断标志位
 	
-	if(EXTI_GetITStatus(EXTI_Line15) !=RESET )//判断是否进入中断，若进入中断则执行后面的中断程序
+
+	
+      //确保是否产生了EXTI Line中断
+	if(EXTI_GetITStatus(MPU6050_INT_EXTI_LINE) != RESET) 
 	{
-		/**********************中断程序*********************/
-		
-		/**************************************************/
-	}
-	EXTI_ClearITPendingBit(EXTI_Line15);//完成中断后清除中断标志位
-	
-	
+       
+        //回调函数
+        MPU6050_data_ready_cb();
+		Control_Car_IRQHandler();
+        //清除中断标志位
+        EXTI_ClearITPendingBit(MPU6050_INT_EXTI_LINE);     
+	} 
 	
 
 }
