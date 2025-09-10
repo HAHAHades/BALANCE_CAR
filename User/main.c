@@ -19,10 +19,7 @@
 //#include "invensense_adv.h"
 #include "eMPL_outputs.h"
 
-#include "bsp_tim.h"
 #include "bsp_hc_sr04.h"
-
-
 
 #ifdef   soft_IIC //MPU
 #include "bsp_soft_i2c.h"
@@ -30,10 +27,11 @@
 #include "bsp_hard_i2c.h"
 #endif
 
-
 #include "bsp_520Motor.h"
 #include "bsp_encoder.h"
 #include "bsp_control.h"
+
+#include "nrf_controller.h"
 
 
 /*
@@ -65,6 +63,9 @@ float volatile G_Euler_RPY[3];//欧拉角
 float volatile G_GYRO_XYZ[3];//角速度
 float volatile G_ACCEL_XYZ[3];//加速度
 
+extern int32_t G_BSPCTRL_TargetSpeed ;//前后速度
+extern int32_t G_BSPCTRL_TurnSpeed ;//转向速度，正为左转，负为右转
+
 /******************************************************/
 
 #if ENCODER_GET_COUNT_IN_IT
@@ -73,14 +74,17 @@ extern int volatile G_ENCODERB_COUNT;
 #endif //ENCODER_GET_COUNT_IN_IT
 
 
-#define UART_Printtf 0 //是否使用UART输出信息
+#define UART_Printtf 1 //是否使用UART输出信息
+#define OLED_ON 0 //OLED 输出信息
+#define HC_SR04_ON 0 //是否开启声波测距
 #define OLED_SHOW_MPU 0 //OLED 显示mpu的信息
+#define USART_DEBUG_MPU 0 //USART 调试mpu
 #define OLED_SHOW_HC_SR04 0 //OLED 显示声波传感器的信息
 #define OLED_SHOW_Encoder_Speed 0 //OLED 显示编码器信息
 #define Motor_DEBUG 0 //调试电机
 #define CONTROL_CAR_IN_IT  1 // 是否在中断中控制小车，在主函数里控制小车无法同时做其他事情，如刷新OLED等
 #define BANLANCE_CAR_TEST 1 //平衡车测试
-
+#define NRF_CTRL_ON 0 //是否使用NRF遥控器
 
 void Hardware_Init(void)
 {
@@ -94,17 +98,20 @@ void Hardware_Init(void)
 	LED_Register(1, GPIOC, GPIO_Pin_13, LED_Trigger_Level_Low);//配置LED灯的端口
 	
 	//串口初始化
-	Usart1_Init( 115200);
+	#if UART_Printtf //
+	Usart2_Init( 115200);
 	UsartPrintf(USART_DEBUG, "TEST...\n");
-	
+	#endif // UART_Printtf
+
 	//OLED初始化
+	#if OLED_ON //
 	IICxInit( OLED_IICx, OLED_IICx_PinRemapping,  I2C_Speed);
 	OLED_Init();
 	OLED_ColorTurn(0);//0正常显示，1 反色显示
 	OLED_DisplayTurn(0);//0正常显示 1 屏幕翻转显示
 	OLED_Display_XxX_ASCII( 0, 0,  8, 16, 1, "TEST...\n");
 	OLED_Refresh();
-	
+	#endif // OLED_ON
 	
     // MPU6050 IIC 初始化
     #ifdef soft_IIC //mpu使用软/硬件IIC
@@ -139,14 +146,36 @@ void Hardware_Init(void)
     #endif //UART_Printtf
 	
 	
+	//NRF遥控器配置
+	#if NRF_CTRL_ON //
+	uint8_t tmpret=0;
+	tmpret = NRF_Controller_Config();
+	if (!tmpret)
+	{
+		#if UART_Printtf
+		UsartPrintf(USART_DEBUG, "NRF Controller Config failed!\n");
+		#endif
+		LED_ON(1);
+		while (1);
+	}
+	else
+	{
+		#if UART_Printtf
+		UsartPrintf(USART_DEBUG, "NRF Controller Config OK!\n");
+		#endif
+	}
+	#endif // NRF_CTRL_ON
+
+	#if HC_SR04_ON //
 	//定时器延时初始化
 	TIMx_Delay_Register(TIM3,  TIMx_10us_Period,  TIMx_10us_Prescaler);//10us中断
 	
 	//声波测距传感器初始化
 	HC_SR04_Init( HC_SR04_Trip_PORTx,  HC_SR04_Trip_PINx,
 				  HC_SR04_Echo_PORTx,  HC_SR04_Echo_PINx);//声波测距模块初始化
+	#endif //HC_SR04_ON
 	
-	
+
 	//电机初始化
 	TIM_DeInit( TIM1);
 	
@@ -210,14 +239,28 @@ int main(void)
 		SisTic_Delay_ms(500);
 	}
 	
+	#if USART_DEBUG_MPU
+	while (1)
+	{
+		UsartPrintf(USART_DEBUG, "%5.2f %5.2f %5.2f\n", G_Euler_RPY[0], G_Euler_RPY[1], G_Euler_RPY[2]);
+		SisTic_Delay_ms(500);
+	}
+	#endif //USART_DEBUG_MPU
+
+
+#if BANLANCE_CAR_TEST //平衡车测试 	
 	//2.开始控制小车
 	#if CONTROL_CAR_IN_IT
 	while(1)
 	{
-//		OLED_Display_XxX_ASCII( 0, 0,  8, 12, 1, "euler:R,P,Y\n");
+		#if NRF_CTRL_ON
+		NRF_Controller_RunOnce();
+		#endif // NRF_CTRL_ON
+
+		#if OLED_ON
 		OLED_Display_XxX_ASCII( 0, 16,  8, 12, 1, "%5.2f %5.2f %5.2f\n", G_Euler_RPY[0], G_Euler_RPY[1], G_Euler_RPY[2]);
 		OLED_Refresh();
-		
+		#endif //OLED_ON
 		LED_ON(1);
 		SisTic_Delay_ms(500);
 		LED_OFF(1);
@@ -425,7 +468,11 @@ int main(void)
 //		mdelay(10);
     }//end while(1)
 	#endif //!CONTROL_CAR_IN_IT
+#endif // BANLANCE_CAR_TEST
+
 }
+
+
 
 
 /**
@@ -546,7 +593,7 @@ void Control_Car_IRQHandler(void)
 		int16_t Encoder_CountA = Get_Encoder_Count(EncoderA_TIMx);//读取编码器
 		int16_t Encoder_CountB = -Get_Encoder_Count(EncoderB_TIMx);
 		
-		Control_PWM( 0.0,  G_Euler_RPY[0],  G_GYRO_XYZ[0],  0.0,  Encoder_CountA,  Encoder_CountB,  G_GYRO_XYZ[2]);//控制小车
+		Control_PWM( 0.0,  G_Euler_RPY[0],  G_GYRO_XYZ[0],  G_BSPCTRL_TargetSpeed,  Encoder_CountA,  Encoder_CountB, G_BSPCTRL_TurnSpeed , G_GYRO_XYZ[2]);//控制小车
 	#endif //BANLANCE_CAR_TEST
 		
 }

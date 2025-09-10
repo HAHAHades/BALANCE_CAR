@@ -10,9 +10,15 @@ static float KI_vel 	= -0.57/200.0; //速度环积分
 #define S_LIMIT 1000 //积分限幅
 
 static float KP_turn 	= 20; //转向环比例
+static float KD_turn 	= 0.8; //转向环微分
 static float Med = -3.0; //机械中值 
 
 #define PWM_LIMIT 100000 //PWM限幅，占空比*100
+
+int32_t G_BSPCTRL_TargetSpeed = 0;//前后速度
+int32_t G_BSPCTRL_TurnSpeed = 0;//转向速度，正为左转，负为右转
+static int SG_BSPCTRL_TrunErr = 80; //转向偏置，中和硬件缺陷
+
 
 
 /**
@@ -76,13 +82,14 @@ float Velocity_Loop(int tatget_speed, int real_speed)
 
 /**
   * @brief   转向环P控制
+  * @param   turn_speed ：期望转向速度
   * @param   gyro_Z ：当前偏航角速度
   * @retval  电机PWM占空比*100；符号表示旋转方向
   */
-int Turn_Loop(float gyro_Z)
+int Turn_Loop(int32_t turn_speed ,float gyro_Z)
 {
 	
-	return KP_turn*gyro_Z;
+	return KP_turn*turn_speed + KD_turn*gyro_Z;
 }
 
 
@@ -92,13 +99,14 @@ int Turn_Loop(float gyro_Z)
   * @param   tatget_angle ：目标倾角角度
   * @param   real_angle(Roll) ：当前倾角角度
   * @param   gyro_X ：当前倾角速度
-  * @param   tatget_speed ：目标速度 单位：正交编码器每10ms的计数值（单脉冲的4倍）； rps轮子转每秒 = 100*tatget_speed/(4 * 11编码器每转单脉冲数*30减速比)
+  * @param   tatget_speed ：目标速度 单位：正交编码器每10ms的计数值（单脉冲的4倍）； rps轮子转每秒 = 100*tatget_speed/(4 * 11编码器每转单脉冲数*30减速比) tatget_speed=25时约1rps
   * @param   encoder_L ：A电机编码器每10ms的正交计数值
   * @param   encoder_R ：B电机编码器每10ms的正交计数值
+  * @param   target_turn ：目标转向速度 正左转 负右转 车轮速度与tatget_speed相同
   * @param   gyro_Z ：当前偏航速度
   * @retval  
   */
-void Control_PWM(float tatget_angle, float real_angle, float gyro_X, int tatget_speed, int encoder_L, int encoder_R, float gyro_Z)
+void Control_PWM(float tatget_angle, float real_angle, float gyro_X, int32_t tatget_speed, int encoder_L, int encoder_R, int32_t target_turn, float gyro_Z)
 {
 	int Vertical_out, Turn_out, PWM_A, PWM_B;
 	
@@ -107,10 +115,10 @@ void Control_PWM(float tatget_angle, float real_angle, float gyro_X, int tatget_
 	
 	Velocity_out = Velocity_Loop(2*tatget_speed, (encoder_L+encoder_R));//encoder_L+encoder_R)/2 表示两轮子中心的速度（每10ms正交计数值）
 	Vertical_out = Vertical_Loop( Velocity_out+Med,  real_angle,  gyro_X);
-	Turn_out = Turn_Loop(gyro_Z);
+	Turn_out = Turn_Loop(target_turn , gyro_Z);
 	
-	PWM_A = Vertical_out + Turn_out;
-	PWM_B = Vertical_out - Turn_out;
+	PWM_A = Vertical_out - Turn_out;
+	PWM_B = Vertical_out + Turn_out + SG_BSPCTRL_TrunErr;
 	
 	
 	//控制电机

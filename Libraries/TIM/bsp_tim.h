@@ -9,7 +9,7 @@
 /*******注意，如果使用TIM3的CH1或CH3等的映射引脚，GPIO需要重映射,使用GPIO_PinRemapConfig()********/
 //注意，C6T6没有TIM4
 
-
+#define TIMx_IT_ON 0 //是否使用TimX定时器中断
 
 #define TIMx_Delay TIM3 //需要用作任务定时的TIM；任务定时时长和任务数在.c文件里修改
 

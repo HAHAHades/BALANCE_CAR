@@ -1,0 +1,1 @@
+采用状态机及FIFO队列进行按键检测，部分代码参考了【安富莱电子 www.armfly.com】(bsp_key_fifo.c/h)

@@ -9,40 +9,9 @@
 
 
 /************使用哪个IIC****************/
-//#define IICNUM  0  //  0:使用IIC1  1：使用IIC2 
 
 
-///*************定义IIC端口***************/
-//#if IICNUM
-//	#define IICx 						I2C2
-//	#define IICx_CLK					RCC_APB1Periph_I2C2
-//	#define IICx_APBxClock_FUN  		RCC_APB1PeriphClockCmd
-//	#define IICx_GPIO_CLK				RCC_APB2Periph_GPIOB
-//	#define IICx_GPIO_APBxClock_FUN 	RCC_APB2PeriphClockCmd
-//	
-//	#define IICx_SDA_PORT 				GPIOB
-//	#define IICx_SDA_PIN 				GPIO_Pin_11
-//	#define IICx_SDA_APBxClock_FUN  	RCC_APB2PeriphClockCmd
-//	
-//	#define IICx_SCL_PORT 				GPIOB
-//	#define IICx_SCL_PIN 				GPIO_Pin_10
-//	#define IICx_SCL_APBxClock_FUN  	RCC_APB2PeriphClockCmd
-//#else
-//	#define IICx 						I2C1
-//	#define IICx_CLK					RCC_APB1Periph_I2C1
-//	#define IICx_APBxClock_FUN  		RCC_APB1PeriphClockCmd
-//	#define IICx_GPIO_CLK				RCC_APB2Periph_GPIOB
-//	#define IICx_GPIO_APBxClock_FUN 	RCC_APB2PeriphClockCmd
-//	
-//	#define IICx_SDA_PORT 				GPIOB
-//	#define IICx_SDA_PIN 				GPIO_Pin_7
-//	#define IICx_SDA_APBxClock_FUN  	RCC_APB2PeriphClockCmd
-//	
-//	#define IICx_SCL_PORT 				GPIOB
-//	#define IICx_SCL_PIN 				GPIO_Pin_6
-//	#define IICx_SCL_APBxClock_FUN  	RCC_APB2PeriphClockCmd
-//	
-//#endif
+#define IICx_DEBUG_ON         0
 
 /********************************/
 
@@ -64,12 +33,18 @@
 
 
 /*信息输出*/
-#define IICx_DEBUG_ON         0
 
-#define IICx_INFO(fmt,arg...)           printf("<<-EEPROM-INFO->> "fmt"\n",##arg)
-#define IICx_ERROR(fmt,arg...)          printf("<<-EEPROM-ERROR->> "fmt"\n",##arg)
+
+#define IICx_INFO(fmt,arg...)           do{\
+                                            if(IICx_DEBUG_ON)\
+                                            printf("<<-EEPROM-INFO->> "fmt"\n",##arg);\
+                                        }while(0)
+#define IICx_ERROR(fmt,arg...)          do{\
+                                            if(IICx_DEBUG_ON)\
+                                            printf("<<-EEPROM-ERROR->> "fmt"\n",##arg);\
+                                        }while(0)
 #define IICx_DEBUG(fmt,arg...)          do{\
-                                          if(EEPROM_DEBUG_ON)\
+                                          if(IICx_DEBUG_ON)\
                                           printf("<<-EEPROM-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
                                           }while(0)
 

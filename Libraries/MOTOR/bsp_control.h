@@ -19,9 +19,9 @@
 
 int Vertical_Loop(float tatget_angle, float real_angle, float gyro_Y);
 float Velocity_Loop(int tatget_speed, int real_speed);
-int Turn_Loop(float gyro_Z);
+int Turn_Loop(int32_t turn_speed ,float gyro_Z);
 uint8_t pwm_limit_abs(int* data);
-void Control_PWM(float tatget_angle, float real_angle, float gyro_Y, int tatget_speed, int encoder_L, int encoder_R, float gyro_Z);
+void Control_PWM(float tatget_angle, float real_angle, float gyro_Y, int32_t tatget_speed, int encoder_L, int encoder_R, int32_t target_turn, float gyro_Z);
 
 
 

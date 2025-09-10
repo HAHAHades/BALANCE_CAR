@@ -9,8 +9,8 @@
 	USART2  TXD：PA2  RXD：PA3  SCLK：PA4 
 */
 
-# define printf_mapping 1 //USART printf 重定向串口号
-# define DEBUG_USART   USART_NUM1
+# define printf_mapping 2 //USART printf 重定向串口号
+# define DEBUG_USART   USART_NUM2
 
 
 # define USART_DEBUG  DEBUG_USART

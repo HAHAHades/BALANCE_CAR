@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F10X_MD,USE_DMP,MPL_LOG_NDEBUG=1,EMPL,MPU6050,EMPL_TARGET_STM32F1</Define>
               <Undefine></Undefine>
-              <IncludePath>..\User;..\Libraries\AHT30;..\Libraries\BEEP;..\Libraries\cJSON;..\Libraries\CMSIS;..\Libraries\FWlib\inc;..\Libraries\IIC;..\Libraries\KEY;..\Libraries\LED;..\Libraries\SPI;..\Libraries\SysTick;..\Libraries\TIM;..\Libraries\UART;..\Libraries\NET\device\inc;..\Libraries\NET\MQTT;..\Libraries\NET\onenet\inc;..\Libraries\OLED;..\Libraries\TFT_LCD;..\Libraries\DMA;..\Libraries\EXTI;..\Libraries\CAN;..\Libraries\MPU6050;..\Libraries\MPU6050\Middlewares\driver;..\Libraries\MPU6050\Middlewares\eMPL-hal;..\Libraries\MPU6050\Middlewares\mllite;..\Libraries\MPU6050\Middlewares\mpl;..\Libraries\MPU6050\Middlewares\porting;..\Libraries\MPU6050\Middlewares\driver\eMPL;..\Libraries\MPU6050\Middlewares\driver\include;..\Libraries\MPU6050\Middlewares\driver\stm32L;..\Libraries\HC_SR04;..\Libraries\MOTOR;..\Libraries\GPIO</IncludePath>
+              <IncludePath>..\User;..\Libraries\AHT30;..\Libraries\BEEP;..\Libraries\cJSON;..\Libraries\CMSIS;..\Libraries\FWlib\inc;..\Libraries\IIC;..\Libraries\KEY;..\Libraries\LED;..\Libraries\SPI;..\Libraries\SysTick;..\Libraries\TIM;..\Libraries\UART;..\Libraries\NET\device\inc;..\Libraries\NET\MQTT;..\Libraries\NET\onenet\inc;..\Libraries\OLED;..\Libraries\TFT_LCD;..\Libraries\DMA;..\Libraries\EXTI;..\Libraries\CAN;..\Libraries\MPU6050;..\Libraries\MPU6050\Middlewares\driver;..\Libraries\MPU6050\Middlewares\eMPL-hal;..\Libraries\MPU6050\Middlewares\mllite;..\Libraries\MPU6050\Middlewares\mpl;..\Libraries\MPU6050\Middlewares\porting;..\Libraries\MPU6050\Middlewares\driver\eMPL;..\Libraries\MPU6050\Middlewares\driver\include;..\Libraries\MPU6050\Middlewares\driver\stm32L;..\Libraries\HC_SR04;..\Libraries\MOTOR;..\Libraries\GPIO;..\Libraries\NRF_CONTROLLER;..\Libraries\NRF24L01P</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -621,6 +621,21 @@
               <FileName>bsp_hard_i2c.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Libraries\IIC\bsp_hard_i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>controller_decode.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\NRF_CONTROLLER\controller_decode.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_controller.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\NRF_CONTROLLER\nrf_controller.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf24l01p.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\NRF24L01P\nrf24l01p.c</FilePath>
             </File>
           </Files>
         </Group>

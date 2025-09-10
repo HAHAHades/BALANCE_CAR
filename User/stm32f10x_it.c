@@ -142,18 +142,18 @@ void PendSV_Handler(void)
 #include "mpu6050.h"
 #include "mpu6050_SL.h"
 
-#define TASK_DELAY_NUM  2       //总任务个数，可以自己根据实际情况修改
-#define TASK_DELAY_0    1000    //任务0延时 1000*1 毫秒后执行：翻转LED
-#define TASK_DELAY_1    500     //任务1延时 500*1 毫秒后执行：MPU6050任务
-#define NumOfTask 2
+// #define TASK_DELAY_NUM  2       //总任务个数，可以自己根据实际情况修改
+// #define TASK_DELAY_0    1000    //任务0延时 1000*1 毫秒后执行：翻转LED
+// #define TASK_DELAY_1    500     //任务1延时 500*1 毫秒后执行：MPU6050任务
+// #define NumOfTask 2
 
 
-unsigned int Task_Delay[NumOfTask]={0};
+// unsigned int Task_Delay[NumOfTask]={0};
 extern void TimingDelay_Decrement(void);
 extern void TimeStamp_Increment(void);
 extern void gyro_data_ready_cb(void);
 
-uint32_t Task_Delay_Group[TASK_DELAY_NUM];  //任务数组，用来计时、并判断是否执行对应任务
+// uint32_t Task_Delay_Group[TASK_DELAY_NUM];  //任务数组，用来计时、并判断是否执行对应任务
 
 
 /* 执行任务标志：读取MPU6050数据 */
@@ -167,19 +167,17 @@ extern short Accel[3];
 extern short Gyro[3];
 extern float Temp;
 
+//nrf_controller.c/h
+extern void NRF_CTRL_TickIncrease(void);
+
 void SysTick_Handler(void)
 {
-	int i;  
-    TimingDelay_Decrement();
-	TimeStamp_Increment();
-	
-	for(i=0;i<NumOfTask;i++)
-	{
-		if(Task_Delay[i])
-		{
-			Task_Delay[i]--;
-		}
-	}
+
+  TimingDelay_Decrement();
+  TimeStamp_Increment();
+#if NRF_CTRL_ON
+  NRF_CTRL_TickIncrease();
+#endif //NRF_CTRL_ON
 }
 
 
@@ -195,7 +193,9 @@ void SysTick_Handler(void)
 
 void TIM3_IRQHandler(void)
 {
+  #if TIMx_IT_ON
 	TIMx_10us_IRQHandler();
+  #endif //TIMx_IT_ON
 }
 
 
@@ -215,9 +215,14 @@ void USART2_IRQHandler(void)
 }
 
 
-
+#include "nrf24l01p.h"
+#include "nrf_controller.h"
 void EXTI0_IRQHandler(void)
 {
+
+#if Use_Default_Pin_Config
+	NRF24L01_IRQ_Handler();
+#endif //!Use_Default_Pin_Config
 
 	if(EXTI_GetITStatus(EXTI_Line0) !=RESET )//判断是否进入中断，若进入中断则执行后面的中断程序
 	{
@@ -251,11 +256,11 @@ void EXTI9_5_IRQHandler(void)
 	if(EXTI_GetITStatus(MPU6050_INT_EXTI_LINE) != RESET) 
 	{
        
-        //回调函数
-        MPU6050_data_ready_cb();
+    //回调函数
+    MPU6050_data_ready_cb();
 		Control_Car_IRQHandler();
-        //清除中断标志位
-        EXTI_ClearITPendingBit(MPU6050_INT_EXTI_LINE);     
+    //清除中断标志位
+    EXTI_ClearITPendingBit(MPU6050_INT_EXTI_LINE);     
 	} 
 	
 }
@@ -280,11 +285,11 @@ void EXTI15_10_IRQHandler(void)
 	if(EXTI_GetITStatus(MPU6050_INT_EXTI_LINE) != RESET) 
 	{
        
-        //回调函数
-        MPU6050_data_ready_cb();
+    //回调函数
+    MPU6050_data_ready_cb();
 		Control_Car_IRQHandler();
-        //清除中断标志位
-        EXTI_ClearITPendingBit(MPU6050_INT_EXTI_LINE);     
+    //清除中断标志位
+    EXTI_ClearITPendingBit(MPU6050_INT_EXTI_LINE);     
 	} 
 	
 

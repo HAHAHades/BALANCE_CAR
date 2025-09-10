@@ -59,7 +59,6 @@
 .\objects\main.o: ..\Libraries\MPU6050\Middlewares\driver\include\mlinclude.h
 .\objects\main.o: ..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu.h
 .\objects\main.o: ..\Libraries\MPU6050\Middlewares\eMPL-hal\eMPL_outputs.h
-.\objects\main.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\main.o: ..\Libraries\HC_SR04\bsp_hc_sr04.h
 .\objects\main.o: ..\Libraries\EXTI\bsp_exti.h
 .\objects\main.o: ..\Libraries\IIC\bsp_soft_i2c.h
@@ -67,3 +66,5 @@
 .\objects\main.o: ..\Libraries\MOTOR\bsp_520Motor.h
 .\objects\main.o: ..\Libraries\TIM\bsp_encoder.h
 .\objects\main.o: ..\Libraries\MOTOR\bsp_control.h
+.\objects\main.o: ..\Libraries\NRF_CONTROLLER\nrf_controller.h
+.\objects\main.o: ..\Libraries\KEY\bsp_key.h
