@@ -23,8 +23,9 @@
 /* Êä³öÖÐ¶Ï */
 #define HC_SR04_Echo_EXTI_IRQHandler EXTI2_IRQHandler
 
-
-
+#define HC_SR04_Echo_H_T_Div10us ((float)10000.0) //10us   / 1.7mm
+#define HC_SR04_Echo_H_T_Div100us ((float)1000.0) //100us  /17mm
+#define HC_SR04_Echo_H_T_Div1ms ((float)100.0) //1ms	   /170mm
 
 
 

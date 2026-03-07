@@ -10,9 +10,10 @@
 /*******************************User Modified*******************************/
 #define NRF_CTRL_DEBUG_ON       1 //是否通过串口输出调试信息
 #define NRF_CTRL_OLED_ON        0 //是否通过OLED输出信息
-#define NRF_CTRL_MASTER         0 //主控端(1)，还是被控端(0)
-//选择硬件驱动方式，目前只提供了一种
-#define NRF_CTRL_USE_KEYIOSCAN  1 //是否使用按键IO扫描作为硬件按键驱动
+#define NRF_CTRL_MASTER         1 //主控端(1)，还是被控端(0)
+//选择硬件驱动方式，
+#define NRF_CTRL_USE_ADC        1 //是否使用ADC检测作为方向按键驱动
+#define NRF_CTRL_USE_KEYIOSCAN  0 //是否使用按键IO扫描作为方向按键驱动
 
 #define NRF_CTRL_USE_CTRLDECODE 1 //是否使用控制端解码(键码在控制端解析，不会直接发给被控端)
 #define NRF_CTRL_WHEEL2MOVETURN 1 //是否将两轮速度解码成移动和转向
@@ -57,9 +58,8 @@
 #define NRF_CTRL_ERROR(fmt,arg...)          printf("<<-NRF_CTRL-ERROR->> "fmt"\n",##arg)
 #define NRF_CTRL_DEBUG(fmt,arg...)          do{\
                                           if(NRF_CTRL_DEBUG_ON)\
-                                          printf("<<-NRF_CTRL-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
+                                          UsartPrintf(USART_DEBUG,"<<-NRF_CTRL-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
                                           }while(0)
-
 
 /************************函数声明********************/
 

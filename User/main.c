@@ -33,6 +33,9 @@
 
 #include "nrf_controller.h"
 
+#include "bsp_hc_sr04.h"
+#include "bsp_tim.h"
+
 
 /*
 	printf重定向到USART1
@@ -76,14 +79,14 @@ extern int volatile G_ENCODERB_COUNT;
 
 #define UART_Printtf 1 //是否使用UART输出信息
 #define OLED_ON 0 //OLED 输出信息
-#define HC_SR04_ON 0 //是否开启声波测距
+#define HC_SR04_ON 1 //是否开启声波测距
 #define OLED_SHOW_MPU 0 //OLED 显示mpu的信息
 #define USART_DEBUG_MPU 0 //USART 调试mpu
 #define OLED_SHOW_HC_SR04 0 //OLED 显示声波传感器的信息
 #define OLED_SHOW_Encoder_Speed 0 //OLED 显示编码器信息
 #define Motor_DEBUG 0 //调试电机
 #define CONTROL_CAR_IN_IT  1 // 是否在中断中控制小车，在主函数里控制小车无法同时做其他事情，如刷新OLED等
-#define BANLANCE_CAR_TEST 1 //平衡车测试
+#define BANLANCE_CAR_TEST 0 //平衡车测试
 #define NRF_CTRL_ON 0 //是否使用NRF遥控器
 
 void Hardware_Init(void)
@@ -99,7 +102,9 @@ void Hardware_Init(void)
 	
 	//串口初始化
 	#if UART_Printtf //
-	Usart2_Init( 115200);
+
+	Usart1_Init( 115200);
+
 	UsartPrintf(USART_DEBUG, "TEST...\n");
 	#endif // UART_Printtf
 
@@ -113,6 +118,7 @@ void Hardware_Init(void)
 	OLED_Refresh();
 	#endif // OLED_ON
 	
+	#if BANLANCE_CAR_TEST
     // MPU6050 IIC 初始化
     #ifdef soft_IIC //mpu使用软/硬件IIC
 		// 使用了B3 B4等引脚
@@ -135,14 +141,15 @@ void Hardware_Init(void)
     if(MPU6050ReadID() == 0)
     {
 		#if UART_Printtf
-        printf("\r\n没有检测到MPU6050传感器！\r\n");
+        UsartPrintf(USART_DEBUG,"\r\n没有检测到MPU6050传感器！\r\n");
 		#endif //UART_Printtf
         LED_ON(1); 
         while(1);	
     }
-	
+	#endif //BANLANCE_CAR_TEST
+
     #if UART_Printtf
-    printf("\r\n检测到MPU6050传感器\r\n");
+    UsartPrintf(USART_DEBUG,"\r\n检测到MPU6050传感器\r\n");
     #endif //UART_Printtf
 	
 	
@@ -175,7 +182,7 @@ void Hardware_Init(void)
 				  HC_SR04_Echo_PORTx,  HC_SR04_Echo_PINx);//声波测距模块初始化
 	#endif //HC_SR04_ON
 	
-
+	#if BANLANCE_CAR_TEST
 	//电机初始化
 	TIM_DeInit( TIM1);
 	
@@ -193,7 +200,7 @@ void Hardware_Init(void)
 	
 	TIMx_CHx_ENCODER_Init( EncoderB_TIMx,  EncoderB_TIMx_ACH_x, 0x00 ,  0); //
 	Get_Encoder_Count(EncoderB_TIMx);//计数器清零
-	
+	#endif //BANLANCE_CAR_TEST
 }
 
 
@@ -239,6 +246,9 @@ int main(void)
 		SisTic_Delay_ms(500);
 	}
 	
+
+
+
 	#if USART_DEBUG_MPU
 	while (1)
 	{
@@ -468,7 +478,49 @@ int main(void)
 //		mdelay(10);
     }//end while(1)
 	#endif //!CONTROL_CAR_IN_IT
+#else //BANLANCE_CAR_TEST
+	#if KEY_TEST_ON
+	/* code */
+	KeyTest();
+	#endif //KEY_TEST_ON
+
+	#if NRF_CTRL_ON
+	while (1)
+	{
+		/* code */
+		NRF_Controller_RunOnce();
+	}
+	
+	#endif // NRF_CTRL_ON
+
+	#if HC_SR04_ON //
+	float hrc_dis;
+	while (1)
+	{
+		/* code */
+		HC_SR04_StartMeasure();
+		SisTic_Delay_ms(50);
+		if(HC_SR04_get_distance(&hrc_dis))
+		{
+			#if UART_Printtf
+			UsartPrintf(USART_DEBUG, "HRC OK\nHRC_DIS:%.5fm\n",hrc_dis);
+			#endif //UART_Printtf
+		}
+		else
+		{
+			#if UART_Printtf
+			UsartPrintf(USART_DEBUG, "HRC ERR\nHRC_DIS:%.5fm\n",hrc_dis);
+			#endif //UART_Printtf
+		}
+		
+		SisTic_Delay_ms(500);
+
+	}
+	#endif // HC_SR04_ON
+
 #endif // BANLANCE_CAR_TEST
+
+
 
 }
 

@@ -9,9 +9,9 @@
 	USART2  TXD：PA2  RXD：PA3  SCLK：PA4 
 */
 
-# define printf_mapping 2 //USART printf 重定向串口号
-# define DEBUG_USART   USART_NUM2
-
+# define printf_mapping 1 //USART printf 重定向串口号
+# define DEBUG_USART   USART_NUM1
+#define USART_IO_Remap 0 //引脚重映射
 
 # define USART_DEBUG  DEBUG_USART
 # define  DEBUG_USARTx DEBUG_USART
@@ -46,6 +46,20 @@ extern u8 USART_RX_BUF2[USART_REC_LEN2];//保存接收的数据
 #define USART_IRQHandler1 	USART1_IRQHandler
 
 
+#if USART_IO_Remap
+/*发送引脚TXD*/
+#define USART_TXD_PORT1 			GPIOB 
+#define USART_TXD_PIN1  			GPIO_Pin_6
+#define USART_TXD_CLK1  			RCC_APB2Periph_GPIOB
+#define USART_TXD_CLKCMD_FUNC1 		RCC_APB2PeriphClockCmd
+
+/*接收引脚RXD*/
+#define USART_RXD_PORT1 			GPIOB 
+#define USART_RXD_PIN1  			GPIO_Pin_7
+#define USART_RXD_CLK1  			RCC_APB2Periph_GPIOB
+#define USART_RXD_CLKCMD_FUNC1 		RCC_APB2PeriphClockCmd	
+
+#else 
 /*发送引脚TXD*/
 #define USART_TXD_PORT1 			GPIOA 
 #define USART_TXD_PIN1  			GPIO_Pin_9
@@ -58,7 +72,7 @@ extern u8 USART_RX_BUF2[USART_REC_LEN2];//保存接收的数据
 #define USART_RXD_PIN1  			GPIO_Pin_10
 #define USART_RXD_CLK1  			RCC_APB2Periph_GPIOA
 #define USART_RXD_CLKCMD_FUNC1 		RCC_APB2PeriphClockCmd	
-
+#endif //USART_IO_Remap
 
 /*时钟引脚SCLK*/
 #if USE_SCLK1

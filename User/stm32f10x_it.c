@@ -168,13 +168,18 @@ extern short Gyro[3];
 extern float Temp;
 
 //nrf_controller.c/h
+#define NRF_CTRL_ON 0 //ÊÇ·ñÊ¹ÓÃNRFÒ£¿ØÆ÷
 extern void NRF_CTRL_TickIncrease(void);
-
+#include "bsp_key.h"
 void SysTick_Handler(void)
 {
 
   TimingDelay_Decrement();
   TimeStamp_Increment();
+#if KEY_TEST_ON
+  KeyTesks_SysTick_Handler();
+
+#endif //KEY_TEST_ON
 #if NRF_CTRL_ON
   NRF_CTRL_TickIncrease();
 #endif //NRF_CTRL_ON

@@ -32,3 +32,6 @@
 .\objects\controller_decode.o: ..\Libraries\KEY\bsp_key.h
 .\objects\controller_decode.o: ..\Libraries\UART\bsp_usart.h
 .\objects\controller_decode.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\controller_decode.o: ..\Libraries\ADC\bsp_adc.h
+.\objects\controller_decode.o: ..\Libraries\SysTick\bsp_SysTick.h
+.\objects\controller_decode.o: ..\Libraries\NRF_CONTROLLER\nrf_controller.h

@@ -64,7 +64,11 @@ void USART_Config(uint8_t usart_num, int BaudRate)
 	
 	if(usart_num==1)
 	{
-	
+
+		#if USART_IO_Remap
+		RCC_APB2PeriphClockCmd( RCC_APB2Periph_AFIO,  ENABLE);
+		GPIO_PinRemapConfig( GPIO_Remap_USART1,  ENABLE);
+		#endif 
 		GPIO_InitTypeDef GPIO_InitStruct;
 		USART_InitTypeDef USART_InitStruct;
 		/******************GPIO≈‰÷√****************/
@@ -80,8 +84,8 @@ void USART_Config(uint8_t usart_num, int BaudRate)
 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 		GPIO_InitStruct.GPIO_Pin = USART_RXD_PIN1;
 		GPIO_Init(USART_RXD_PORT1, &GPIO_InitStruct);
-		
-		
+
+
 		/******************USART≈‰÷√****************/
 		USART_InitStruct.USART_BaudRate = BaudRate;
 		USART_InitStruct.USART_WordLength = USART_WordLength_8b;

@@ -3,7 +3,7 @@
 
 #include "stm32f10x.h"
 #include "stdio.h"
-
+#include "bsp_usart.h"
 /*
   推荐频率10Mhz以内
 */
@@ -18,7 +18,7 @@
 			8  IRQ		
 */
 
-#define NRF_DEBUG_ON         1  //输出调试信息
+#define NRF_DEBUG_ON         0  //输出调试信息
 #define TEST_NRF24L01  0  //是否仅测试NRF24L01模块
 
 #define NRF24L01_IRQ_EXTI 1 //是否使用外部中断处理NRF状态
@@ -127,7 +127,7 @@
 #define NRF_ERROR(fmt,arg...)          printf("<<-NRF-ERROR->> "fmt"\n",##arg)
 #define NRF_DEBUG(fmt,arg...)          do{\
                                           if(NRF_DEBUG_ON)\
-                                          printf("<<-NRF-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
+                                          UsartPrintf(USART_DEBUG , "<<-NRF-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
                                           }while(0)
 
 

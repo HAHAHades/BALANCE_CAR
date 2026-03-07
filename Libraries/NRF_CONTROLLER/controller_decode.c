@@ -7,7 +7,7 @@ static uint8_t SG_CTRL_DECODE_VirtualKey;//虚拟键值
 static uint8_t SG_CTRL_DECODE_DistanceDetectFlag=0;//距离检测开启状态
 
 
-extern void NRF_CTRL_ConnectionDetect(void);
+extern uint8_t NRF_CTRL_ConnectionDetect(void);
 
 /**
   * @brief   按键信息处理，检测被按下的按键，做出相应处理。
@@ -17,7 +17,13 @@ extern void NRF_CTRL_ConnectionDetect(void);
 **/
 void CTRL_DECODE_CopeCmdKeyMsg(uint8_t* Keys, uint8_t keys_num)
 {
-
+#if NRF_CTRL_USE_ADC
+    int32_t lw;
+    int32_t rw;
+    int32_t tlw;
+    int32_t trw;
+    int tmp_p;
+#endif //NRF_CTRL_USE_ADC
     for (uint8_t i = 0; i < keys_num; i++)
     {
 
@@ -51,9 +57,43 @@ void CTRL_DECODE_CopeCmdKeyMsg(uint8_t* Keys, uint8_t keys_num)
         }
         else
         {
+#if NRF_CTRL_USE_ADC
+
+
             /* 遍历所有按键 */
             switch (Keys[i]/KEY_FIFOFLAG_NUM)
             {
+            case CTRL_DECODE_KeyPot1_LP:
+            {
+                /* 左侧左右 */
+
+            }break;
+            case CTRL_DECODE_KeyPot2_LP:
+            {
+                /* 左侧上下 */
+                KeyPot_CalPercentage(&tmp_p, KeyPot_FindByFlag(Keys[i]));
+                tmp_p/=CTRL_DECODE_SpeedLimit;
+                lw = (int32_t)tmp_p;
+                rw = (int32_t)tmp_p;
+                CTRL_DECODE_ModifyWheel(lw, rw);
+            }break;
+            case CTRL_DECODE_KeyPot3_LP:
+            {
+                /* 右侧左右 */
+                KeyPot_CalPercentage(&tmp_p, KeyPot_FindByFlag(Keys[i]));
+                tmp_p/=CTRL_DECODE_DIRSpeedLimit;
+                tlw = (int32_t)(-tmp_p);
+                trw = (int32_t)tmp_p;
+                CTRL_DECODE_ModifyWheel(lw, rw);
+            }break;
+            case CTRL_DECODE_KeyPot4_LP:
+            {
+                /* 右侧上下 */
+
+            }break;
+#endif //NRF_CTRL_USE_ADC
+
+#if NRF_CTRL_USE_KEYIOSCAN
             case CTRL_DECODE_Key_UP_PLP:
             {
                 /* 上 */
@@ -102,10 +142,15 @@ void CTRL_DECODE_CopeCmdKeyMsg(uint8_t* Keys, uint8_t keys_num)
                 CTRL_DECODE_ModifyWheel(0, -1*CTRL_DECODE_SpeedIncrement);
                 SG_CTRL_DECODE_VirtualKey |= CTRL_DECODE_Key_UPDATAWHEEL;
             }break;
+#endif //NRF_CTRL_USE_KEYIOSCAN
             default:
                 break;
             }
-    
+#if NRF_CTRL_USE_ADC
+            lw += tlw;
+            rw += trw;
+            CTRL_DECODE_ModifyWheel(lw, rw);
+#endif //NRF_CTRL_USE_ADC
         }
         
     }
@@ -123,8 +168,17 @@ void CTRL_DECODE_CopeCmdKeyMsg(uint8_t* Keys, uint8_t keys_num)
 **/
 void CTRL_DECODE_ModifyWheel(int32_t Lw, int32_t Rw)
 {
+#if NRF_CTRL_USE_KEYIOSCAN
     CTRL_DECODE_LeftWheel_Speed += Lw;
     CTRL_DECODE_RightWheel_Speed += Rw;
+#endif //NRF_CTRL_USE_KEYIOSCAN
+
+#if NRF_CTRL_USE_ADC
+    CTRL_DECODE_LeftWheel_Speed = Lw;
+    CTRL_DECODE_RightWheel_Speed = Rw;
+#endif //#if NRF_CTRL_USE_ADC
+
+
     return;
 }
 

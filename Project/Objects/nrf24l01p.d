@@ -30,7 +30,7 @@
 .\objects\nrf24l01p.o: ..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 .\objects\nrf24l01p.o: ..\Libraries\FWlib\inc\misc.h
 .\objects\nrf24l01p.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\nrf24l01p.o: ..\Libraries\UART\bsp_usart.h
 .\objects\nrf24l01p.o: ..\Libraries\GPIO\bsp_gpio.h
 .\objects\nrf24l01p.o: ..\Libraries\EXTI\bsp_exti.h
 .\objects\nrf24l01p.o: ..\Libraries\SPI\bsp_spi.h
-.\objects\nrf24l01p.o: ..\Libraries\UART\bsp_usart.h

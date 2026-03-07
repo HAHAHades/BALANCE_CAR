@@ -283,6 +283,7 @@ void NRF_CTRL_CheckKeyStatues(void)
   if (tmp_readFlagNum !=0)
   {
     /* 读取到按键 */
+    
     #if NRF_CTRL_USE_CTRLDECODE //使用控制端解码
     CTRL_DECODE_CopeCmdKeyMsg(key_fifoFlag, tmp_readFlagNum);
     #else // NRF_CTRL_USE_CTRLDECODE

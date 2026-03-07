@@ -31,4 +31,6 @@
 .\objects\bsp_key.o: ..\Libraries\FWlib\inc\misc.h
 .\objects\bsp_key.o: ..\Libraries\UART\bsp_usart.h
 .\objects\bsp_key.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\bsp_key.o: ..\Libraries\ADC\bsp_adc.h
+.\objects\bsp_key.o: ..\Libraries\SysTick\bsp_SysTick.h
 .\objects\bsp_key.o: ..\Libraries\GPIO\bsp_gpio.h

@@ -3,7 +3,8 @@
 #include "stm32f10x.h"
 
 #define  soft_IIC//是否使用软件IIC，注释代表使用硬件
-
+#define   MPU_6500ID 0x70 
+#define   MPU_6050ID 0x68 
 //模块的A0引脚接GND，IIC的7位地址为0x68，若接到VCC，需要改为0x69
 #define MPU6050_SLAVE_ADDRESS  (0x68)      //MPU6050器件读地址
 

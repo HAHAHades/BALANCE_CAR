@@ -224,9 +224,10 @@ uint8_t MPU6050ReadID(void)
 {
 	unsigned char Re = 0;
     MPU6050_ReadData(MPU6050_SLAVE_ADDRESS,MPU6050_RA_WHO_AM_I,1,&Re);
-	if(Re != 0x68)
+	if((Re != MPU_6500ID)&&(Re != MPU_6050ID))
 	{
 		printf("MPU6050 dectected error!\r\n检测不到MPU6050模块，请检查模块与开发板的接线");
+    printf("MPU6050 ID = %d\r\n",Re);
 		return 0;
 	}
 	else

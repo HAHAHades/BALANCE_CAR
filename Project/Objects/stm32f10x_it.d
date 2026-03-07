@@ -32,12 +32,13 @@
 .\objects\stm32f10x_it.o: ..\Libraries\SysTick\bsp_SysTick.h
 .\objects\stm32f10x_it.o: ..\Libraries\MPU6050\mpu6050.h
 .\objects\stm32f10x_it.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
-.\objects\stm32f10x_it.o: ..\Libraries\TIM\bsp_tim.h
-.\objects\stm32f10x_it.o: ..\Libraries\UART\bsp_USART.h
+.\objects\stm32f10x_it.o: ..\Libraries\KEY\bsp_key.h
+.\objects\stm32f10x_it.o: ..\Libraries\UART\bsp_usart.h
 .\objects\stm32f10x_it.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\stm32f10x_it.o: ..\Libraries\ADC\bsp_adc.h
+.\objects\stm32f10x_it.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\stm32f10x_it.o: ..\Libraries\NRF24L01P\nrf24l01p.h
 .\objects\stm32f10x_it.o: ..\Libraries\NRF_CONTROLLER\nrf_controller.h
-.\objects\stm32f10x_it.o: ..\Libraries\KEY\bsp_key.h
 .\objects\stm32f10x_it.o: ..\Libraries\HC_SR04\bsp_hc_sr04.h
 .\objects\stm32f10x_it.o: ..\Libraries\EXTI\bsp_exti.h
 .\objects\stm32f10x_it.o: ..\Libraries\SPI\bsp_spi.h

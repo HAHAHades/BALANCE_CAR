@@ -68,3 +68,5 @@
 .\objects\main.o: ..\Libraries\MOTOR\bsp_control.h
 .\objects\main.o: ..\Libraries\NRF_CONTROLLER\nrf_controller.h
 .\objects\main.o: ..\Libraries\KEY\bsp_key.h
+.\objects\main.o: ..\Libraries\ADC\bsp_adc.h
+.\objects\main.o: ..\Libraries\TIM\bsp_tim.h

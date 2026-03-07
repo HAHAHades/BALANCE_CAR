@@ -47,6 +47,7 @@
 ".\objects\controller_decode.o"
 ".\objects\nrf_controller.o"
 ".\objects\nrf24l01p.o"
+".\objects\bsp_adc.o"
 ".\objects\startup_stm32f10x_md.o"
 ".\objects\mpu6050.o"
 ".\objects\inv_mpu.o"

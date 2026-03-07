@@ -125,7 +125,7 @@ static volatile  _Bool HC_SR04_Echo_EXTI_Falg = 0;//1已产生上升沿，0未产生上升沿
 _Bool HC_SR04_get_distance(float *dis)
 {
 	
-	*dis = ((float)HC_SR04_Echo_H_Time/10000.0)*17;//m
+	*dis = ((float)HC_SR04_Echo_H_Time/HC_SR04_Echo_H_T_Div10us)*17;//m
 	if(HC_SR04_Echo_H_Time)
 		return 1;
 	else

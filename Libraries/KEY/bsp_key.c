@@ -16,6 +16,8 @@ uint8_t G_key_TesksTick = 0; // 按键任务运行计时
 /**********************user defined parameters start***********************/
 
 /*每个按键所属的组合键的索引及在该组合键中的标识，用于初始化按键IO对象列表*/
+
+#if KEY_COMB_ON
 //锚键所属的组合键索引
 static const uint8_t SCG_CombM1IndexList[3] = {0, 1, 2};
 static const uint8_t SCG_CombM2IndexList[3] = {0, 3, 4};
@@ -36,20 +38,28 @@ static const uint8_t SCG_CombDownFlagList[1] = {0x01};
 static const uint8_t SCG_CombAFlagList[1] = {0x01};
 static const uint8_t SCG_CombBFlagList[1] = {0x01};
 
-//按键IO对象列表(不包括组合键锚键)
+#endif //KEY_COMB_ON
+
+
+//按键IO对象列表(不包括电位计按键,不包括组合键锚键)
 static KEY_GPIO_t SG_KeyIOList[G_KEY_NUM]=
 {
-	{GPIOA, GPIO_Pin_0, Pressed_Level_Low, 1, SCG_CombUpIndexList, SCG_CombUpFlagList},	//KEY_UP
-	{GPIOA, GPIO_Pin_1, Pressed_Level_Low, 1, SCG_CombDownIndexList, SCG_CombDownFlagList},	//KEY_DOWN
-	{GPIOA, GPIO_Pin_2, Pressed_Level_Low, 0},	//KEY_LEFT
-	{GPIOA, GPIO_Pin_3, Pressed_Level_Low, 0},	//KEY_RIGHT
-	{GPIOB, GPIO_Pin_12, Pressed_Level_Low, 1, SCG_CombAIndexList, SCG_CombAFlagList},	//KEY_A
-	{GPIOB, GPIO_Pin_13, Pressed_Level_Low, 1, SCG_CombBIndexList, SCG_CombBFlagList},	//KEY_B
-	{GPIOB, GPIO_Pin_14, Pressed_Level_Low, 0},	//KEY_C
-	{GPIOB, GPIO_Pin_15, Pressed_Level_Low, 0},	//KEY_D
+
+	{GPIOA, GPIO_Pin_8, Pressed_Level_Low, 1,  },	//KEY_A
+	{GPIOA, GPIO_Pin_9, Pressed_Level_Low, 1,  },	//KEY_B
+	{GPIOA, GPIO_Pin_10, Pressed_Level_Low, 0},	//KEY_C
+	{GPIOA, GPIO_Pin_11, Pressed_Level_Low, 0},	//KEY_D
 
 
 };
+
+//电位计对象列表
+static KEY_Pot_TypeDef SG_KeyPotList[G_KEYPOT_NUM]=
+{
+	{GPIOA, GPIO_Pin_0, },
+
+};
+
 
 //锚键IO对象列表
 #if KEY_COMB_ON //
@@ -61,23 +71,23 @@ static KEY_GPIO_t SG_CombAnchorKeyIOList[G_KEYCOMBANCHOR_NUM]=
 };
 #endif //KEY_COMB_ON
 
-/*定义按键回调使能标识列表，普通按键在前，组合键在后，标识对应 KEY_CALLBACK_FUN_t
+/*定义按键回调使能标识列表，普通按键在前，电位计在中，组合键在后，标识对应 KEY_CALLBACK_FUN_t
 所展示的回调，若使能对应回调则需将标识的对应位置1*/
-static uint8_t SG_KeyEnableFlag[G_KEY_NUM+G_KEYCOMB_NUM]=
+static uint8_t SG_KeyEnableFlag[G_KEY_NUM+G_KEYPOT_NUM+G_KEYCOMB_NUM]=
 {
 	0x0e,//key1，使能序号123的回调
 	0x0e,//key2
 	0x0e,//key3
 	0x0e,//key4
-	0x0e,//key5
-	0x0e,//key6
-	0x0e,//key7
-	0x0e,//key8
-	0x0e,//key9
-	0x01,//key10, 使能序号0的回调
-	0x01,//key11
-	0x01,//key12
-	0x01,//key13
+	0x08,//key5
+	0x08,//key6
+	0x08,//key7
+	0x08,//key8
+	0x00,//key9
+	0x00,//key10
+	0x00,//key11
+	0x00,//key12
+	0x00,//key13
 };
 
 /**********************user defined parameters end***********************/
@@ -86,28 +96,21 @@ static uint8_t SG_KeyEnableFlag[G_KEY_NUM+G_KEYCOMB_NUM]=
 /* 按键状态回调函数列表 KeyUpLongPressedCBF */
 static KEY_CALLBACK_FUN_t SG_KeyCallBackFunList[G_KEYCBFLIST_NUM]=
 {
-	{0, KeyUpReleaseCBF, 	 KeyUpDoubleReleaseCBF, 	KeyUpLongPressedCBF},	//KEY_UP
-	{0, KeyDownReleaseCBF,  KeyDownDoubleReleaseCBF,  KeyDownLongPressedCBF},  //KEY_DOWN
-	{0, KeyLeftReleaseCBF,  KeyLeftDoubleReleaseCBF,  KeyLeftLongPressedCBF},  //KEY_LEFT
-	{0, KeyRightReleaseCBF, KeyRightDoubleReleaseCBF, KeyRightLongPressedCBF}, //KEY_RIGHT
+
 	{0, KeyAReleaseCBF, KeyADoubleReleaseCBF, KeyALongPressedCBF},	//KEY_A
 	{0, KeyBReleaseCBF, KeyBDoubleReleaseCBF, KeyBLongPressedCBF},	//KEY_B
 	{0, KeyCReleaseCBF, KeyCDoubleReleaseCBF, KeyCLongPressedCBF},	//KEY_C
-	{0, KeyDReleaseCBF, KeyDDoubleReleaseCBF, KeyDLongPressedCBF},	//KEY_D
-	{0, KeyComb1ReleaseCBF, KeyComb1DoubleReleaseCBF, KeyComb1LongPressedCBF},	//KEY_Comb1
+	{0, KeyDReleaseCBF, KeyDDoubleReleaseCBF, KeyDLongPressedCBF}	//KEY_D
+
 };
 #endif //KEY_USE_DEFAULT_CBF
 
 static KEY_STA_t SG_KeyStaList[G_KEY_NUM]=
 {
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//UP
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//DOWN
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//LEFT
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//RIGHT
 	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//A
 	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//B
 	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//C
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//D
+	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0}	//D
 };
 
 #if KEY_COMB_ON //
@@ -168,9 +171,9 @@ void KeyTest(void)
 {
 
 	KeyInit();
-	KeyGpioConfig();
-	KEY_Flag_enumt rFlag;
 
+	KEY_Flag_enumt rFlag;
+	KEY_DEBUG("key test\n");
 	uint8_t tmpIndex;
 	while (1)
 	{
@@ -183,7 +186,7 @@ void KeyTest(void)
 			{
 				/* 读取到有效标识 */
 				tmpIndex = rFlag/4;
-				if (tmpIndex < 9)
+				if (tmpIndex < G_KEY_NUM) //普通按键
 				{
 					/* 按键回调较全，采用回调函数列表方式执行 */
 					#if KEY_USE_DEFAULT_CBF //使用默认按键回调函数
@@ -192,10 +195,17 @@ void KeyTest(void)
 					KeyCallBackListExe(UserDefined_KeyCallBackFunList, rFlag%4);
 					#endif //KEY_USE_DEFAULT_CBF
 				}
-				else
+				else if (tmpIndex < (G_KEY_NUM+G_KEYPOT_NUM))//电位计按键
+				{
+					/*  */
+					KeyPot_CBF_List( rFlag);
+					
+
+				}
+				else //组合键
 				{
 					/* 按键回调较少较分散，采用switch执行 */
-					KeyCallBackSwitchExe(rFlag);
+					//KeyCallBackSwitchExe(rFlag);
 				}
 			}
 		} while (rFlag);
@@ -347,15 +357,49 @@ void KeyInit(void)
 	#endif //KEY_COMB_ON
 
 
+	#if KEY_POT_ON
+	for (uint8_t i = 0; i < G_KEYPOT_NUM; i++)
+	{
+		/* 电位计按键结构体初始化 */
+		KEY_Pot_t_structInit(&SG_KeyPotList[i]);
+	}
+	//其余参数配置
+	SG_KeyPotList[0].gpio = GPIOA;
+	SG_KeyPotList[0].pin = GPIO_Pin_0;
+	SG_KeyPotList[0].ADCx = ADC1;
+	SG_KeyPotList[0].ADC_Channel_x = ADC_Channel_0;
+	SG_KeyPotList[0].lpCBF = KeyPot1_lpCBF;
+	
+	SG_KeyPotList[1].gpio = GPIOA;
+	SG_KeyPotList[1].pin = GPIO_Pin_1;
+	SG_KeyPotList[1].ADCx = ADC1;
+	SG_KeyPotList[1].ADC_Channel_x = ADC_Channel_1;
+	SG_KeyPotList[1].lpCBF = KeyPot2_lpCBF;
+
+	SG_KeyPotList[2].gpio = GPIOA;
+	SG_KeyPotList[2].pin = GPIO_Pin_2;
+	SG_KeyPotList[2].ADCx = ADC1;
+	SG_KeyPotList[2].ADC_Channel_x = ADC_Channel_2;
+	SG_KeyPotList[2].lpCBF = KeyPot3_lpCBF;
+	
+	SG_KeyPotList[3].gpio = GPIOA;
+	SG_KeyPotList[3].pin = GPIO_Pin_3;
+	SG_KeyPotList[3].ADCx = ADC1;
+	SG_KeyPotList[3].ADC_Channel_x = ADC_Channel_3;
+	SG_KeyPotList[3].lpCBF = KeyPot4_lpCBF;
+
+	#endif //KEY_POT_ON
+
 	KeyGpioConfig();
 	KeyClearFIFO();
 
+	#if KEY_COMB_ON //
 	for (uint8_t i = 0; i < G_KEYCOMB_NUM; i++)
 	{
 		/* 组合键状态标识复位 */
 		SG_CombKeyFlagList[i] = 0;
 	}
-	
+	#endif //KEY_COMB_ON
 
 	return;
 }
@@ -383,6 +427,18 @@ void KeyGpioConfig(void)
 		
 		BSP_GPIO_Config(SG_KeyIOList[i].gpio, SG_KeyIOList[i].pin, GPIO_Mode_tmp);
 	}
+
+	#if KEY_POT_ON // 
+	uint8_t ADC_Channel_xList[G_KEYPOT_NUM];
+	for (uint8_t i = 0; i < G_KEYPOT_NUM; i++)
+	{
+		/* code */
+		ADC_Channel_xList[i] = SG_KeyPotList[i].ADC_Channel_x;
+	}
+	ADCx_CHx_IndependentCongfig(SG_KeyPotList[0].ADCx, ADC_Channel_xList);
+	ADC_START(SG_KeyPotList[0].ADCx, ADC_Mode_Independent);
+	#endif //KEY_POT_ON
+
 
 	#if KEY_COMB_ON // 
 
@@ -420,6 +476,24 @@ void KeySetParam(KEY_STA_t *KeyStaObj , uint8_t LPFTime, uint8_t LPRTime)
 	return;
 }
 
+/**
+  * @brief   电位计按键结构体初始化函数
+  * @param   key[IN/OUT]:需要按默认值初始化的结构体
+  * @retval  
+**/
+void KEY_Pot_t_structInit(KEY_Pot_TypeDef* key)
+{
+	key->keyPot_PHLevel = G_KeyPot_PHL;
+	key->keyPot_PLLevel = G_KeyPot_PLL;
+	key->keyPot_NHLevel = G_KeyPot_NHL;
+	key->keyPot_NLLevel = G_KeyPot_NLL;
+	key->keyPot_Level = 0;
+	key->longPressCount = 0;
+	key->_LPRTime = G_KeyPot_RTime;
+	key->current_value = 0;
+	key->sum_value = 0;
+
+}
 
 /**
   * @brief   按键任务扫描周期处理函数
@@ -439,6 +513,7 @@ void KeyTesks_SysTick_Handler(void)
 }
 
 
+#if KEY_COMB_ON
 /**
   * @brief   扫描检测组合键锚键
   * @param   
@@ -537,6 +612,7 @@ void KeyDetectAnchor(void)
 	return;
 }
 
+#endif //KEY_COMB_ON
 
 /**
   * @brief   扫描检测普通按键
@@ -545,11 +621,14 @@ void KeyDetectAnchor(void)
 **/
 void KeyDetectCommon(void)
 {
-	uint16_t tmpPPLevel;
+		uint16_t tmpPPLevel;
+	#if KEY_COMB_ON //
+
 	uint8_t tmpIndex;
 	uint8_t tmpFlag=0;
 	uint8_t tmpPressFilteringOk;
 	uint8_t tmpReleaseFilteringOk;
+	#endif //#if KEY_COMB_ON //
 	for (uint8_t i = 0; i < G_KEY_NUM; i++)
 	{
 		/* 分别扫描每个按键的状态，切换时重置下一状态所使用参数 */
@@ -843,6 +922,67 @@ void KeyDetectCommon(void)
 }
 
 
+
+
+/**
+  * @brief   扫描检测电位计按键
+  * @param   
+  * @retval  
+**/
+void KeyDetectPot(void)
+{
+	uint16_t tmp_keyLevel;
+	for (uint8_t i = 0; i < G_KEYPOT_NUM; i++)
+	{
+		/* 分别扫描每个按键的状态，切换时重置下一状态所使用参数 */
+		SG_KeyPotList[i].longPressCount++;
+		ADC_Get_CHx_Data(&tmp_keyLevel, i);
+		SG_KeyPotList[i].keyPot_Level = tmp_keyLevel;
+		if (tmp_keyLevel > SG_KeyPotList[i].keyPot_PLLevel)
+		{
+			/* 正向 */
+			if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_P))
+			{
+				/* 对应回调使能，将回调标识写入FIFO */
+				KeyWriteFIFO((KEY_Flag_enumt)(Key1_P+((G_KEY_NUM+i)*4)));
+			}
+		}
+		else if (tmp_keyLevel < SG_KeyPotList[i].keyPot_NHLevel)
+		{
+			/* 逆向 */
+			if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_R))
+			{
+				/* 对应回调使能，将回调标识写入FIFO */
+				KeyWriteFIFO((KEY_Flag_enumt)(Key1_R+((G_KEY_NUM+i)*4)));
+			}
+		}
+		else
+		{
+			/* 中位 */
+			if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_DPR))
+			{
+				/* 对应回调使能，将回调标识写入FIFO */
+				KeyWriteFIFO((KEY_Flag_enumt)(Key1_DPR+((G_KEY_NUM+i)*4)));
+			}
+		}
+		
+		/* 重复 */
+		if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_LP))
+		{
+			/*对应回调使能*/
+			if (SG_KeyPotList[i].longPressCount > SG_KeyPotList[i]._LPRTime)
+			{
+				/* 达到重复周期数 */
+				SG_KeyPotList[i].longPressCount = 0;
+				/* 将回调标识写入FIFO */
+				KeyWriteFIFO((KEY_Flag_enumt)(Key1_LP+((G_KEY_NUM+i)*4)));
+			}
+		}
+	}
+}
+
+
+#if KEY_COMB_ON
 /**
   * @brief   扫描检测组合按键
   * @param   
@@ -1005,6 +1145,8 @@ void KeyDetectCombination(void)
 	return;
 }
 
+#endif //KEY_COMB_ON
+
 
 /**
   * @brief   按键扫描程序，在中断中每10ms执行一次，每次扫描并切换所有按键的状态
@@ -1017,7 +1159,13 @@ void KeyScan10ms(void)
 	KeyDetectAnchor();//扫描锚键
 	#endif //KEY_COMB_ON
 
+	#if KEY_COMMON_ON //
 	KeyDetectCommon();//扫描普通按键
+	#endif //KEY_COMMON_ON
+
+	#if KEY_POT_ON //
+	KeyDetectPot(); //扫描电位计按键
+	#endif //KEY_POT_ON
 
 	#if KEY_COMB_ON //
 	KeyDetectCombination();//扫描组合键
@@ -1084,8 +1232,241 @@ void KeyClearFIFO(void)
 	return;
 }
 
+
+
+#if KEY_POT_ON
+
+
+/**
+  * @brief   电位计按键计算电位百分比
+  * @param   Flag[IN]:按键触发标识
+  * @retval  key:按键对象
+**/
+KEY_Pot_TypeDef* KeyPot_FindByFlag(uint8_t Flag)
+{
+
+
+	KEY_Pot_TypeDef* keyPot;
+	keyPot = &(SG_KeyPotList[Flag/4 - G_KEY_NUM]);
+	return keyPot;
+
+}
+
+
+/**
+  * @brief   电位计按键计算电位百分比
+  * @param   p[OUT]:百分比
+  * @param   key[IN]:按键
+  * @retval  
+**/
+void KeyPot_CalPercentage(int *p, KEY_Pot_TypeDef* keyPot)
+{
+	float tmp_proportion;
+	
+	if (keyPot->keyPot_Level > keyPot->keyPot_PLLevel)
+	{
+		/* 正向 */
+		tmp_proportion = ((float)(keyPot->keyPot_Level - keyPot->keyPot_PLLevel))/(keyPot->keyPot_PHLevel-keyPot->keyPot_PLLevel);
+	}
+	else if (keyPot->keyPot_Level < keyPot->keyPot_NHLevel)
+	{
+		/* 逆向 */
+		tmp_proportion = ((float)(keyPot->keyPot_Level - keyPot->keyPot_NHLevel))/(keyPot->keyPot_NHLevel - keyPot->keyPot_NLLevel);
+	}
+	else
+	{
+		/* 中位 */
+		tmp_proportion = 0;
+	}
+
+	*p = (int)(tmp_proportion * 100.0);
+
+
+}
+
+
+#endif //KEY_POT_ON
+
+
 /***************************按键状态回调函数***********************/
 #if KEY_USE_DEFAULT_CBF //使用默认按键回调函数
+
+
+/**
+  * @brief   电位计按键回调函数调度函数
+  * @param   
+  * @retval  
+**/
+void KeyPot_CBF_List(KEY_Flag_enumt kflag)
+{
+	uint8_t tmp_flag = kflag%4;
+	KEY_Pot_TypeDef* keyPot;
+	keyPot = &(SG_KeyPotList[kflag/4 - G_KEY_NUM]);
+	switch (tmp_flag)
+	{
+	case Key1_P:
+		{
+			/* code */
+			keyPot->pCBF(keyPot);
+		
+		}break;
+	case Key1_R:
+		{
+			/* code */
+			keyPot->dpCBF(keyPot);
+		
+		}break;
+	case Key1_DPR:
+		{
+			/* code */
+			keyPot->rCBF(keyPot);
+		
+		}break;
+	case Key1_LP:
+		{
+			/* code */
+			keyPot->lpCBF(keyPot);
+		
+		}break;
+	
+	default:
+		break;
+	}
+	
+}
+
+
+
+
+/**
+  * @brief   电位计按键重复回调函数
+  * @param   
+  * @retval  
+**/
+void KeyPot1_lpCBF( KEY_Pot_TypeDef* keyPot)
+{
+	float tmp_proportion;
+	
+	if (keyPot->keyPot_Level > keyPot->keyPot_PLLevel)
+	{
+		/* 正向 */
+		tmp_proportion = ((float)(keyPot->keyPot_Level - keyPot->keyPot_PLLevel))/(keyPot->keyPot_PHLevel-keyPot->keyPot_PLLevel);
+	}
+	else if (keyPot->keyPot_Level < keyPot->keyPot_NHLevel)
+	{
+		/* 逆向 */
+		tmp_proportion = ((float)(keyPot->keyPot_Level - keyPot->keyPot_NHLevel))/(keyPot->keyPot_NHLevel - keyPot->keyPot_NLLevel);
+	}
+	else
+	{
+		/* 中位 */
+		tmp_proportion = 0;
+	}
+
+	int proportion = (int)(tmp_proportion * 100.0);
+	
+	KEY_DEBUG("p1=%d", proportion);
+	KEY_DEBUG("keyPot_Level=%d", keyPot->keyPot_Level);
+}
+
+
+/**
+  * @brief   电位计按键重复回调函数
+  * @param   
+  * @retval  
+**/
+void KeyPot2_lpCBF( KEY_Pot_TypeDef* keyPot)
+{
+	float tmp_proportion;
+	
+	if (keyPot->keyPot_Level > keyPot->keyPot_PLLevel)
+	{
+		/* 正向 */
+		tmp_proportion = (float)(keyPot->keyPot_Level - keyPot->keyPot_PLLevel)/(keyPot->keyPot_PHLevel-keyPot->keyPot_PLLevel);
+	}
+	else if (keyPot->keyPot_Level < keyPot->keyPot_NHLevel)
+	{
+		/* 逆向 */
+		tmp_proportion = (float)(keyPot->keyPot_Level - keyPot->keyPot_NHLevel)/(keyPot->keyPot_NHLevel - keyPot->keyPot_NLLevel);
+	}
+	else
+	{
+		/* 中位 */
+		tmp_proportion = 0;
+	}
+
+	int proportion = (int)(tmp_proportion * 100.0);
+	
+	KEY_DEBUG("p2=%d", proportion);
+
+}
+
+
+
+/**
+  * @brief   电位计按键重复回调函数
+  * @param   
+  * @retval  
+**/
+void KeyPot3_lpCBF( KEY_Pot_TypeDef* keyPot)
+{
+	float tmp_proportion;
+	
+	if (keyPot->keyPot_Level > keyPot->keyPot_PLLevel)
+	{
+		/* 正向 */
+		tmp_proportion = (float)(keyPot->keyPot_Level - keyPot->keyPot_PLLevel)/(keyPot->keyPot_PHLevel-keyPot->keyPot_PLLevel);
+	}
+	else if (keyPot->keyPot_Level < keyPot->keyPot_NHLevel)
+	{
+		/* 逆向 */
+		tmp_proportion = (float)(keyPot->keyPot_Level - keyPot->keyPot_NHLevel)/(keyPot->keyPot_NHLevel - keyPot->keyPot_NLLevel);
+	}
+	else
+	{
+		/* 中位 */
+		tmp_proportion = 0;
+	}
+
+	int proportion = (int)(tmp_proportion * 100.0);
+	
+	KEY_DEBUG("p3=%d", proportion);
+
+}
+
+
+
+/**
+  * @brief   电位计按键重复回调函数
+  * @param   
+  * @retval  
+**/
+void KeyPot4_lpCBF( KEY_Pot_TypeDef* keyPot)
+{
+	float tmp_proportion;
+	
+	if (keyPot->keyPot_Level > keyPot->keyPot_PLLevel)
+	{
+		/* 正向 */
+		tmp_proportion = (float)(keyPot->keyPot_Level - keyPot->keyPot_PLLevel)/(keyPot->keyPot_PHLevel-keyPot->keyPot_PLLevel);
+	}
+	else if (keyPot->keyPot_Level < keyPot->keyPot_NHLevel)
+	{
+		/* 逆向 */
+		tmp_proportion = (float)(keyPot->keyPot_Level - keyPot->keyPot_NHLevel)/(keyPot->keyPot_NHLevel - keyPot->keyPot_NLLevel);
+	}
+	else
+	{
+		/* 中位 */
+		tmp_proportion = 0;
+	}
+
+	int proportion = (int)(tmp_proportion * 100.0);
+	
+	KEY_DEBUG("p4=%d", proportion);
+
+}
+
 /************************KEY_UP******************/
 
 /**

@@ -317,7 +317,7 @@ uint8_t MPU6050_get_sensor(float *Acceleration, float *Angular_velocity, float *
 {
     uint8_t return_value = 0;
     short gyro[3], accel_short[3], sensors;
-    unsigned char more, new_data = 0;
+    unsigned char more;
     long accel[3], quat[4], temperature;
     unsigned long sensor_timestamp;
     dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors, &more);
@@ -330,7 +330,7 @@ uint8_t MPU6050_get_sensor(float *Acceleration, float *Angular_velocity, float *
         inv_build_gyro(gyro, sensor_timestamp);
         mpu_get_temperature(&temperature, &sensor_timestamp);
         inv_build_temp(temperature, sensor_timestamp);
-        new_data = 1;
+        
     }
     if (sensors & INV_XYZ_ACCEL)
     {
@@ -338,12 +338,12 @@ uint8_t MPU6050_get_sensor(float *Acceleration, float *Angular_velocity, float *
         accel[1] = (long)accel_short[1];
         accel[2] = (long)accel_short[2];
         inv_build_accel(accel, 0, sensor_timestamp);
-        new_data = 1;
+       
     }
     if (sensors & INV_WXYZ_QUAT)
     {
         inv_build_quat(quat, 0, sensor_timestamp);
-        new_data = 1;
+     
     }
 
     inv_execute_on_data();

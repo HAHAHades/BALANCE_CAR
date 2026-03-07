@@ -1,6 +1,8 @@
 #ifndef __SYSTICK_H
 #define __SYSTICK_H
 
+#define SisTic_Delay_ms mdelay
+
 #include "stm32f10x.h"
 
 int get_tick_count(unsigned long *count);

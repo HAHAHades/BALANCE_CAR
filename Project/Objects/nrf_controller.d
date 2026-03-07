@@ -32,6 +32,8 @@
 .\objects\nrf_controller.o: ..\Libraries\KEY\bsp_key.h
 .\objects\nrf_controller.o: ..\Libraries\UART\bsp_usart.h
 .\objects\nrf_controller.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\nrf_controller.o: ..\Libraries\ADC\bsp_adc.h
+.\objects\nrf_controller.o: ..\Libraries\SysTick\bsp_SysTick.h
 .\objects\nrf_controller.o: ..\Libraries\NRF24L01P\nrf24l01p.h
 .\objects\nrf_controller.o: ..\Libraries\EXTI\bsp_exti.h
 .\objects\nrf_controller.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
