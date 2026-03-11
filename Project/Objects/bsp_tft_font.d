@@ -1,4 +1,4 @@
-.\objects\bsp_tft_font.o: ..\Libraries\TFT_LCD\bsp_TFT_Font.c
+.\objects\bsp_tft_font.o: ..\Libraries\OLED\bsp_TFT_Font.c
 .\objects\bsp_tft_font.o: ..\Libraries\CMSIS\stm32f10x.h
 .\objects\bsp_tft_font.o: ..\Libraries\CMSIS\core_cm3.h
 .\objects\bsp_tft_font.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h

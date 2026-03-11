@@ -29,4 +29,5 @@
 .\objects\bsp_tim.o: ..\Libraries\FWlib\inc\stm32f10x_usart.h
 .\objects\bsp_tim.o: ..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 .\objects\bsp_tim.o: ..\Libraries\FWlib\inc\misc.h
-.\objects\bsp_tim.o: ..\Libraries\TIM\bsp_encoder.h
+.\objects\bsp_tim.o: ..\Libraries\TIM\bsp_time.h
+.\objects\bsp_tim.o: ..\Libraries\TIM\bsp_pwm.h

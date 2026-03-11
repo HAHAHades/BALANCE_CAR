@@ -39,7 +39,7 @@
 
 #define i2c_write MPU6050_WriteReg
 #define i2c_read MPU6050_ReadData
-#define delay_ms mdelay
+
 #define get_ms get_tick_count
 
 //================以下为原文件==================

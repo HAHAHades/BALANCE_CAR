@@ -17,7 +17,7 @@
 
 
 #include "mpu6050.h"
-#include "bsp_usart.h"
+
 
 
 
@@ -226,13 +226,17 @@ uint8_t MPU6050ReadID(void)
     MPU6050_ReadData(MPU6050_SLAVE_ADDRESS,MPU6050_RA_WHO_AM_I,1,&Re);
 	if((Re != MPU_6500ID)&&(Re != MPU_6050ID))
 	{
-		printf("MPU6050 dectected error!\r\n检测不到MPU6050模块，请检查模块与开发板的接线");
-    printf("MPU6050 ID = %d\r\n",Re);
+        #if USART_Print_ON
+		UsartPrintf(USART_DEBUG,"MPU6050 dectected error!\r\n检测不到MPU6050模块，请检查模块与开发板的接线");
+        UsartPrintf(USART_DEBUG,"MPU6050 ID = %d\r\n",Re);
+        #endif //USART_Print_ON
 		return 0;
 	}
 	else
 	{
-		printf("MPU6050 ID = %d\r\n",Re);
+        #if USART_Print_ON
+		UsartPrintf(USART_DEBUG,"MPU6050 ID = %d\r\n",Re);
+        #endif //USART_Print_ON
 		return 1;
 	}
 		
@@ -294,3 +298,130 @@ void MPU6050_ReturnTemp(float *Temperature)
 	*Temperature=((double) temp3/340.0)+36.53;
 
 }
+
+/**
+  * @brief   将读取的数据转为欧拉角、加速度、角速度
+  * @param   Euler_RPY[3] 欧拉角
+  * @param   ACCEL[3] 加速度
+  * @param   GYRO_XYZ[3] 角速度
+  * @retval  
+  */
+void MPU_GetEuler(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ)
+{
+    unsigned char new_temp = 0;
+    unsigned long timestamp;
+    unsigned long sensor_timestamp;
+    int new_data = 0;
+
+    /* 接收到INT传来的中断信息后继续往下 */
+    if (!hal.sensors || !hal.new_gyro)
+    {
+        return;
+    }
+
+    /* 每过500ms读取一次温度 */
+    get_tick_count(&timestamp);
+    if (timestamp > hal.next_temp_ms)
+    {
+        hal.next_temp_ms = timestamp + TEMP_READ_MS;
+        new_temp = 1;
+    }
+
+    /* 接收到新数据 并且 开启DMP */
+    if (hal.new_gyro && hal.dmp_on)
+    {
+        short gyro[3], accel_short[3], sensors;
+        unsigned char more;
+        long accel[3], quat[4], temperature;
+        /* 当DMP正在使用时，该函数从FIFO获取新数据 */
+        dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors, &more);
+        /* 如果more=0，则数据被获取完毕 */
+        if (!more)
+            hal.new_gyro = 0;
+
+        /* 读取相对应的新数据，推入MPL */
+        //四元数数据
+        if (sensors & INV_WXYZ_QUAT)
+        {
+            inv_build_quat(quat, 0, sensor_timestamp);
+            new_data = 1;
+        }
+
+        //陀螺仪数据
+        if (sensors & INV_XYZ_GYRO)
+        {
+            inv_build_gyro(gyro, sensor_timestamp);
+            new_data = 1;
+            if (new_temp)
+            {
+                new_temp = 0;
+                /* 获取温度，仅用于陀螺温度比较 */
+                mpu_get_temperature(&temperature, &sensor_timestamp);
+                inv_build_temp(temperature, sensor_timestamp);
+            }
+        }
+        
+        //加速度计数据
+        if (sensors & INV_XYZ_ACCEL)
+        {
+            accel[0] = (long)accel_short[0];
+            accel[1] = (long)accel_short[1];
+            accel[2] = (long)accel_short[2];
+            inv_build_accel(accel, 0, sensor_timestamp);
+            new_data = 1;
+        }
+    }//end if (hal.new_gyro && hal.dmp_on)
+
+    if (new_data)
+    {
+        long data[9];
+        int8_t accuracy;
+        /* 处理接收到的数据 */
+        if (inv_execute_on_data())
+        {
+            #if USART_Print_IN_IT_ON
+            UsartPrintf(USART_DEBUG,"数据错误\n");
+            #endif //USART_Print_IN_IT_ON
+        }
+
+        if (inv_get_sensor_type_euler(data, &accuracy, (inv_time_t *)&timestamp))
+        {
+            Euler_RPY[0] = data[0] * 1.0 / (1 << 16);
+            Euler_RPY[1] = data[1] * 1.0 / (1 << 16);
+            Euler_RPY[2] = data[2] * 1.0 / (1 << 16);
+            
+            #if USART_Print_IN_IT_ON
+            UsartPrintf(USART_DEBUG,"\r\n欧拉角(rad)\t\t: %7.5f\t %7.5f\t %7.5f\t", Euler_RPY[0], Euler_RPY[1], Euler_RPY[2]);
+            #endif //USART_Print_IN_IT_ON
+            
+            #if OLED_SHOW_MPU
+            OLED_Display_XxX_ASCII( 0, 0,  8, 16, 1, "euler:R,P,Y\n", Euler_RPY[0], Euler_RPY[1], Euler_RPY[2]);
+            OLED_Display_XxX_ASCII( 0, 16,  8, 16, 1, "%5.2f %5.2f %5.2f\n", Euler_RPY[0], Euler_RPY[1], Euler_RPY[2]);
+            OLED_Refresh();
+            #endif //OLED_SHOW_MPU
+        }
+           if (inv_get_sensor_type_accel(data, &accuracy, (inv_time_t *)&timestamp))
+           {
+               ACCEL[0] = data[0] * 1.0 / (1 << 16);
+               ACCEL[1] = data[1] * 1.0 / (1 << 16);
+               ACCEL[2] = data[2] * 1.0 / (1 << 16);
+				#if USART_Print_IN_IT_ON
+               UsartPrintf(USART_DEBUG,"\r加速度(g/s)\t\t: %7.5f\t %7.5f\t %7.5f\t\r", ACCEL[0], ACCEL[1], ACCEL[2]);
+				#endif //USART_Print_IN_IT_ON
+			}
+
+            if (inv_get_sensor_type_gyro(data, &accuracy, (inv_time_t *)&timestamp))
+            {
+                GYRO_XYZ[0] = data[0] * 1.0 / (1 << 16);
+                GYRO_XYZ[1] = data[1] * 1.0 / (1 << 16);
+                GYRO_XYZ[2] = data[2] * 1.0 / (1 << 16);
+				#if USART_Print_IN_IT_ON
+                UsartPrintf(USART_DEBUG,"角速度(rad/s)\t\t: %7.5f\t %7.5f\t %7.5f\t\r\n", GYRO_XYZ[0], GYRO_XYZ[1], GYRO_XYZ[2]);
+				#endif //USART_Print_IN_IT_ON+
+            }		
+
+        }//end if (new_data)
+
+}
+
+

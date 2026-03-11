@@ -52,11 +52,15 @@ uint8_t NRF24L01P_Init(uint8_t TxMode)
 	#endif //NRF24L01_IRQ_EXTI
 	
 	//spi配置
-	BSP_SPIx_Init(NRF24L01_SPIx ,  SPI_Mode_Master,  NRF24L01_SPIx_Direction,  SPI_NSS_Soft,  SPIx_SSOE_DISABLE,  NRF24L01_SPIx_GPIO_Remap,
-				  NRF24L01_SPIx_CPOL,  NRF24L01_SPIx_CPHA,  NRF24L01_SPIx_FirstBit,  NRF24L01_SPIx_BaudRate_Psc);
+	#if NRF_InitSPI
+	// BSP_SPIx_Init(NRF24L01_SPIx ,  SPI_Mode_Master,  NRF24L01_SPIx_Direction,  SPI_NSS_Soft,  SPIx_SSOE_DISABLE,  NRF24L01_SPIx_GPIO_Remap,
+	// 			  NRF24L01_SPIx_CPOL,  NRF24L01_SPIx_CPHA,  NRF24L01_SPIx_FirstBit,  NRF24L01_SPIx_BaudRate_Psc);
 	
-
-	
+	// BSP_SPI1_Struct.SPIx = NRF24L01_SPIx;
+	// BSP_SPI1_Struct.SPI_GPIO_Remap = NRF24L01_SPIx_GPIO_Remap;
+	// BSP_SPI1_Struct.SPI_InitStruct = BSP_SPIxStructInit( SPI_Mode_Master,  NRF24L01_SPIx_Direction);
+	// BSP_SPIx_Init( &BSP_SPI1_Struct);
+	#endif //NRF_InitSPI
 
 	NRF24L01_TX_ModeConfig();//上电，准备检测
 

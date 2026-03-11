@@ -1,5 +1,6 @@
 .\objects\bsp_encoder.o: ..\Libraries\TIM\bsp_encoder.c
 .\objects\bsp_encoder.o: ..\Libraries\TIM\bsp_encoder.h
+.\objects\bsp_encoder.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\bsp_encoder.o: ..\Libraries\CMSIS\stm32f10x.h
 .\objects\bsp_encoder.o: ..\Libraries\CMSIS\core_cm3.h
 .\objects\bsp_encoder.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h

@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "bsp_tim.h": "c",
-        "bsp_hc_sr04.h": "c"
+        "bsp_hc_sr04.h": "c",
+        "inv_mpu.h": "c"
     }
 }

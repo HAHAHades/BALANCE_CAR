@@ -1,12 +1,18 @@
 #ifndef __SYSTICK_H
 #define __SYSTICK_H
 
-#define SisTic_Delay_ms mdelay
-
 #include "stm32f10x.h"
 
-int get_tick_count(unsigned long *count);
-void mdelay(unsigned long nTime);
-void SysTick_Init(void);
 
+#define SisTic_Delay_ms  SysTick_delay
+#define delay_ms  SysTick_delay
+
+
+
+int get_tick_count(unsigned long *count);
+void SysTick_delay(unsigned long nTime);
+void SysTick_Init(void);
+void TimingDelay_Decrement(void);
+void TimeStamp_Increment(void);
+void delay_5_nop(void);
 #endif /* __SYSTICK_H */

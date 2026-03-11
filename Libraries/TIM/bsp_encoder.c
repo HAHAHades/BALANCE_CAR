@@ -2,31 +2,47 @@
 #include "bsp_encoder.h"
 
 
+
+
+
+void BSP_ENCODER_UsageDemo(void)
+{
+
+	TIMx_CHx_ENCODER_Init(TIM2,  TIM_Channel_1, TIM2_IO_Reamp0 ,  BSP_Encoder_DirF);
+
+	int16_t FirstCount = Get_Encoder_Count(TIM2);
+
+
+	//after 10ms
+	int16_t LastCount = Get_Encoder_Count(TIM2);
+
+
+	//若一圈11个脉冲，减速比30,编码器直连电机，则输出速度为
+	float MSpeed = (LastCount-FirstCount)*100/(30*4*11);// rps,正交编码器模式下一个脉冲计数4次
+
+
+}
+
+
+
+
+
 /**
-  * @brief   定时器PWM功能初始化
+  * @brief   定时器编码器接口初始化
   * @param   ENCODER_TIMx ：要使用的定时器
   * @param   TIM_Channel_x1 ：使用定时器的通道(相对通道要成对使用), TIM_Channel_x1=TIM_Channel_1/3时， TIM_Channel_x2=TIM_Channel_2/4
-  * @param   GPIO_Remapping：定时器引脚是否进行重映射，0x00:不重映射;0x01:部分重映射1;0x10:部分重映射2;0x11:完全重映射;
-  *		@arg 0x00:不重映射;
-  *		@arg 0x01:部分重映射1;
-  *		@arg 0x10:部分重映射2;
-  *		@arg 0x11:完全重映射;
+  * @param   GPIO_Remapping： @ref TIMx_IO_Reamp
   * @param   Dir ：编码器A B相顺序， 
-  *		@arg 0:AB，
-  *		@arg 1:BA
+  *		@arg BSP_Encoder_DirF(0):AB，正向
+  *		@arg BSP_Encoder_DirB(1):BA，反向
   * @retval  
   */
-
-
 void TIMx_CHx_ENCODER_Init(TIM_TypeDef * ENCODER_TIMx, uint16_t TIM_Channel_x1,
-						uint8_t GPIO_Remapping , _Bool Dir)
+						uint32_t GPIO_Remapping , _Bool Dir)
 {
-	
 	
 	if(!IS_TIM_ALL_PERIPH(ENCODER_TIMx))return;
 	if(!IS_TIM_CHANNEL(TIM_Channel_x1))return;
-	
-	
 	
 	TIM_Cmd(ENCODER_TIMx,DISABLE); //关闭定时器
 	
@@ -42,10 +58,9 @@ void TIMx_CHx_ENCODER_Init(TIM_TypeDef * ENCODER_TIMx, uint16_t TIM_Channel_x1,
 	
 	uint16_t TIM_Channel_x2 = ((TIM_Channel_x1==0x0008) || (TIM_Channel_x1== 0x0000)) ? TIM_Channel_x1+4 : TIM_Channel_x1-4 ;
 	
-	
 	uint32_t GPIO_RemapX;
-	
-	
+	uint8_t IO_RemapFlag = 0;
+
 	if(ENCODER_TIMx==TIM1)//TIM1 的 CH1234 分别在 A8 A9 A10 A11 
 	{
 		TIMx_CLK = RCC_APB2Periph_TIM1;
@@ -92,8 +107,9 @@ void TIMx_CHx_ENCODER_Init(TIM_TypeDef * ENCODER_TIMx, uint16_t TIM_Channel_x1,
 			ENCODER_GPIO_Pin_x2 =  GPIO_Pin_3;
 		}
 
-		if(GPIO_Remapping==0x01)// CH1234 -> A15 B3 A2 A3
+		if(GPIO_Remapping==TIM2_IO_Reamp1)// CH1234 -> A15 B3 A2 A3
 		{
+			IO_RemapFlag = 1;
 			GPIO_RemapX = GPIO_PartialRemap1_TIM2;
 			if(TIM_Channel_x1==TIM_Channel_1 || TIM_Channel_x1==TIM_Channel_2)
 			{
@@ -104,8 +120,9 @@ void TIMx_CHx_ENCODER_Init(TIM_TypeDef * ENCODER_TIMx, uint16_t TIM_Channel_x1,
 				ENCODER_GPIO_Pin_x2 =  GPIO_Pin_3;
 			}
 		}
-		else if(GPIO_Remapping==0x10)// CH1234 -> A0 A1 B10 B11
+		else if(GPIO_Remapping==TIM2_IO_Reamp2)// CH1234 -> A0 A1 B10 B11
 		{
+			IO_RemapFlag = 1;
 			GPIO_RemapX = GPIO_PartialRemap2_TIM2;
 
 			if(TIM_Channel_x1==TIM_Channel_3 || TIM_Channel_x1==TIM_Channel_4)
@@ -119,8 +136,9 @@ void TIMx_CHx_ENCODER_Init(TIM_TypeDef * ENCODER_TIMx, uint16_t TIM_Channel_x1,
 				ENCODER_GPIO_Pin_x2 =  GPIO_Pin_11;
 			}
 		}
-		else if(GPIO_Remapping==0x11)// CH1234 -> A15 B3 B10 B11
+		else if(GPIO_Remapping==TIM2_IO_Reamp3)// CH1234 -> A15 B3 B10 B11
 		{
+			IO_RemapFlag = 1;
 			GPIO_RemapX = GPIO_FullRemap_TIM2;
 			
 			if(TIM_Channel_x1==TIM_Channel_1 || TIM_Channel_x1==TIM_Channel_2)
@@ -156,11 +174,8 @@ void TIMx_CHx_ENCODER_Init(TIM_TypeDef * ENCODER_TIMx, uint16_t TIM_Channel_x1,
 		ENCODER_GPIOx2_CLK = RCC_APB2Periph_GPIOA;
 		ENCODER_GPIOx1 = GPIOA;
 		ENCODER_GPIOx2 = GPIOA;
-		
 		ENCODER_GPIO_Pin_x1 =  GPIO_Pin_6;
-		
 		ENCODER_GPIO_Pin_x2 =  GPIO_Pin_7;
-		
 	    if(TIM_Channel_x1==TIM_Channel_3 || TIM_Channel_x1==TIM_Channel_4)//使用CH3 CH4
 		{
 			ENCODER_GPIOx1_CLK = RCC_APB2Periph_GPIOB;
@@ -172,10 +187,10 @@ void TIMx_CHx_ENCODER_Init(TIM_TypeDef * ENCODER_TIMx, uint16_t TIM_Channel_x1,
 			ENCODER_GPIO_Pin_x2 =  GPIO_Pin_1;
 		}
 
-		if(GPIO_Remapping==0x01||GPIO_Remapping==0x10)// CH1234 -> B4 B5 B0 B1
+		if(GPIO_Remapping==TIM3_IO_Reamp1)// CH1234 -> B4 B5 B0 B1
 		{
+			IO_RemapFlag = 1;
 			GPIO_RemapX = GPIO_PartialRemap_TIM3;
-			
 			if(TIM_Channel_x1==TIM_Channel_1 || TIM_Channel_x1==TIM_Channel_2)
 			{
 				ENCODER_GPIOx1_CLK = RCC_APB2Periph_GPIOB;
@@ -186,9 +201,7 @@ void TIMx_CHx_ENCODER_Init(TIM_TypeDef * ENCODER_TIMx, uint16_t TIM_Channel_x1,
 				ENCODER_GPIOx2 = GPIOB;
 				ENCODER_GPIO_Pin_x2 =  GPIO_Pin_5;
 			}
-
 		}
-		
 	}	
 	else if (ENCODER_TIMx==TIM4)//TIM4 的 CH1234 分别在 B6 B7 B8 B9
 	{
@@ -201,21 +214,16 @@ void TIMx_CHx_ENCODER_Init(TIM_TypeDef * ENCODER_TIMx, uint16_t TIM_Channel_x1,
 		ENCODER_GPIOx1 = GPIOB;
 		ENCODER_GPIOx2_CLK = RCC_APB2Periph_GPIOB;
 		ENCODER_GPIOx2 = GPIOB;
-		
 		ENCODER_GPIO_Pin_x1 =  GPIO_Pin_6;
-		
 		ENCODER_GPIO_Pin_x2 =  GPIO_Pin_7;
-		
 		if(TIM_Channel_x1==TIM_Channel_3 || TIM_Channel_x1==TIM_Channel_4)
 		{
 			ENCODER_GPIO_Pin_x1 =  GPIO_Pin_8;
-			
 			ENCODER_GPIO_Pin_x2 =  GPIO_Pin_9;
 		}
-
 	}
 	
-	if(GPIO_Remapping!=0x00)//某些引脚重映射需要禁用JTAG和SWD
+	if(IO_RemapFlag!=0)//某些引脚重映射需要禁用JTAG和SWD
 	{
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);	//开启IO复用时钟
 		GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable,ENABLE);//完全禁用SWD及JTAG
@@ -265,26 +273,25 @@ void TIMx_CHx_ENCODER_Init(TIM_TypeDef * ENCODER_TIMx, uint16_t TIM_Channel_x1,
 	
 	TIM_EncoderInterfaceConfig(ENCODER_TIMx, TIM_EncoderMode_TI12,
                                 TIM_ICPolarity,  TIM_ICPolarity);//编码器接口配置，使用双通道(正交编码器)，通道是否反向
-
-																						
+													
 	TIM_Cmd(ENCODER_TIMx,ENABLE); //开启定时器
 											
 }
 
 
 
-/**
-  * @brief   获取编码器位置
-  * @param   TIMx ：编码器所使用的定时器
-  *		@arg 
-  * @retval  编码器当前位置
-  */
+
 
 #if ENCODER_GET_COUNT_IN_IT
 int volatile G_ENCODERA_COUNT;
 int volatile G_ENCODERB_COUNT;
 #endif //ENCODER_GET_COUNT_IN_IT
-
+/**
+  * @brief   获取编码器位置并清零计数器
+  * @param   TIMx ：编码器所使用的定时器
+  *		@arg 
+  * @retval  编码器当前位置(定时器计数器值)
+  */
 int16_t Get_Encoder_Count(TIM_TypeDef* TIMx)
 {
 

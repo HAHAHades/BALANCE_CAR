@@ -336,7 +336,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_STDPERIPH_DRIVER,STM32F10X_MD,USE_DMP,MPL_LOG_NDEBUG=1,EMPL,MPU6500,EMPL_TARGET_STM32F1</Define>
+              <Define>USE_STDPERIPH_DRIVER,STM32F10X_MD,USE_DMP,MPL_LOG_NDEBUG=1,EMPL,MPU6050,EMPL_TARGET_STM32F1</Define>
               <Undefine></Undefine>
               <IncludePath>..\User;..\Libraries\AHT30;..\Libraries\BEEP;..\Libraries\cJSON;..\Libraries\CMSIS;..\Libraries\FWlib\inc;..\Libraries\IIC;..\Libraries\KEY;..\Libraries\LED;..\Libraries\SPI;..\Libraries\SysTick;..\Libraries\TIM;..\Libraries\UART;..\Libraries\NET\device\inc;..\Libraries\NET\MQTT;..\Libraries\NET\onenet\inc;..\Libraries\OLED;..\Libraries\TFT_LCD;..\Libraries\DMA;..\Libraries\EXTI;..\Libraries\CAN;..\Libraries\MPU6050;..\Libraries\MPU6050\Middlewares\driver;..\Libraries\MPU6050\Middlewares\eMPL-hal;..\Libraries\MPU6050\Middlewares\mllite;..\Libraries\MPU6050\Middlewares\mpl;..\Libraries\MPU6050\Middlewares\porting;..\Libraries\MPU6050\Middlewares\driver\eMPL;..\Libraries\MPU6050\Middlewares\driver\include;..\Libraries\MPU6050\Middlewares\driver\stm32L;..\Libraries\HC_SR04;..\Libraries\MOTOR;..\Libraries\GPIO;..\Libraries\NRF_CONTROLLER;..\Libraries\NRF24L01P;..\Libraries\ADC</IncludePath>
             </VariousControls>
@@ -573,11 +573,6 @@
               <FilePath>..\Libraries\OLED\oled.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_TFT_Font.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Libraries\TFT_LCD\bsp_TFT_Font.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_iic.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Libraries\IIC\bsp_iic.c</FilePath>
@@ -641,6 +636,16 @@
               <FileName>bsp_adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Libraries\ADC\bsp_adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_TFT_Font.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\OLED\bsp_TFT_Font.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_time.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\TIM\bsp_time.c</FilePath>
             </File>
           </Files>
         </Group>

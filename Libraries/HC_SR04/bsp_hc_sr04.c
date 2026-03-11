@@ -104,7 +104,7 @@ void HC_SR04_Init(GPIO_TypeDef* HC_Trig_GPIO_POTRx, uint16_t HC_Trig_GPIO_PINx,
 void HC_SR04_StartMeasure(void)
 {
 	GPIO_SetBits( HC_SR04_Trip_PORTx,  HC_SR04_Trip_PINx);
-	mdelay(1);
+	SisTic_Delay_ms(1);
 	GPIO_ResetBits( HC_SR04_Trip_PORTx,  HC_SR04_Trip_PINx);
 }
 
@@ -145,18 +145,25 @@ void HC_SR04_IRQHandler(void)
 		
 		if(HC_SR04_Echo_EXTI_Falg)
 		{
-			TIMx_Get_10usTicCount(&HC_SR04_Now_TimeStamp);//10us
+			// TIMx_Get_10usTicCount(&HC_SR04_Now_TimeStamp);//10us
+			#if (HC_SR04_TIME_BSPTIMxStruct!=NULL)
+			TIMx_Get_TIMx_DelayTCount(HC_SR04_TIME_BSPTIMxStruct, &HC_SR04_Now_TimeStamp);
+			#else
+			#warning There are undefined actual parameters: HC_SR04_TIME_BSPTIMxStruct
+			#endif //(HC_SR04_TIME_BSPTIMxStruct!=NULL)
 			HC_SR04_Echo_H_Time = HC_SR04_Now_TimeStamp - HC_SR04_Last_TimeStamp;
 			HC_SR04_Echo_EXTI_Falg = 0;
 		}
 		else
 		{
-			TIMx_Get_10usTicCount(&HC_SR04_Last_TimeStamp);//10us
+			// TIMx_Get_10usTicCount(&HC_SR04_Last_TimeStamp);//10us
+			#if (HC_SR04_TIME_BSPTIMxStruct!=NULL)
+			TIMx_Get_TIMx_DelayTCount(HC_SR04_TIME_BSPTIMxStruct, &HC_SR04_Last_TimeStamp);
+			#else
+			#warning There are undefined actual parameters: HC_SR04_TIME_BSPTIMxStruct
+			#endif //(HC_SR04_TIME_BSPTIMxStruct!=NULL)
 			HC_SR04_Echo_EXTI_Falg = 1;
 		}
-		
-		
-		
 		
 		/**************************************************/
 	}

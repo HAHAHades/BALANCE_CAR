@@ -50,7 +50,7 @@ uint32_t OLED_WR_Byte(u8 dat,u8 mode)
 	I2CTimeout = I2CT_FLAG_TIMEOUT;
 	/* Send OLED address for write */
 	I2C_Send7bitAddress(OLED_IICx, OLED_IIC_ADDRESS7, I2C_Direction_Transmitter);
-	//SisTic_Delay_ms(10);
+	SisTic_Delay_ms(10);
 	/* Test on EV6 and clear it */
 
 	while(!I2C_CheckEvent(OLED_IICx, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))
@@ -90,7 +90,7 @@ uint32_t OLED_WR_Bytes(u8 *dat,u8 mode, u16 len)
 {
 	/* Send STRAT condition */
 	I2C_GenerateSTART(OLED_IICx, ENABLE);
-	//SisTic_Delay_ms(10);
+	SisTic_Delay_ms(10);
 	I2CTimeout = I2CT_FLAG_TIMEOUT;  
 	/* Test on EV5 and clear it */
 	while(!I2C_CheckEvent(OLED_IICx, I2C_EVENT_MASTER_MODE_SELECT))  

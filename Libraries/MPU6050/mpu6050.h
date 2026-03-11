@@ -1,6 +1,20 @@
 #ifndef __MPU6050_H
 #define __MPU6050_H
+
+
+
 #include "stm32f10x.h"
+
+#include "bsp_usart.h"
+
+#include "mpu6050_SL.h"
+#include "inv_mpu_dmp_motion_driver.h"
+#include "invensense.h"
+#include "inv_mpu.h"
+#include "invensense_adv.h"
+#include "eMPL_outputs.h"
+
+
 
 #define  soft_IIC//是否使用软件IIC，注释代表使用硬件
 #define   MPU_6500ID 0x70 
@@ -9,6 +23,9 @@
 #define MPU6050_SLAVE_ADDRESS  (0x68)      //MPU6050器件读地址
 
 //INT引脚的GPIO宏定义
+
+#define MPU_INT_PA15  1  //定义MPU中断引脚(外部中断函数使用)
+#define MPU_INT_PB5  0  //定义MPU中断引脚(外部中断函数使用)
 #define RCC_INT_GPIO_PORT             RCC_APB2Periph_GPIOA //RCC_APB2Periph_GPIOB
 #define MPU6050_INT_Pin               GPIO_Pin_15 //GPIO_Pin_5
 #define MPU6050_INT_GPIO_Port         GPIOA //GPIOB
@@ -391,7 +408,8 @@ int MPU6050_WriteReg(unsigned char slave_addr, unsigned char reg_addr, unsigned 
                               unsigned char *data_ptr);
 
 void MPU6050_PWR_MGMT_1_INIT(void);
-void delay_ms(uint32_t nms);
+
 void MPU_INT_Init(void);
 
+void MPU_GetEuler(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ);
 #endif  /*__MPU6050*/

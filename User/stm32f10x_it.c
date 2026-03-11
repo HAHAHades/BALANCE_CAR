@@ -132,57 +132,38 @@ void PendSV_Handler(void)
 }
 
 
-
-/**
-  * @brief  This function handles SysTick Handler.
-  * @param  None
-  * @retval None
-  */
+#include "main.h"
 #include "bsp_SysTick.h"
-#include "mpu6050.h"
-#include "mpu6050_SL.h"
-
-// #define TASK_DELAY_NUM  2       //总任务个数，可以自己根据实际情况修改
-// #define TASK_DELAY_0    1000    //任务0延时 1000*1 毫秒后执行：翻转LED
-// #define TASK_DELAY_1    500     //任务1延时 500*1 毫秒后执行：MPU6050任务
-// #define NumOfTask 2
-
-
-// unsigned int Task_Delay[NumOfTask]={0};
-extern void TimingDelay_Decrement(void);
-extern void TimeStamp_Increment(void);
-extern void gyro_data_ready_cb(void);
-
-// uint32_t Task_Delay_Group[TASK_DELAY_NUM];  //任务数组，用来计时、并判断是否执行对应任务
 
 
 /* 执行任务标志：读取MPU6050数据 */
 // - 标志置 1表示读取MPU6050数据完成，需要在主循环处理MPU6050数据
 // - 标志置 0表示未完成读取MPU6050数据，需要在中断中读取MPU6050数据
 int task_readdata_finish;
-
-
 // 声明外部变量
-extern short Accel[3];
-extern short Gyro[3];
-extern float Temp;
-
+// extern short Accel[3];
+// extern short Gyro[3];
+// extern float Temp;
 //nrf_controller.c/h
 #define NRF_CTRL_ON 0 //是否使用NRF遥控器
 extern void NRF_CTRL_TickIncrease(void);
-#include "bsp_key.h"
+
+/**
+  * @brief  This function handles SysTick Handler.
+  * @param  None
+  * @retval None
+  */
 void SysTick_Handler(void)
 {
-
   TimingDelay_Decrement();
   TimeStamp_Increment();
-#if KEY_TEST_ON
-  KeyTesks_SysTick_Handler();
+// #if KEY_TEST_ON
+//   KeyTesks_SysTick_Handler();
 
-#endif //KEY_TEST_ON
-#if NRF_CTRL_ON
-  NRF_CTRL_TickIncrease();
-#endif //NRF_CTRL_ON
+// #endif //KEY_TEST_ON
+// #if NRF_CTRL_ON
+//   NRF_CTRL_TickIncrease();
+// #endif //NRF_CTRL_ON
 }
 
 
@@ -194,18 +175,18 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 
-#include "bsp_tim.h"
+
 
 void TIM3_IRQHandler(void)
 {
-  #if TIMx_IT_ON
-	TIMx_10us_IRQHandler();
-  #endif //TIMx_IT_ON
+  #if BSP_TIM3_TIME_ON
+  TIMx_DelayT_IRQHandler(&BSP_TIM3_Struct);
+  #endif //#if BSP_TIM3_TIME_ON
 }
 
 
 
-#include "bsp_USART.h"
+#if USART_Print_ON
 
 void USART1_IRQHandler(void)
 {
@@ -219,15 +200,15 @@ void USART2_IRQHandler(void)
 	
 }
 
+#endif //USART_Print_ON
 
-#include "nrf24l01p.h"
-#include "nrf_controller.h"
+
 void EXTI0_IRQHandler(void)
 {
 
-#if Use_Default_Pin_Config
-	NRF24L01_IRQ_Handler();
-#endif //!Use_Default_Pin_Config
+// #if Use_Default_Pin_Config
+// 	NRF24L01_IRQ_Handler();
+// #endif //!Use_Default_Pin_Config
 
 	if(EXTI_GetITStatus(EXTI_Line0) !=RESET )//判断是否进入中断，若进入中断则执行后面的中断程序
 	{
@@ -241,33 +222,35 @@ void EXTI0_IRQHandler(void)
 
 
 
-#include "bsp_hc_sr04.h"
+
 
 void EXTI2_IRQHandler(void)
 {
 	
-	HC_SR04_IRQHandler();
+	// HC_SR04_IRQHandler();
 	
 }
 
 
-extern void Control_Car_IRQHandler(void);
+// extern void Control_Car_IRQHandler(void);
 
 void EXTI9_5_IRQHandler(void)
 {
 
-
+#if MPU_INT_PB5
       //确保是否产生了EXTI Line中断
 	if(EXTI_GetITStatus(MPU6050_INT_EXTI_LINE) != RESET) 
 	{
        
     //回调函数
     MPU6050_data_ready_cb();
+    #if BANLANCE_CAR_ON
 		Control_Car_IRQHandler();
+    #endif //#if BANLANCE_CAR_ON
     //清除中断标志位
     EXTI_ClearITPendingBit(MPU6050_INT_EXTI_LINE);     
 	} 
-	
+#endif //MPU_INT_PB5
 }
 
 
@@ -276,65 +259,62 @@ void EXTI9_5_IRQHandler(void)
 
 void EXTI15_10_IRQHandler(void)
 {
-	if(EXTI_GetITStatus(EXTI_Line13) !=RESET )//判断是否进入中断，若进入中断则执行后面的中断程序
-	{
-		/**********************中断程序*********************/
+	// if(EXTI_GetITStatus(EXTI_Line13) !=RESET )//判断是否进入中断，若进入中断则执行后面的中断程序
+	// {
+	// 	/**********************中断程序*********************/
 
-		/**************************************************/
-	}
-	EXTI_ClearITPendingBit(EXTI_Line13);//完成中断后清除中断标志位
+	// 	/**************************************************/
+  //   EXTI_ClearITPendingBit(EXTI_Line13);//完成中断后清除中断标志位
+	// }
 	
-
-	
-      //确保是否产生了EXTI Line中断
+#if MPU_INT_PA15
+  // //确保是否产生了EXTI Line中断
 	if(EXTI_GetITStatus(MPU6050_INT_EXTI_LINE) != RESET) 
 	{
-       
     //回调函数
     MPU6050_data_ready_cb();
-		Control_Car_IRQHandler();
+#if MPU_GetEuler_IN_IT
+    MPU_GetEuler(G_Euler_RPY, G_ACCEL_XYZ, G_GYRO_XYZ);
+#endif //#if MPU_GetEuler_IN_IT
+
+#if BANLANCE_CAR_ON
+	Control_Car_IRQHandler();
+#endif //#if BANLANCE_CAR_ON
     //清除中断标志位
     EXTI_ClearITPendingBit(MPU6050_INT_EXTI_LINE);     
 	} 
-	
+#endif //MPU_INT_PA15
 
 }
 
 
-
-
-
-
-
-
-#include "bsp_spi.h"
 
 
 void DMA1_Channel2_IRQHandler(void)
 {
-	if( (DMA1->ISR & DMA1_IT_TC2) != RESET )//获取中断标志位
-	{
-		if(SPI1_DMA_REQ_Rx)//
-		{
-			SPI1->CR2 &= (uint16_t)~SPI_I2S_DMAReq_Rx;//关闭SPI1的Tx DMA
-		}
-		DMA1_Channel2->CCR  &= (uint16_t)(~DMA_CCR1_EN);//关闭DMA1_Channel2
-		DMA1->IFCR = DMA1_IT_TC2; //清楚中断标志位
-	}
+	// if( (DMA1->ISR & DMA1_IT_TC2) != RESET )//获取中断标志位
+	// {
+	// 	if(SPI1_DMA_REQ_Rx)//
+	// 	{
+	// 		SPI1->CR2 &= (uint16_t)~SPI_I2S_DMAReq_Rx;//关闭SPI1的Tx DMA
+	// 	}
+	// 	DMA1_Channel2->CCR  &= (uint16_t)(~DMA_CCR1_EN);//关闭DMA1_Channel2
+	// 	DMA1->IFCR = DMA1_IT_TC2; //清楚中断标志位
+	// }
 }
 
 void DMA1_Channel3_IRQHandler(void)
 {
-	if( (DMA1->ISR & DMA1_IT_TC3) != RESET )//获取中断标志位
-	{
-		if(SPI1_DMA_REQ_Tx)//
-		{
-			SPI1->CR2 &= (uint16_t)~SPI_I2S_DMAReq_Tx;//关闭SPI1的Tx DMA
-		}
+	// if( (DMA1->ISR & DMA1_IT_TC3) != RESET )//获取中断标志位
+	// {
+	// 	if(SPI1_DMA_REQ_Tx)//
+	// 	{
+	// 		SPI1->CR2 &= (uint16_t)~SPI_I2S_DMAReq_Tx;//关闭SPI1的Tx DMA
+	// 	}
 		
-		DMA1_Channel3->CCR  &= (uint16_t)(~DMA_CCR1_EN);//关闭DMA1_Channel3
-		DMA1->IFCR = DMA1_IT_TC3; //清楚中断标志位
-	}
+	// 	DMA1_Channel3->CCR  &= (uint16_t)(~DMA_CCR1_EN);//关闭DMA1_Channel3
+	// 	DMA1->IFCR = DMA1_IT_TC3; //清楚中断标志位
+	// }
 	
 }
 

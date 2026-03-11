@@ -1,15 +1,19 @@
 #ifndef _BSP_HC_SR04_H
 #define _BSP_HC_SR04_H
-
+#include "main.h"
 #include "stm32f10x.h"
 
 #include "bsp_exti.h"
 
 #include "bsp_SysTick.h"
+#include "bsp_time.h"
 
 
+#define HC_SR04_TIME_BSPTIMxStruct  BSP_TIM3_Struct  //传感器使用的计时定时器(需设置好全局变量)
+#define HC_SR04_TIME_CountUnitDiv10us  ((uint32_t)100)  //传感器使用的计时定时器计数器单位(/10us)
 
-/*  输出端口高电平时长分辨率   *10us */ 
+
+/*  输出端口高电平时长分辨率   /10us */ 
 #define HC_SR04_Echo_HLevel_TimeRes 1 //1*10us
 
 

@@ -40,13 +40,13 @@ void SysTick_Init(void)
 	}
 
   // 关闭滴答定时器  
-	SysTick->CTRL &= ~ SysTick_CTRL_ENABLE_Msk;
+	// SysTick->CTRL &= ~ SysTick_CTRL_ENABLE_Msk;
 	
   // 使能滴答定时器  1ms中断一次
-//	SysTick->CTRL |=  SysTick_CTRL_ENABLE_Msk;
+	SysTick->CTRL |=  SysTick_CTRL_ENABLE_Msk;
 }
 
-void mdelay(unsigned long nTime)
+void SysTick_delay(unsigned long nTime)
 {
 	TimingDelay = nTime;
 	while(TimingDelay != 0);
@@ -68,6 +68,16 @@ void TimeStamp_Increment(void)
 {
 	g_ul_ms_ticks++;
 }
+
+void delay_5_nop(void)
+{
+		__nop();
+		__nop();
+		__nop();
+		__nop();
+		__nop();
+}
+
 
 
 /*********************************************END OF FILE**********************/

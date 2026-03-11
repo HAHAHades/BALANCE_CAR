@@ -23,6 +23,7 @@
 
 #define NRF24L01_IRQ_EXTI 1 //是否使用外部中断处理NRF状态
 
+#define NRF_InitSPI  0  //是否初始化NRF时一并初始化SPI
 #define Use_Default_Pin_Config 1 //是否使用默认的引脚配置，包括SPI，中断，片选等引脚
 
 /**************定义NRF使用的SPI**************/
@@ -30,7 +31,7 @@
 
 #define NRF24L01_SPIx  				SPI1 
 #define NRF24L01_SPIx_Direction  	SPI_Direction_2Lines_FullDuplex 
-#define NRF24L01_SPIx_GPIO_Remap  	0x00 
+#define NRF24L01_SPIx_GPIO_Remap  	SPI1_IO_Reamp0 
 #define NRF24L01_SPIx_CPOL  		SPI_CPOL_Low 
 #define NRF24L01_SPIx_CPHA 			SPI_CPHA_1Edge 
 #define NRF24L01_SPIx_FirstBit 		SPI_FirstBit_MSB 

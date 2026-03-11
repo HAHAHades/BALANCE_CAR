@@ -3,19 +3,14 @@
 
 
 #include "stm32f10x.h"
-#include "stdlib.h"	
 #include "bsp_SysTick.h"
+#include "stdlib.h"	
+ 
 #include "bsp_iic.h"
  	 
 
-
-//#define SisTic_Delay_ms mdelay
-//#define delay_ms SisTic_Delay_ms
-
-
-
-#define OLED_IICx I2C1 //oled使用的iic
-#define OLED_IICx_PinRemapping GPIO_Remap_I2C1 //iic 引脚是否重映射 0：不重映射 否则重映射
+#define OLED_IICx I2C1
+#define OLED_IICx_IO_Reamp IIC1_IO_Reamp1
 
 
 #define OLED_IIC_ADDRESS7 0x3C<<1  //OLED IIC 地址    0011 1100->0111 1000 0x78

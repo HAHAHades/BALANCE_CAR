@@ -15,7 +15,6 @@
   *		@arg INy_GPIO_Pinx ：电机正反转输入y引脚
   * @retval  
   */
-
 void BSP_520Motor_Config(TIM_TypeDef * PWM_TIMx, uint16_t PWM_TIM_Channel_x, 
 						GPIO_TypeDef* IN1_GPIO_PORTx, uint16_t IN1_GPIO_Pinx, 
 						GPIO_TypeDef* IN2_GPIO_PORTx, uint16_t IN2_GPIO_Pinx)
@@ -53,8 +52,8 @@ void BSP_520Motor_Rotation(uint8_t Motor_Num, _Bool Dir, float Speed)
 			GPIO_ResetBits(Motor_520_AIN2_PORTx,  Motor_520_AIN2_Pinx);
 		}
 		
-		PWM1_SetSta(Motor_520_APWM_TIMx, Motor_520_APWM_TIM_Channel_x, 1,  (uint16_t)((Speed/100)*Motor_520_PWM_10KHz_Period));
-		PWM1_SetCompare(Motor_520_APWM_TIMx, Motor_520_APWM_TIM_Channel_x, (uint16_t)((Speed/100)*Motor_520_PWM_10KHz_Period));
+		PWM_SetSta(Motor_520_APWM_TIMx, Motor_520_APWM_TIM_Channel_x, 1);
+		PWM_SetCompare(Motor_520_APWM_TIMx, Motor_520_APWM_TIM_Channel_x, (uint16_t)((Speed/100)*Motor_520_PWM_10KHz_Period));
 		
 	}
 	else if(Motor_Num == Motor_520_B)
@@ -70,8 +69,8 @@ void BSP_520Motor_Rotation(uint8_t Motor_Num, _Bool Dir, float Speed)
 			GPIO_ResetBits(Motor_520_BIN2_PORTx,  Motor_520_BIN2_Pinx);
 		}
 		
-		PWM1_SetSta(Motor_520_BPWM_TIMx, Motor_520_BPWM_TIM_Channel_x, 1,  (uint16_t)((Speed/100)*Motor_520_PWM_10KHz_Period));
-		PWM1_SetCompare(Motor_520_BPWM_TIMx, Motor_520_BPWM_TIM_Channel_x, (uint16_t)((Speed/100)*Motor_520_PWM_10KHz_Period));
+		PWM_SetSta(Motor_520_BPWM_TIMx, Motor_520_BPWM_TIM_Channel_x, 1);
+		PWM_SetCompare(Motor_520_BPWM_TIMx, Motor_520_BPWM_TIM_Channel_x, (uint16_t)((Speed/100)*Motor_520_PWM_10KHz_Period));
 	}
 
 
@@ -89,13 +88,13 @@ void BSP_520Motor_Stop(uint8_t Motor_Num)
 	{
 		GPIO_ResetBits(Motor_520_AIN1_PORTx,  Motor_520_AIN1_Pinx);
 		GPIO_ResetBits(Motor_520_AIN2_PORTx,  Motor_520_AIN2_Pinx);
-		PWM1_SetSta(Motor_520_APWM_TIMx, Motor_520_APWM_TIM_Channel_x, 0,  (uint16_t)(Motor_520_PWM_10KHz_Period));
+		PWM_SetSta(Motor_520_APWM_TIMx, Motor_520_APWM_TIM_Channel_x, 0);
 	}
 	else if(Motor_Num == Motor_520_B)
 	{
 		GPIO_ResetBits(Motor_520_BIN1_PORTx,  Motor_520_BIN1_Pinx);
 		GPIO_ResetBits(Motor_520_BIN2_PORTx,  Motor_520_BIN2_Pinx);
-		PWM1_SetSta(Motor_520_BPWM_TIMx, Motor_520_BPWM_TIM_Channel_x, 0,  (uint16_t)(Motor_520_PWM_10KHz_Period));
+		PWM_SetSta(Motor_520_BPWM_TIMx, Motor_520_BPWM_TIM_Channel_x, 0);
 	}
 	
 }

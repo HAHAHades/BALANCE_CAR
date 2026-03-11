@@ -37,6 +37,9 @@
  * min(int a, int b)
  */
 //==============修改========================
+
+#define MPU_OVERFLOW_CLEAR_FIFO 0  //FIFO溢出时是否清除FIFO
+
 #if defined EMPL_TARGET_STM32F1
 
 #include "mpu6050.h" //声明MPU6050_WriteReg和MPU6050_ReadData
@@ -45,7 +48,7 @@
 
 #define i2c_write MPU6050_WriteReg
 #define i2c_read MPU6050_ReadData
-#define delay_ms mdelay
+
 #define get_ms get_tick_count
 #define log_i MPL_LOGI
 #define log_e MPL_LOGE
@@ -1893,6 +1896,7 @@ int mpu_read_fifo_stream(unsigned short length, unsigned char *data, unsigned ch
         more[0] = 0;
         return -1;
     }
+
     if (fifo_count > (st.hw->max_fifo >> 1))
     {
         /* FIFO is 50% full, better check overflow bit. */
@@ -1900,14 +1904,31 @@ int mpu_read_fifo_stream(unsigned short length, unsigned char *data, unsigned ch
             return -1;
         if (tmp[0] & BIT_FIFO_OVERFLOW)
         {
+            #if MPU_OVERFLOW_CLEAR_FIFO
             mpu_reset_fifo();
             return -2;
+            #else
+            do
+            {
+                /* 一直读取,将最后一包完整的数据读出 */
+                if (i2c_read(st.hw->addr, st.reg->fifo_r_w, length, data))
+                    return -1;
+                if (i2c_read(st.hw->addr, st.reg->fifo_count_h, 2, tmp))
+                    return -1;
+                fifo_count = (tmp[0] << 8) | tmp[1];    
+                more[0] = fifo_count / length - 1;
+                //fifo_count-=length;
+            } while (more[0]);
+            mpu_reset_fifo();//清空FIFO对齐下一包数据
+            return 0;
+            #endif //MPU_OVERFLOW_CLEAR_FIFO
         }
     }
 
     if (i2c_read(st.hw->addr, st.reg->fifo_r_w, length, data))
         return -1;
     more[0] = fifo_count / length - 1;
+
     return 0;
 }
 

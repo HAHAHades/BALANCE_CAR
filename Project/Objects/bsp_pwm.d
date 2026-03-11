@@ -1,5 +1,6 @@
 .\objects\bsp_pwm.o: ..\Libraries\TIM\bsp_pwm.c
 .\objects\bsp_pwm.o: ..\Libraries\TIM\bsp_pwm.h
+.\objects\bsp_pwm.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\bsp_pwm.o: ..\Libraries\CMSIS\stm32f10x.h
 .\objects\bsp_pwm.o: ..\Libraries\CMSIS\core_cm3.h
 .\objects\bsp_pwm.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
