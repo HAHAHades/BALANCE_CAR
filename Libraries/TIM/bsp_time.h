@@ -17,30 +17,30 @@
   * @{
   */
 
-#define TIMx72M_1us_Prescaler 72-1
-#define TIMx72M_1us_Period 1-1 // TIMx_DelayT = 1 / ( 72000000 / ( (Psc+1)*(Period+1) ) )
+#define TIMx72M_1us_Prescaler TIMx72M_1000k_Prescaler
+#define TIMx72M_1us_Period TIMx72M_1000k_Period // TIMx_DelayT = 1 / ( 72000000 / ( (Psc+1)*(Period+1) ) )
 
-#define TIMx72M_10us_Prescaler 72-1
-#define TIMx72M_10us_Period 10-1 // TIMx_DelayT = 1 / ( 72000000 / ( (Psc+1)*(Period+1) ) )
+#define TIMx72M_10us_Prescaler TIMx72M_100k_Prescaler
+#define TIMx72M_10us_Period TIMx72M_100k_Period // TIMx_DelayT = 1 / ( 72000000 / ( (Psc+1)*(Period+1) ) )
 
-#define TIMx72M_100us_Prescaler 72-1
-#define TIMx72M_100us_Period 100-1 // TIMx_DelayT = 1 / ( 72000000 / ( (Psc+1)*(Period+1) ) )
+#define TIMx72M_100us_Prescaler TIMx72M_10k_Prescaler
+#define TIMx72M_100us_Period TIMx72M_10k_Period // TIMx_DelayT = 1 / ( 72000000 / ( (Psc+1)*(Period+1) ) )
 
-#define TIMx72M_1ms_Prescaler 72-1
-#define TIMx72M_1ms_Period 1000-1 // TIMx_DelayT = 1 / ( 72000000 / ( (Psc+1)*(Period+1) ) )
+#define TIMx72M_1ms_Prescaler TIMx72M_1k_Prescaler
+#define TIMx72M_1ms_Period TIMx72M_1k_Period // TIMx_DelayT = 1 / ( 72000000 / ( (Psc+1)*(Period+1) ) )
 
 
-#define TIMx36M_1us_Prescaler 36-1
-#define TIMx36M_1us_Period 1-1 // TIMx_DelayT = 1 / ( 36000000 / ( (Psc+1)*(Period+1) ) )
+#define TIMx36M_1us_Prescaler TIMx36M_1000k_Prescaler
+#define TIMx36M_1us_Period TIMx36M_1000k_Period // TIMx_DelayT = 1 / ( 36000000 / ( (Psc+1)*(Period+1) ) )
 
-#define TIMx36M_10us_Prescaler 36-1
-#define TIMx36M_10us_Period 10-1 // TIMx_DelayT = 1 / ( 36000000 / ( (Psc+1)*(Period+1) ) )
+#define TIMx36M_10us_Prescaler TIMx36M_100k_Prescaler
+#define TIMx36M_10us_Period TIMx36M_100k_Period // TIMx_DelayT = 1 / ( 36000000 / ( (Psc+1)*(Period+1) ) )
 
-#define TIMx36M_100us_Prescaler 36-1
-#define TIMx36M_100us_Period 100-1 // TIMx_DelayT = 1 / ( 36000000 / ( (Psc+1)*(Period+1) ) )
+#define TIMx36M_100us_Prescaler TIMx36M_10k_Prescaler
+#define TIMx36M_100us_Period TIMx36M_10k_Period // TIMx_DelayT = 1 / ( 36000000 / ( (Psc+1)*(Period+1) ) )
 
-#define TIMx36M_1ms_Prescaler 36-1
-#define TIMx36M_1ms_Period 1000-1 // TIMx_DelayT = 1 / ( 36000000 / ( (Psc+1)*(Period+1) ) )
+#define TIMx36M_1ms_Prescaler TIMx36M_1k_Prescaler
+#define TIMx36M_1ms_Period TIMx36M_1k_Period // TIMx_DelayT = 1 / ( 36000000 / ( (Psc+1)*(Period+1) ) )
 
 /**
   * @}

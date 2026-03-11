@@ -37,11 +37,11 @@ Motor	停止	正转	反转
 #define Motor_520_BPWM_TIM_Channel_x 	TIM_Channel_1
 
 /************************电机PWM频率*************************/
-#define Motor_520_PWM_1KHz_Prescaler  	720-1  // 定时器计数频率f =  72000000 / (Psc+1) 
-#define Motor_520_PWM_1KHz_Period		100-1	// pwm 频率f = 72000000 / ((Psc+1) *(Period+1))
+#define Motor_520_PWM_1KHz_Prescaler  	TIMx72M_1k_Prescaler  // 定时器计数频率f =  72000000 / (Psc+1) 
+#define Motor_520_PWM_1KHz_Period		TIMx72M_1k_Period	// pwm 频率f = 72000000 / ((Psc+1) *(Period+1))
 
-#define Motor_520_PWM_10KHz_Prescaler	72-1
-#define Motor_520_PWM_10KHz_Period		100-1
+#define Motor_520_PWM_10KHz_Prescaler	TIMx72M_10k_Prescaler
+#define Motor_520_PWM_10KHz_Period		TIMx72M_10k_Period
 
 
 

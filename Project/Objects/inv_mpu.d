@@ -43,7 +43,11 @@
 .\objects\inv_mpu.o: ..\Libraries\UART\bsp_usart.h
 .\objects\inv_mpu.o: ..\Libraries\IIC\bsp_iic.h
 .\objects\inv_mpu.o: ..\Libraries\OLED\oled.h
+.\objects\inv_mpu.o: ..\Libraries\MOTOR\bsp_520Motor.h
+.\objects\inv_mpu.o: ..\Libraries\MOTOR\bsp_control.h
 .\objects\inv_mpu.o: ..\Libraries\MPU6050\mpu6050.h
+.\objects\inv_mpu.o: ..\Libraries\TIM\bsp_encoder.h
+.\objects\inv_mpu.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\inv_mpu.o: ..\Libraries\IIC\bsp_hard_i2c.h
 .\objects\inv_mpu.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\inv_mpu.o: ..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu_dmp_motion_driver.h

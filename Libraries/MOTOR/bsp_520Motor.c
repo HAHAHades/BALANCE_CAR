@@ -11,8 +11,8 @@
   * @param   
   *		@arg PWM_TIMx ：电机PWM使用的定时器
   *		@arg PWM_TIM_Channel_x ：电机PWM使用的定时器通道
-  *		@arg INy_GPIO_PORTx ：电机正反转输入y端口
-  *		@arg INy_GPIO_Pinx ：电机正反转输入y引脚
+  *		@arg INy_GPIO_PORTx ：电机正反转输入端口
+  *		@arg INy_GPIO_Pinx ：电机正反转输入引脚
   * @retval  
   */
 void BSP_520Motor_Config(TIM_TypeDef * PWM_TIMx, uint16_t PWM_TIM_Channel_x, 
@@ -20,8 +20,12 @@ void BSP_520Motor_Config(TIM_TypeDef * PWM_TIMx, uint16_t PWM_TIM_Channel_x,
 						GPIO_TypeDef* IN2_GPIO_PORTx, uint16_t IN2_GPIO_Pinx)
 {
 	
-	TIMx_CHx_PWM1_Init( PWM_TIMx,  PWM_TIM_Channel_x, 0x00 , 
-						Motor_520_PWM_10KHz_Period, Motor_520_PWM_10KHz_Prescaler);//PWM频率10k
+	// TIMx_CHx_PWM1_Init( PWM_TIMx,  PWM_TIM_Channel_x, 0x00 , 
+	// 					Motor_520_PWM_10KHz_Period, Motor_520_PWM_10KHz_Prescaler);//PWM频率10k
+
+	TIMx_CHx_PWM_Init(PWM_TIMx,  PWM_TIM_Channel_x,  TIM1_IO_Reamp0 , 
+					Motor_520_PWM_10KHz_Period,  Motor_520_PWM_10KHz_Prescaler);//PWM频率10k
+
 
 	BSP_GPIO_Config(IN1_GPIO_PORTx,  IN1_GPIO_Pinx,  GPIO_Mode_Out_PP);
 	BSP_GPIO_Config(IN2_GPIO_PORTx,  IN2_GPIO_Pinx,  GPIO_Mode_Out_PP);

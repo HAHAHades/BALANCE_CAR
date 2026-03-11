@@ -40,6 +40,8 @@
 .\objects\bsp_key.o: ..\Libraries\IIC\bsp_iic.h
 .\objects\bsp_key.o: ..\Libraries\OLED\oled.h
 .\objects\bsp_key.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\objects\bsp_key.o: ..\Libraries\MOTOR\bsp_520Motor.h
+.\objects\bsp_key.o: ..\Libraries\MOTOR\bsp_control.h
 .\objects\bsp_key.o: ..\Libraries\MPU6050\mpu6050.h
 .\objects\bsp_key.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\bsp_key.o: ..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu_dmp_motion_driver.h
@@ -75,6 +77,8 @@
 .\objects\bsp_key.o: ..\Libraries\MPU6050\Middlewares\mpl\no_gyro_fusion.h
 .\objects\bsp_key.o: ..\Libraries\MPU6050\Middlewares\mpl\quaternion_supervisor.h
 .\objects\bsp_key.o: ..\Libraries\MPU6050\Middlewares\eMPL-hal\eMPL_outputs.h
+.\objects\bsp_key.o: ..\Libraries\TIM\bsp_encoder.h
+.\objects\bsp_key.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\bsp_key.o: ..\Libraries\IIC\bsp_soft_i2c.h
 .\objects\bsp_key.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\inttypes.h
 .\objects\bsp_key.o: ..\Libraries\ADC\bsp_adc.h

@@ -154,6 +154,130 @@ uint8_t pwm_limit_abs(int* data)
 
 
 
+/**
+  * @brief   小车控制的中断服务程序
+  * @param
+  * @retval  
+  */
+void Control_Car_IRQHandler(void)
+{
+	
+	/* 接收到中断信息后继续往下 */
+	if (!hal.new_gyro)
+	{
+		return;
+	}
+	
+    unsigned char new_temp = 0;
+    unsigned long timestamp;
+
+	unsigned long sensor_timestamp;
+	int new_data = 0;
+		
+	/* 每过500ms读取一次温度 */
+	get_tick_count(&timestamp);
+	if (timestamp > hal.next_temp_ms)
+	{
+		hal.next_temp_ms = timestamp + TEMP_READ_MS;
+		new_temp = 1;
+	}
+
+	/* 接收到新数据 并且 开启DMP */
+	if (hal.new_gyro && hal.dmp_on)
+	{
+		short gyro[3], accel_short[3], sensors;
+		unsigned char more;
+		long accel[3], quat[4], temperature;
+		/* 当DMP正在使用时，该函数从FIFO获取新数据 */
+		dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors, &more);
+		/* 如果more=0，则数据被获取完毕 */
+		if (!more)
+			hal.new_gyro = 0;
+
+		/* 读取相对应的新数据，推入MPL */
+		//四元数数据
+		if (sensors & INV_WXYZ_QUAT)
+		{
+			inv_build_quat(quat, 0, sensor_timestamp);
+			new_data = 1;
+		}
+
+		//陀螺仪数据
+		if (sensors & INV_XYZ_GYRO)
+		{
+			inv_build_gyro(gyro, sensor_timestamp);
+			new_data = 1;
+			if (new_temp)
+			{
+				new_temp = 0;
+				/* 获取温度，仅用于陀螺温度比较 */
+				mpu_get_temperature(&temperature, &sensor_timestamp);
+				inv_build_temp(temperature, sensor_timestamp);
+			}
+		}
+		
+		//加速度计数据
+		if (sensors & INV_XYZ_ACCEL)
+		{
+			accel[0] = (long)accel_short[0];
+			accel[1] = (long)accel_short[1];
+			accel[2] = (long)accel_short[2];
+			inv_build_accel(accel, 0, sensor_timestamp);
+			new_data = 1;
+		}
+	}//end if (hal.new_gyro && hal.dmp_on)
+
+	if (new_data)
+	{
+		long data[9];
+		int8_t accuracy;
+		/* 处理接收到的数据 */
+		if (inv_execute_on_data())
+		{
+			//数据错误
+			new_data = 0;
+			return;
+//			#if UART_Printtf
+//			printf("数据错误\n");
+//			#endif //UART_Printtf
+		}
+		
+		//欧拉角
+		if (inv_get_sensor_type_euler(data, &accuracy, (inv_time_t *)&timestamp))
+		{
+			G_Euler_RPY[0] = data[0] * 1.0 / (1 << 16);
+			G_Euler_RPY[1] = data[1] * 1.0 / (1 << 16);
+			G_Euler_RPY[2] = data[2] * 1.0 / (1 << 16);
+		}
+		
+		//加速度
+		if (inv_get_sensor_type_accel(data, &accuracy, (inv_time_t *)&timestamp))
+		{
+			G_ACCEL_XYZ[0] = data[0] * 1.0 / (1 << 16);
+			G_ACCEL_XYZ[1] = data[1] * 1.0 / (1 << 16);
+			G_ACCEL_XYZ[2] = data[2] * 1.0 / (1 << 16);
+		}
+		
+		//角速度
+		if (inv_get_sensor_type_gyro(data, &accuracy, (inv_time_t *)&timestamp))
+		{
+			G_GYRO_XYZ[0] = data[0] * 1.0 / (1 << 16);
+			G_GYRO_XYZ[1] = data[1] * 1.0 / (1 << 16);
+			G_GYRO_XYZ[2] = data[2] * 1.0 / (1 << 16);
+		}		
+
+	}//end if (new_data)
+
+
+		int16_t Encoder_CountA = Get_Encoder_Count(EncoderA_TIMx);//读取编码器
+		int16_t Encoder_CountB = -Get_Encoder_Count(EncoderB_TIMx);
+		
+		Control_PWM( 0.0,  G_Euler_RPY[0],  G_GYRO_XYZ[0],  G_BSPCTRL_TargetSpeed,  Encoder_CountA,  Encoder_CountB, G_BSPCTRL_TurnSpeed , G_GYRO_XYZ[2]);//控制小车
+	
+		
+}
+
+
 
 
 

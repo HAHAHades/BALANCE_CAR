@@ -13,12 +13,9 @@
 
 // extern _Bool GTask_DelayFlag_List[];
 
-float  G_Euler_RPY[3];//欧拉角
-float  G_GYRO_XYZ[3];//角速度
-float  G_ACCEL_XYZ[3];//加速度
 
-// extern int32_t G_BSPCTRL_TargetSpeed ;//前后速度
-// extern int32_t G_BSPCTRL_TurnSpeed ;//转向速度，正为左转，负为右转
+
+
 
 /******************************************************/
 
@@ -102,8 +99,6 @@ void Hardware_Init(void)
     }
 	#endif //MPU_ON
 
-
-	
 	//NRF遥控器配置
 	#if NRF_CTRL_ON //
 	uint8_t tmpret=0;
@@ -135,7 +130,7 @@ void Hardware_Init(void)
 	
 	#if BANLANCE_CAR_ON
 	//电机初始化
-	TIM_DeInit( TIM1);
+	TIM_DeInit(Motor_520_APWM_TIMx);
 	
 	BSP_520Motor_Config( Motor_520_APWM_TIMx,  Motor_520_APWM_TIM_Channel_x, 
 						Motor_520_AIN1_PORTx,  Motor_520_AIN1_Pinx, 
@@ -146,10 +141,10 @@ void Hardware_Init(void)
 						 Motor_520_BIN2_PORTx,  Motor_520_BIN2_Pinx);
 	
 	//编码器初始化
-	TIMx_CHx_ENCODER_Init( EncoderA_TIMx,  EncoderA_TIMx_ACH_x, 0x00 ,  0); //
+	TIMx_CHx_ENCODER_Init( EncoderA_TIMx,  EncoderA_TIMx_ACH_x, EncoderA_TIMx_IO_Reamp ,  0); //
 	Get_Encoder_Count(EncoderA_TIMx);//计数器清零
 	
-	TIMx_CHx_ENCODER_Init( EncoderB_TIMx,  EncoderB_TIMx_ACH_x, 0x00 ,  0); //
+	TIMx_CHx_ENCODER_Init( EncoderB_TIMx,  EncoderB_TIMx_ACH_x, EncoderB_TIMx_IO_Reamp ,  0); //
 	Get_Encoder_Count(EncoderB_TIMx);//计数器清零
 	#endif //BANLANCE_CAR_ON
 }
@@ -174,7 +169,8 @@ void C8_6T6_Test(void)
 
 }
 
-void MPU_GetEuler2(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ);
+
+
 int main(void)
 {
 	Hardware_Init();//初始化外围硬件
@@ -221,23 +217,24 @@ int main(void)
 	}	
 	#endif //CONTROL_CAR_IN_IT
 	
-	#if BANLANCE_CAR_TEST
+	while(1)
+	{
+
+		MPU_GetEuler(G_Euler_RPY, G_ACCEL_XYZ, G_GYRO_XYZ);
 		int16_t Encoder_CountA = Get_Encoder_Count(EncoderA_TIMx);//读取编码器
 		int16_t Encoder_CountB = -Get_Encoder_Count(EncoderB_TIMx);
-		
+		Control_PWM( 0.0,  G_Euler_RPY[0],  G_GYRO_XYZ[0],  G_BSPCTRL_TargetSpeed,  Encoder_CountA,  Encoder_CountB, G_BSPCTRL_TurnSpeed,G_GYRO_XYZ[2]);//控制小车
+
 //	    float SpeedA = (Encoder_CountA/11.0)*100.0*(60.0/(30*4.0)); // rpm ,定时器在正交编码器模式下电机一圈产生四个上/下计数
 //		float SpeedB = (Encoder_CountB/11.0)*100.0*(60.0/(30*4.0)); // rpm
 //		OLED_Display_XxX_ASCII( 0, 0,  8, 16, 1, "Arpm:%08.4f\n", SpeedA);
 //		OLED_Display_XxX_ASCII( 0, 16,  8, 16, 1, "Brpm:%08.4f\n", SpeedB);
 //		OLED_Refresh();
-		
-		Control_PWM( 0.0,  Euler_RPY[0],  GYRO_XYZ[0],  0.0,  Encoder_CountA,  Encoder_CountB,  GYRO_XYZ[2]);//控制小车
-//		
 //		OLED_Display_XxX_ASCII( 0, 0,  8, 12, 1, "euler:R,P,Y\n", Euler_RPY[0], Euler_RPY[1], Euler_RPY[2]);
 //		OLED_Display_XxX_ASCII( 0, 16,  8, 12, 1, "%5.2f %5.2f %5.2f\n", Euler_RPY[0], Euler_RPY[1], Euler_RPY[2]);
 //		OLED_Refresh();
-		
-	#endif //BANLANCE_CAR_TEST
+		SisTic_Delay_ms(8);//
+	}
 		
 		#if OLED_SHOW_HC_SR04
 		float HC_distance;
@@ -330,246 +327,6 @@ int main(void)
 		LED_OFF(1);
 		SisTic_Delay_ms(150);
 	}
-
-}
-
-
-
-#if BANLANCE_CAR_ON
-/**
-  * @brief   小车控制的中断服务程序
-  * @param
-  * @retval  
-  */
-void Control_Car_IRQHandler(void)
-{
-	
-	/* 接收到中断信息后继续往下 */
-	if (!hal.new_gyro)
-	{
-		return;
-	}
-	
-    unsigned char new_temp = 0;
-    unsigned long timestamp;
-
-	unsigned long sensor_timestamp;
-	int new_data = 0;
-		
-	/* 每过500ms读取一次温度 */
-	get_tick_count(&timestamp);
-	if (timestamp > hal.next_temp_ms)
-	{
-		hal.next_temp_ms = timestamp + TEMP_READ_MS;
-		new_temp = 1;
-	}
-
-	/* 接收到新数据 并且 开启DMP */
-	if (hal.new_gyro && hal.dmp_on)
-	{
-		short gyro[3], accel_short[3], sensors;
-		unsigned char more;
-		long accel[3], quat[4], temperature;
-		/* 当DMP正在使用时，该函数从FIFO获取新数据 */
-		dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors, &more);
-		/* 如果more=0，则数据被获取完毕 */
-		if (!more)
-			hal.new_gyro = 0;
-
-		/* 读取相对应的新数据，推入MPL */
-		//四元数数据
-		if (sensors & INV_WXYZ_QUAT)
-		{
-			inv_build_quat(quat, 0, sensor_timestamp);
-			new_data = 1;
-		}
-
-		//陀螺仪数据
-		if (sensors & INV_XYZ_GYRO)
-		{
-			inv_build_gyro(gyro, sensor_timestamp);
-			new_data = 1;
-			if (new_temp)
-			{
-				new_temp = 0;
-				/* 获取温度，仅用于陀螺温度比较 */
-				mpu_get_temperature(&temperature, &sensor_timestamp);
-				inv_build_temp(temperature, sensor_timestamp);
-			}
-		}
-		
-		//加速度计数据
-		if (sensors & INV_XYZ_ACCEL)
-		{
-			accel[0] = (long)accel_short[0];
-			accel[1] = (long)accel_short[1];
-			accel[2] = (long)accel_short[2];
-			inv_build_accel(accel, 0, sensor_timestamp);
-			new_data = 1;
-		}
-	}//end if (hal.new_gyro && hal.dmp_on)
-
-	if (new_data)
-	{
-		long data[9];
-		int8_t accuracy;
-		/* 处理接收到的数据 */
-		if (inv_execute_on_data())
-		{
-			//数据错误
-			new_data = 0;
-			return;
-//			#if UART_Printtf
-//			printf("数据错误\n");
-//			#endif //UART_Printtf
-		}
-		
-		//欧拉角
-		if (inv_get_sensor_type_euler(data, &accuracy, (inv_time_t *)&timestamp))
-		{
-			G_Euler_RPY[0] = data[0] * 1.0 / (1 << 16);
-			G_Euler_RPY[1] = data[1] * 1.0 / (1 << 16);
-			G_Euler_RPY[2] = data[2] * 1.0 / (1 << 16);
-		}
-		
-		//加速度
-		if (inv_get_sensor_type_accel(data, &accuracy, (inv_time_t *)&timestamp))
-		{
-			G_ACCEL_XYZ[0] = data[0] * 1.0 / (1 << 16);
-			G_ACCEL_XYZ[1] = data[1] * 1.0 / (1 << 16);
-			G_ACCEL_XYZ[2] = data[2] * 1.0 / (1 << 16);
-		}
-		
-		//角速度
-		if (inv_get_sensor_type_gyro(data, &accuracy, (inv_time_t *)&timestamp))
-		{
-			G_GYRO_XYZ[0] = data[0] * 1.0 / (1 << 16);
-			G_GYRO_XYZ[1] = data[1] * 1.0 / (1 << 16);
-			G_GYRO_XYZ[2] = data[2] * 1.0 / (1 << 16);
-		}		
-
-	}//end if (new_data)
-
-	#if BANLANCE_CAR_TEST
-		int16_t Encoder_CountA = Get_Encoder_Count(EncoderA_TIMx);//读取编码器
-		int16_t Encoder_CountB = -Get_Encoder_Count(EncoderB_TIMx);
-		
-		Control_PWM( 0.0,  G_Euler_RPY[0],  G_GYRO_XYZ[0],  G_BSPCTRL_TargetSpeed,  Encoder_CountA,  Encoder_CountB, G_BSPCTRL_TurnSpeed , G_GYRO_XYZ[2]);//控制小车
-	#endif //BANLANCE_CAR_TEST
-		
-}
-
-#endif //BANLANCE_CAR_ON
-
-
-void MPU_GetEuler2(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ)
-{
-
-    while (0)
-    {
-		unsigned char new_temp = 0;
-		unsigned long timestamp;
-        unsigned long sensor_timestamp;
-        int new_data = 0;
-
-        /* 接收到INT传来的中断信息后继续往下 */
-        if (!hal.sensors || !hal.new_gyro)
-        {
-            continue;
-        }
-
-        /* 每过500ms读取一次温度 */
-        get_tick_count(&timestamp);
-        if (timestamp > hal.next_temp_ms)
-        {
-            hal.next_temp_ms = timestamp + TEMP_READ_MS;
-            new_temp = 1;
-        }
-
-        /* 接收到新数据 并且 开启DMP */
-        if (hal.new_gyro && hal.dmp_on)
-        {
-            short gyro[3], accel_short[3], sensors;
-            unsigned char more;
-            long accel[3], quat[4], temperature;
-            /* 当DMP正在使用时，该函数从FIFO获取新数据 */
-            dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors, &more);
-            /* 如果more=0，则数据被获取完毕 */
-            if (!more)
-                hal.new_gyro = 0;
-
-            /* 读取相对应的新数据，推入MPL */
-            //四元数数据
-            if (sensors & INV_WXYZ_QUAT)
-            {
-                inv_build_quat(quat, 0, sensor_timestamp);
-                new_data = 1;
-            }
-
-            //陀螺仪数据
-            if (sensors & INV_XYZ_GYRO)
-            {
-                inv_build_gyro(gyro, sensor_timestamp);
-                new_data = 1;
-                if (new_temp)
-                {
-                    new_temp = 0;
-                    /* 获取温度，仅用于陀螺温度比较 */
-                    mpu_get_temperature(&temperature, &sensor_timestamp);
-                    inv_build_temp(temperature, sensor_timestamp);
-                }
-            }
-            
-            //加速度计数据
-            if (sensors & INV_XYZ_ACCEL)
-            {
-                accel[0] = (long)accel_short[0];
-                accel[1] = (long)accel_short[1];
-                accel[2] = (long)accel_short[2];
-                inv_build_accel(accel, 0, sensor_timestamp);
-                new_data = 1;
-            }
-        }
-
-        if (new_data)
-        {
-            long data[9];
-            int8_t accuracy;
-            /* 处理接收到的数据 */
-            if (inv_execute_on_data())
-            {
-                UsartPrintf(USART_DEBUG, "数据错误\n");
-            }
-
-            float float_data[3];
-            if (inv_get_sensor_type_euler(data, &accuracy, (inv_time_t *)&timestamp))
-            {
-                float_data[0] = data[0] * 1.0 / (1 << 16);
-                float_data[1] = data[1] * 1.0 / (1 << 16);
-                float_data[2] = data[2] * 1.0 / (1 << 16);
-                UsartPrintf(USART_DEBUG, "\r\n欧拉角(rad)\t\t: %7.5f\t %7.5f\t %7.5f\t", float_data[0], float_data[1], float_data[2]);
-            }
-            if (inv_get_sensor_type_accel(data, &accuracy, (inv_time_t *)&timestamp))
-            {
-                float_data[0] = data[0] * 1.0 / (1 << 16);
-                float_data[1] = data[1] * 1.0 / (1 << 16);
-                float_data[2] = data[2] * 1.0 / (1 << 16);
-                UsartPrintf(USART_DEBUG, "\r加速度(g/s)\t\t: %7.5f\t %7.5f\t %7.5f\t\r", float_data[0], float_data[1], float_data[2]);
-            }
-
-            if (inv_get_sensor_type_gyro(data, &accuracy, (inv_time_t *)&timestamp))
-            {
-                float_data[0] = data[0] * 1.0 / (1 << 16);
-                float_data[1] = data[1] * 1.0 / (1 << 16);
-                float_data[2] = data[2] * 1.0 / (1 << 16);
-                UsartPrintf(USART_DEBUG, "角速度(rad/s)\t\t: %7.5f\t %7.5f\t %7.5f\t\r\n", float_data[0], float_data[1], float_data[2]);
-            }
-            SisTic_Delay_ms(500);
-        }
-
-    }
-
-
 
 }
 

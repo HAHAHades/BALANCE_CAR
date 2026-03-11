@@ -41,7 +41,11 @@
 .\objects\bsp_hard_i2c.o: ..\Libraries\IIC\bsp_iic.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\OLED\oled.h
 .\objects\bsp_hard_i2c.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\objects\bsp_hard_i2c.o: ..\Libraries\MOTOR\bsp_520Motor.h
+.\objects\bsp_hard_i2c.o: ..\Libraries\MOTOR\bsp_control.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\mpu6050.h
+.\objects\bsp_hard_i2c.o: ..\Libraries\TIM\bsp_encoder.h
+.\objects\bsp_hard_i2c.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu_dmp_motion_driver.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\Middlewares\mllite\invensense.h

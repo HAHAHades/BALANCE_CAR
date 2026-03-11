@@ -41,6 +41,8 @@
 .\objects\oled.o: ..\Libraries\UART\bsp_usart.h
 .\objects\oled.o: ..\Libraries\IIC\bsp_iic.h
 .\objects\oled.o: ..\Libraries\OLED\oled.h
+.\objects\oled.o: ..\Libraries\MOTOR\bsp_520Motor.h
+.\objects\oled.o: ..\Libraries\MOTOR\bsp_control.h
 .\objects\oled.o: ..\Libraries\MPU6050\mpu6050.h
 .\objects\oled.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\oled.o: ..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu_dmp_motion_driver.h
@@ -76,5 +78,7 @@
 .\objects\oled.o: ..\Libraries\MPU6050\Middlewares\mpl\no_gyro_fusion.h
 .\objects\oled.o: ..\Libraries\MPU6050\Middlewares\mpl\quaternion_supervisor.h
 .\objects\oled.o: ..\Libraries\MPU6050\Middlewares\eMPL-hal\eMPL_outputs.h
+.\objects\oled.o: ..\Libraries\TIM\bsp_encoder.h
+.\objects\oled.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\oled.o: ..\Libraries\IIC\bsp_soft_i2c.h
 .\objects\oled.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\inttypes.h

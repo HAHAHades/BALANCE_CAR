@@ -16,10 +16,13 @@
 #define EncoderA_TIMx TIM2
 #define EncoderA_TIMx_ACH_x TIM_Channel_1
 #define EncoderA_TIMx_BCH_x TIM_Channel_2
+#define EncoderA_TIMx_IO_Reamp TIM2_IO_Reamp0
+
 
 #define EncoderB_TIMx TIM4
 #define EncoderB_TIMx_ACH_x TIM_Channel_1
 #define EncoderB_TIMx_BCH_x TIM_Channel_2
+#define EncoderB_TIMx_IO_Reamp TIM4_IO_Reamp0
 
 #define Encoder_Count_Period 1000-1 //编码器计数周期 (Encoder_Count_Period+1)*Delay_T(bsp_tim.h)
 #define Encoder_Count_GTask_DelayFlag_List_at 1 //编码器计数标识在任务状态标识列表中的位置

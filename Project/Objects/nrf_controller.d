@@ -41,6 +41,8 @@
 .\objects\nrf_controller.o: ..\Libraries\IIC\bsp_iic.h
 .\objects\nrf_controller.o: ..\Libraries\OLED\oled.h
 .\objects\nrf_controller.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\objects\nrf_controller.o: ..\Libraries\MOTOR\bsp_520Motor.h
+.\objects\nrf_controller.o: ..\Libraries\MOTOR\bsp_control.h
 .\objects\nrf_controller.o: ..\Libraries\MPU6050\mpu6050.h
 .\objects\nrf_controller.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\nrf_controller.o: ..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu_dmp_motion_driver.h
@@ -76,6 +78,8 @@
 .\objects\nrf_controller.o: ..\Libraries\MPU6050\Middlewares\mpl\no_gyro_fusion.h
 .\objects\nrf_controller.o: ..\Libraries\MPU6050\Middlewares\mpl\quaternion_supervisor.h
 .\objects\nrf_controller.o: ..\Libraries\MPU6050\Middlewares\eMPL-hal\eMPL_outputs.h
+.\objects\nrf_controller.o: ..\Libraries\TIM\bsp_encoder.h
+.\objects\nrf_controller.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\nrf_controller.o: ..\Libraries\IIC\bsp_soft_i2c.h
 .\objects\nrf_controller.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\inttypes.h
 .\objects\nrf_controller.o: ..\Libraries\ADC\bsp_adc.h

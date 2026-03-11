@@ -41,6 +41,8 @@
 .\objects\controller_decode.o: ..\Libraries\IIC\bsp_iic.h
 .\objects\controller_decode.o: ..\Libraries\OLED\oled.h
 .\objects\controller_decode.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\objects\controller_decode.o: ..\Libraries\MOTOR\bsp_520Motor.h
+.\objects\controller_decode.o: ..\Libraries\MOTOR\bsp_control.h
 .\objects\controller_decode.o: ..\Libraries\MPU6050\mpu6050.h
 .\objects\controller_decode.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\controller_decode.o: ..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu_dmp_motion_driver.h
@@ -76,6 +78,8 @@
 .\objects\controller_decode.o: ..\Libraries\MPU6050\Middlewares\mpl\no_gyro_fusion.h
 .\objects\controller_decode.o: ..\Libraries\MPU6050\Middlewares\mpl\quaternion_supervisor.h
 .\objects\controller_decode.o: ..\Libraries\MPU6050\Middlewares\eMPL-hal\eMPL_outputs.h
+.\objects\controller_decode.o: ..\Libraries\TIM\bsp_encoder.h
+.\objects\controller_decode.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\controller_decode.o: ..\Libraries\IIC\bsp_soft_i2c.h
 .\objects\controller_decode.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\inttypes.h
 .\objects\controller_decode.o: ..\Libraries\ADC\bsp_adc.h

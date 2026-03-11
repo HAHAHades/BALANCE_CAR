@@ -110,6 +110,41 @@ typedef struct BSP_timx_TypeDef
 
 
 
+/** @defgroup TIMx_TIMEBASE_CountOverFlow 计数器中断频率对应的psc和reload
+  * @{
+  */
+
+#define TIMx72M_1000k_Prescaler 72-1
+#define TIMx72M_1000k_Period 1-1 // TIMx_DelayT = 1 / ( 72000000 / ( (Psc+1)*(Period+1) ) )
+
+#define TIMx72M_100k_Prescaler 72-1
+#define TIMx72M_100k_Period 10-1 // TIMx_DelayT = 1 / ( 72000000 / ( (Psc+1)*(Period+1) ) )
+
+#define TIMx72M_10k_Prescaler 72-1
+#define TIMx72M_10k_Period 100-1 // TIMx_DelayT = 1 / ( 72000000 / ( (Psc+1)*(Period+1) ) )
+
+#define TIMx72M_1k_Prescaler 72-1
+#define TIMx72M_1k_Period 1000-1 // TIMx_DelayT = 1 / ( 72000000 / ( (Psc+1)*(Period+1) ) )
+
+
+#define TIMx36M_1000k_Prescaler 36-1
+#define TIMx36M_1000k_Period 1-1 // TIMx_DelayT = 1 / ( 36000000 / ( (Psc+1)*(Period+1) ) )
+
+#define TIMx36M_100k_Prescaler 36-1
+#define TIMx36M_100k_Period 10-1 // TIMx_DelayT = 1 / ( 36000000 / ( (Psc+1)*(Period+1) ) )
+
+#define TIMx36M_10k_Prescaler 36-1
+#define TIMx36M_10k_Period 100-1 // TIMx_DelayT = 1 / ( 36000000 / ( (Psc+1)*(Period+1) ) )
+
+#define TIMx36M_1k_Prescaler 36-1
+#define TIMx36M_1k_Period 1000-1 // TIMx_DelayT = 1 / ( 36000000 / ( (Psc+1)*(Period+1) ) )
+
+/**
+  * @}
+  */
+
+
+
 #define ARRAY_LENGTH(arr) sizeof(arr)/sizeof(arr[0]) //获取数据长度
 
 /* 标志代码 */

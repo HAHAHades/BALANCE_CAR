@@ -277,9 +277,9 @@ void EXTI15_10_IRQHandler(void)
     MPU_GetEuler(G_Euler_RPY, G_ACCEL_XYZ, G_GYRO_XYZ);
 #endif //#if MPU_GetEuler_IN_IT
 
-#if BANLANCE_CAR_ON
+#if CONTROL_CAR_IN_IT
 	Control_Car_IRQHandler();
-#endif //#if BANLANCE_CAR_ON
+#endif //#if CONTROL_CAR_IN_IT
     //清除中断标志位
     EXTI_ClearITPendingBit(MPU6050_INT_EXTI_LINE);     
 	} 

@@ -16,13 +16,13 @@
 #define HC_SR04_ON 0 //是否开启声波测距
 #define Motor_DEBUG 0 //调试电机
 #define CONTROL_CAR_IN_IT  0 // 是否在中断中控制小车，在主函数里控制小车无法同时做其他事情，如刷新OLED等
-#define BANLANCE_CAR_ON 0 //平衡车测试
+#define BANLANCE_CAR_ON 1 //平衡车测试
 #define NRF_CTRL_ON 0 //是否使用NRF遥控器
 #define TIMx_TIME_ON 0
 #define TIMx_ENCODER_ON 0
 #define MPU_ON 1
 #define MPU_GetEuler_IN_IT  0  //在中断中读取MPU数据
-#define USART_DEBUG_MPU 1 //USART 输出mpu数据
+#define USART_DEBUG_MPU 0 //USART 输出mpu数据
 #define USART_Print_IN_IT_ON 0 //USART 在中断中输出，(中断频率过高可能导致系统卡死)
 
 /* Includes ------------------------------------------------------------------*/
@@ -76,6 +76,7 @@ extern BSP_TIMx_TypeDef BSP_TIM3_Struct;
 #if BANLANCE_CAR_ON
 #include "bsp_520Motor.h"
 #include "bsp_control.h"
+#include "bsp_encoder.h"
 #endif //BANLANCE_CAR_ON
 
 /******************* */

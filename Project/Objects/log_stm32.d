@@ -47,6 +47,8 @@
 .\objects\log_stm32.o: ..\Libraries\UART\bsp_usart.h
 .\objects\log_stm32.o: ..\Libraries\IIC\bsp_iic.h
 .\objects\log_stm32.o: ..\Libraries\OLED\oled.h
+.\objects\log_stm32.o: ..\Libraries\MOTOR\bsp_520Motor.h
+.\objects\log_stm32.o: ..\Libraries\MOTOR\bsp_control.h
 .\objects\log_stm32.o: ..\Libraries\MPU6050\mpu6050.h
 .\objects\log_stm32.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\log_stm32.o: ..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu_dmp_motion_driver.h
@@ -75,5 +77,7 @@
 .\objects\log_stm32.o: ..\Libraries\MPU6050\Middlewares\mpl\no_gyro_fusion.h
 .\objects\log_stm32.o: ..\Libraries\MPU6050\Middlewares\mpl\quaternion_supervisor.h
 .\objects\log_stm32.o: ..\Libraries\MPU6050\Middlewares\eMPL-hal\eMPL_outputs.h
+.\objects\log_stm32.o: ..\Libraries\TIM\bsp_encoder.h
+.\objects\log_stm32.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\log_stm32.o: ..\Libraries\IIC\bsp_soft_i2c.h
 .\objects\log_stm32.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\inttypes.h

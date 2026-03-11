@@ -18,8 +18,9 @@
 
 #include "mpu6050.h"
 
-
-
+float  G_Euler_RPY[3];//欧拉角
+float  G_GYRO_XYZ[3];//角速度
+float  G_ACCEL_XYZ[3];//加速度
 
 
 #ifdef   soft_IIC

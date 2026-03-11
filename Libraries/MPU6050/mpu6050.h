@@ -14,6 +14,10 @@
 #include "invensense_adv.h"
 #include "eMPL_outputs.h"
 
+extern float  G_Euler_RPY[3];//欧拉角
+extern float  G_GYRO_XYZ[3];//角速度
+extern float  G_ACCEL_XYZ[3];//加速度
+
 
 
 #define  soft_IIC//是否使用软件IIC，注释代表使用硬件
