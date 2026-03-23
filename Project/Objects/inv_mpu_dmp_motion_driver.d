@@ -44,14 +44,9 @@
 .\objects\inv_mpu_dmp_motion_driver.o: ..\User\main.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\LED\bsp_led.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\UART\bsp_usart.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\IIC\bsp_iic.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\OLED\oled.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\MOTOR\bsp_520Motor.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\MOTOR\bsp_control.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\MPU6050\mpu6050.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\TIM\bsp_encoder.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\IIC\bsp_hard_i2c.h
+.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\KEY\bsp_key.h
+.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\ADC\bsp_adc.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\MPU6050\Middlewares\mllite\invensense.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\MPU6050\Middlewares\mllite\data_builder.h

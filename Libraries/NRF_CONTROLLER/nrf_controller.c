@@ -17,10 +17,10 @@ extern int32_t G_BSPCTRL_TargetSpeed ;//前后速度
 extern int32_t G_BSPCTRL_TurnSpeed ;//转向速度，正为左转，负为右转
 #endif // NRF_CTRL_MODIFYSPEED
 
-
+#if 0
 uint8_t NRF_CTRL_Recvbuf[WRX_PAYLOAD_WIDTH] ; //被控端接收的数据
-
-static uint16_t SG_NRF_CTRL_CD_Tick; //长连接心跳
+uint32_t G_NRF_CTRL_STA_Flag;//连接器状态标志
+static uint32_t SG_NRF_CTRL_CD_Tick; //长连接心跳
 static uint8_t SG_NRF_CTRL_CD_Status; //连接检测状态，0：未连接，else：已连接
 
 /**
@@ -43,6 +43,15 @@ void NRF_Controller_RunOnce(void)
   #endif // NRF_CTRL_MASTER
 
   
+  //读取按键码
+  
+
+  //发送数据
+  // NRF_CTRL_SendMsg(uint8_t CMD, uint8_t* Msg, uint8_t MsgLen);
+
+  //更新连接状态
+
+
   return;
 }
 
@@ -69,15 +78,6 @@ uint8_t NRF_Controller_Config(void)
     #if NRF_CTRL_DEBUG_ON
     NRF_CTRL_DEBUG("Configuring NRF Conctroller...");
     #endif //NRF_CTRL_DEBUG_ON
-
-    #if NRF_CTRL_OLED_ON
-    IICxInit( OLED_IICx, OLED_IICx_PinRemapping,  I2C_Speed);
-    OLED_Init();
-    OLED_ColorTurn(0);//0正常显示，1 反色显示
-    OLED_DisplayTurn(0);//0正常显示 1 屏幕翻转显示
-    OLED_Display_XxX_ASCII( 0, 0,  8, 16, 1, "NRF_Ctrl_Config\n");
-    OLED_Refresh();
-    #endif // NRF_CTRL_OLED_ON
 
     return ret;
 }
@@ -189,28 +189,36 @@ uint8_t NRF_CTRL_ConnectionDetect(void)
 
 
 /**
-  * @brief   NRF主控端被控端长连接心跳检测
+  * @brief   NRF主控端被控端心跳自增
   * @param   
   * @retval  
-注：1ms执行一次
+注：执行周期 NRF_CTRL_TICK_PERIOD
 **/
 void NRF_CTRL_TickIncrease(void)
 {
-
   SG_NRF_CTRL_CD_Tick++;
-  if (SG_NRF_CTRL_CD_Tick > NRF_CTRL_TICKDET_TIMEOUT)
+}
+
+
+/**
+  * @brief   NRF主控端被控端长连接心跳检测
+  * @param   
+  * @retval  
+**/
+void NRF_CTRL_TickDetect(uint32_t tic)
+{
+  if (tic*NRF_CTRL_TICK_PERIOD > NRF_CTRL_TICKDET_TIMEOUT)
   {
     /* 超时 */
     SG_NRF_CTRL_CD_Tick = 0;
-    if (SG_NRF_CTRL_CD_Status)
+    if (G_NRF_CTRL_STA_Flag|NRF_CTRL_STA_CONNECTED)
     {
      /* 已连接 */
       if (NRF_CTRL_SendTick())
       {
         /* 发送心跳失败 */
-        SG_NRF_CTRL_CD_Status = 0;
+        G_NRF_CTRL_STA_Flag &= ~(NRF_CTRL_STA_CONNECTED);
       }
-     
     }
     else
     {
@@ -218,12 +226,10 @@ void NRF_CTRL_TickIncrease(void)
       if (NRF_CTRL_ConnectionDetect())
       {
         /* 连接成功 */
-        SG_NRF_CTRL_CD_Status = 1;
+        G_NRF_CTRL_STA_Flag |= NRF_CTRL_STA_CONNECTED;
       }
-      
     }
   }
-
   return;
 }
 
@@ -237,7 +243,7 @@ uint8_t NRF_CTRL_SendTick(void)
 {
   uint8_t Msg;
   uint8_t ret;
-  NRF_CTRL_SendMsg(NRF_CTRL_CMD_CONNDET, &Msg,  0);
+  ret = NRF_CTRL_SendMsg(NRF_CTRL_CMD_CONNDET, &Msg,  0);
   return ret;
 }
 
@@ -283,7 +289,6 @@ void NRF_CTRL_CheckKeyStatues(void)
   if (tmp_readFlagNum !=0)
   {
     /* 读取到按键 */
-    
     #if NRF_CTRL_USE_CTRLDECODE //使用控制端解码
     CTRL_DECODE_CopeCmdKeyMsg(key_fifoFlag, tmp_readFlagNum);
     #else // NRF_CTRL_USE_CTRLDECODE
@@ -771,4 +776,7 @@ void NRF_CTRL_CopeREQ(uint8_t reqMode, uint8_t dataBytes, uint8_t reqObj,  uint8
 
 
 #endif //NRF_CTRL_MASTER
+
+#endif
+
 

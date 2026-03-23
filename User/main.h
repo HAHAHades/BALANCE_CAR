@@ -8,7 +8,7 @@
 
 
 #define USART_Print_ON  1
-#define OLED_Display_ON  1
+#define OLED_Display_ON  0
 #define OLED_SHOW_MPU 0 //OLED 显示mpu的信息
 
 #define OLED_SHOW_HC_SR04 0 //OLED 显示声波传感器的信息
@@ -16,14 +16,15 @@
 #define HC_SR04_ON 0 //是否开启声波测距
 #define Motor_DEBUG 0 //调试电机
 #define CONTROL_CAR_IN_IT  0 // 是否在中断中控制小车，在主函数里控制小车无法同时做其他事情，如刷新OLED等
-#define BANLANCE_CAR_ON 1 //平衡车测试
+#define BANLANCE_CAR_ON 0 //平衡车测试
 #define NRF_CTRL_ON 0 //是否使用NRF遥控器
 #define TIMx_TIME_ON 0
 #define TIMx_ENCODER_ON 0
-#define MPU_ON 1
+#define MPU_ON 0
 #define MPU_GetEuler_IN_IT  0  //在中断中读取MPU数据
 #define USART_DEBUG_MPU 0 //USART 输出mpu数据
 #define USART_Print_IN_IT_ON 0 //USART 在中断中输出，(中断频率过高可能导致系统卡死)
+#define BSP_KEYButton_TESTOnly 1  //仅测试按钮
 
 /* Includes ------------------------------------------------------------------*/
 #include "stdio.h"
@@ -98,6 +99,12 @@ extern float  G_ACCEL_XYZ[3];//加速度
 #else
 #include "bsp_hard_i2c.h"
 #endif
+
+#if BSP_KEYButton_TESTOnly
+#include "bsp_key.h"
+ 
+#endif //BSP_KEYButton_TESTOnly
+
 
 
 #endif /* __MAIN_H */

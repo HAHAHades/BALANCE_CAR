@@ -3,6 +3,7 @@
         "bsp_tim.h": "c",
         "bsp_hc_sr04.h": "c",
         "inv_mpu.h": "c",
-        "main.h": "c"
+        "main.h": "c",
+        "bsp_key.h": "c"
     }
 }

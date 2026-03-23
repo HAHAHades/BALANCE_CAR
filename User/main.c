@@ -39,7 +39,7 @@ void Hardware_Init(void)
 
 #if USART_Print_ON
 	//´®¿Ú³õÊ¼»¯
-	BSP_USARTx_Init(USART_DEBUG, BSP_USARTxStructInit(115200) , USART2_IO_Reamp0);
+	BSP_USARTx_Init(USART_DEBUG, BSP_USARTxStructInit(115200) , USART1_IO_Reamp1);
 	
 	UsartPrintf(USART_DEBUG, "TEST...\n");
 
@@ -185,6 +185,8 @@ int main(void)
 		SisTic_Delay_ms(500);
 	}
 	
+	BSP_KEY_UsageDemo();
+
 	#if USART_DEBUG_MPU
 	while (1)
 	{

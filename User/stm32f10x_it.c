@@ -256,7 +256,6 @@ void EXTI9_5_IRQHandler(void)
 
 
 
-
 void EXTI15_10_IRQHandler(void)
 {
 	// if(EXTI_GetITStatus(EXTI_Line13) !=RESET )//判断是否进入中断，若进入中断则执行后面的中断程序
@@ -281,7 +280,7 @@ void EXTI15_10_IRQHandler(void)
 	Control_Car_IRQHandler();
 #endif //#if CONTROL_CAR_IN_IT
     //清除中断标志位
-    EXTI_ClearITPendingBit(MPU6050_INT_EXTI_LINE);     
+    EXTI_ClearITPendingBit(MPU6050_INT_EXTI_LINE); 
 	} 
 #endif //MPU_INT_PA15
 

@@ -38,14 +38,8 @@
 .\objects\bsp_hard_i2c.o: ..\User\main.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\LED\bsp_led.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\UART\bsp_usart.h
-.\objects\bsp_hard_i2c.o: ..\Libraries\IIC\bsp_iic.h
-.\objects\bsp_hard_i2c.o: ..\Libraries\OLED\oled.h
-.\objects\bsp_hard_i2c.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\objects\bsp_hard_i2c.o: ..\Libraries\MOTOR\bsp_520Motor.h
-.\objects\bsp_hard_i2c.o: ..\Libraries\MOTOR\bsp_control.h
-.\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\mpu6050.h
-.\objects\bsp_hard_i2c.o: ..\Libraries\TIM\bsp_encoder.h
-.\objects\bsp_hard_i2c.o: ..\Libraries\TIM\bsp_tim.h
+.\objects\bsp_hard_i2c.o: ..\Libraries\KEY\bsp_key.h
+.\objects\bsp_hard_i2c.o: ..\Libraries\ADC\bsp_adc.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu_dmp_motion_driver.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\Middlewares\mllite\invensense.h
@@ -64,6 +58,7 @@
 .\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\Middlewares\mllite\results_holder.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\Middlewares\mllite\start_manager.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\Middlewares\mllite\storage_manager.h
+.\objects\bsp_hard_i2c.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\Middlewares\driver\include\log.h
 .\objects\bsp_hard_i2c.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\bsp_hard_i2c.o: ..\Libraries\MPU6050\Middlewares\driver\include\mlinclude.h

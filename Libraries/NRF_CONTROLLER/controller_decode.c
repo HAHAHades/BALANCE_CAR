@@ -1,5 +1,6 @@
 #include "controller_decode.h"
 
+#if 0
 /*小车两轮速度，百分比包含符号*/
 static int32_t CTRL_DECODE_LeftWheel_Speed;//左轮速度 
 static int32_t CTRL_DECODE_RightWheel_Speed;//右轮速度 
@@ -236,4 +237,4 @@ void CTRL_DECODE_GetVirtualKey(uint8_t *VKey)
     return;
 }
 
-
+#endif

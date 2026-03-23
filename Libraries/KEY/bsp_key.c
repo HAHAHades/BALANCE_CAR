@@ -1,295 +1,408 @@
 
 #include "bsp_key.h"
 #include "bsp_gpio.h"
+#include "stdlib.h"
 
 
-uint8_t Registered_KEY_Count = 0;//已注册的KEY个数			  				  
-uint8_t KEY_NUM_List[MAX_KEY_NUM];
-GPIO_TypeDef* KEY_GPIO_POTRx_List[MAX_KEY_NUM];
-uint16_t KEY_GPIO_PINx_List[MAX_KEY_NUM];
+//组合键的标识在所有实体按键的标识之后
+static uint8_t SG_KEY_Registered_Button_Count = 0;//已注册的实体按键个数		  				  
+static uint8_t SG_KEY_Registered_Comb_Count = 0;//已注册的组合键个数	
+static KEY_Button_TypeDef* SG_KEY_ButtonStruct_List = NULL;//已注册的实体按键对象列表
+static KEY_COMBINATION_t* SG_KEY_CombStruct_List = NULL;//已注册的组合键对象列表
+static uint32_t SG_KEY_ButtonPressFlag;//实体按键按下标志位，指示所有按键按下状态
+static uint32_t SG_KEY_CombPressFlag;//组合键触发标志位，指示触发了组合键的所有按键状态
+/* 按键回调标识FIFO储存器 */
+static KEY_FIFO_t SG_KeyCBFlagFIFO[KEY_FIFO_CAPACITY]={KEY_FIFO_DUMMY};
+static KEY_FIFORW_t SG_KeyFifoRW_Obj; 
 
-
-const uint8_t KEY_IOscan10ms_ON=KEY_IOscan10_ON;//是否开启IO扫描
 
 uint8_t G_key_TesksTick = 0; // 按键任务运行计时
 
-/**********************user defined parameters start***********************/
-
-/*每个按键所属的组合键的索引及在该组合键中的标识，用于初始化按键IO对象列表*/
-
-#if KEY_COMB_ON
-//锚键所属的组合键索引
-static const uint8_t SCG_CombM1IndexList[3] = {0, 1, 2};
-static const uint8_t SCG_CombM2IndexList[3] = {0, 3, 4};
-
-//锚键在对应组合键中的标识
-static const uint8_t SCG_CombM1FlagList[3] = {G_KEYCOMBANCHOR_FLAG, G_KEYCOMBANCHOR_FLAG, G_KEYCOMBANCHOR_FLAG};
-static const uint8_t SCG_CombM2FlagList[3] = {0x01, G_KEYCOMBANCHOR_FLAG, G_KEYCOMBANCHOR_FLAG};
-
-//普通按键所属的组合键索引
-static const uint8_t SCG_CombUpIndexList[1] = {3};
-static const uint8_t SCG_CombDownIndexList[1] = {4};
-static const uint8_t SCG_CombAIndexList[1] = {1};
-static const uint8_t SCG_CombBIndexList[1] = {2};
-
-//普通按键在对应组合键中的标识
-static const uint8_t SCG_CombUpFlagList[1] = {0x01};
-static const uint8_t SCG_CombDownFlagList[1] = {0x01};
-static const uint8_t SCG_CombAFlagList[1] = {0x01};
-static const uint8_t SCG_CombBFlagList[1] = {0x01};
-
-#endif //KEY_COMB_ON
 
 
-//按键IO对象列表(不包括电位计按键,不包括组合键锚键)
-static KEY_GPIO_t SG_KeyIOList[G_KEY_NUM]=
-{
-
-	{GPIOA, GPIO_Pin_8, Pressed_Level_Low, 1,  },	//KEY_A
-	{GPIOA, GPIO_Pin_9, Pressed_Level_Low, 1,  },	//KEY_B
-	{GPIOA, GPIO_Pin_10, Pressed_Level_Low, 0},	//KEY_C
-	{GPIOA, GPIO_Pin_11, Pressed_Level_Low, 0},	//KEY_D
-
-
-};
-
-//电位计对象列表
-static KEY_Pot_TypeDef SG_KeyPotList[G_KEYPOT_NUM]=
-{
-	{GPIOA, GPIO_Pin_0, },
-
-};
-
-
-//锚键IO对象列表
-#if KEY_COMB_ON //
-static KEY_GPIO_t SG_CombAnchorKeyIOList[G_KEYCOMBANCHOR_NUM]=
-{
-	{GPIOB, GPIO_Pin_10, Pressed_Level_Low, 3, SCG_CombM1IndexList, SCG_CombM1FlagList},	//KEY_M1
-	{GPIOB, GPIO_Pin_11, Pressed_Level_Low, 3, SCG_CombM2IndexList, SCG_CombM2FlagList},	//KEY_M2
-
-};
-#endif //KEY_COMB_ON
-
-/*定义按键回调使能标识列表，普通按键在前，电位计在中，组合键在后，标识对应 KEY_CALLBACK_FUN_t
-所展示的回调，若使能对应回调则需将标识的对应位置1*/
-static uint8_t SG_KeyEnableFlag[G_KEY_NUM+G_KEYPOT_NUM+G_KEYCOMB_NUM]=
-{
-	0x0e,//key1，使能序号123的回调
-	0x0e,//key2
-	0x0e,//key3
-	0x0e,//key4
-	0x08,//key5
-	0x08,//key6
-	0x08,//key7
-	0x08,//key8
-	0x00,//key9
-	0x00,//key10
-	0x00,//key11
-	0x00,//key12
-	0x00,//key13
-};
-
-/**********************user defined parameters end***********************/
-
-#if KEY_USE_DEFAULT_CBF //使用默认按键回调函数
-/* 按键状态回调函数列表 KeyUpLongPressedCBF */
-static KEY_CALLBACK_FUN_t SG_KeyCallBackFunList[G_KEYCBFLIST_NUM]=
-{
-
-	{0, KeyAReleaseCBF, KeyADoubleReleaseCBF, KeyALongPressedCBF},	//KEY_A
-	{0, KeyBReleaseCBF, KeyBDoubleReleaseCBF, KeyBLongPressedCBF},	//KEY_B
-	{0, KeyCReleaseCBF, KeyCDoubleReleaseCBF, KeyCLongPressedCBF},	//KEY_C
-	{0, KeyDReleaseCBF, KeyDDoubleReleaseCBF, KeyDLongPressedCBF}	//KEY_D
-
-};
-#endif //KEY_USE_DEFAULT_CBF
-
-static KEY_STA_t SG_KeyStaList[G_KEY_NUM]=
-{
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//A
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//B
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//C
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0}	//D
-};
-
-#if KEY_COMB_ON //
-//组合键状态对象列表
-static KEY_STA_t SG_KeyCombStaList[G_KEYCOMB_NUM]=
-{
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//M1,M2
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//M1,A
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//M1,C
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//M2,UP
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//M2,DOWN
-};
-
-//锚键状态对象列表
-static KEY_STA_t SG_AnchorKeyStaList[G_KEYCOMBANCHOR_NUM]=
-{
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//KEY_M1
-	{ keySta_dummy, 0, 0, 0, G_KEY_LP_FT, 0, G_KEY_LP_RT, 0},	//KEY_M2
-};
-
-
-//组合键实时标识列表
-static uint8_t SG_CombKeyFlagList[G_KEYCOMB_NUM]=
-{
-0x00,
-0x00,
-0x00,
-0x00,
-0x00
-};
-
-//组合键触发标识列表
-static uint8_t SG_CombKeyTrigFlagList[G_KEYCOMB_NUM]=
-{
-0x81,
-0x81,
-0x81,
-0x81,
-0x81
-};
-#endif //KEY_COMB_ON
-
-
-/* 按键回调标识FIFO储存器 */
-static KEY_Flag_enumt SG_KeyCBFlagFIFO[KEY_FIFO_CAPACITY]={KeyDummy};
-
-static KEY_FIFORW_t SG_KeyFifoRW_Obj; 
+//电位计
+static uint8_t SG_KEY_Registered_Pot_Count = 0;//已注册的电位计按键个数
+static KEY_Pot_TypeDef* SG_KeyPotStruct_List;
 
 
 /*****************************************************************/
 
+
+
+void BSP_KEY_UsageDemo(void)
+{
+	uint8_t initSta; 
+	uint8_t Button_Count = 4;
+	uint8_t Comb_Count = 2;
+	uint8_t Pot_Count = 4;
+
+	initSta = BSP_KEY_InitParam( Button_Count,  Comb_Count, Pot_Count);
+	if (initSta)
+	{
+		//return init failed code
+		return;
+	}
+	
+	//先注册配置实体按钮，索引从0开始，小于Button_Count
+	KEY_Button_TypeDef ButtonStruct;
+	//设置按钮0参数为 PA0引脚 低电平有效，开启单击按下、长按、双击回调
+	BSP_KEY_Button_StructInit(&ButtonStruct,  GPIOA, GPIO_Pin_8, KEY_PL_RESET, (KEY_Flag_R|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Button_Register( 0,  ButtonStruct);
+	BSP_KEY_Button_StructInit(&ButtonStruct,  GPIOA, GPIO_Pin_9, KEY_PL_RESET, (KEY_Flag_P|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Button_Register( 1,  ButtonStruct);
+	BSP_KEY_Button_StructInit(&ButtonStruct,  GPIOA, GPIO_Pin_10, KEY_PL_RESET, (KEY_Flag_R|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Button_Register( 2,  ButtonStruct);
+	BSP_KEY_Button_StructInit(&ButtonStruct,  GPIOA, GPIO_Pin_11, KEY_PL_RESET, (KEY_Flag_P|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Button_Register( 3,  ButtonStruct);
+
+
+	//再注册配置组合键，按键数多的索引应越小，否则会出现歧义(比如A+B+C会触发A+B)，索引从0开始，小于Comb_Count
+	KEY_COMBINATION_t CombStruct;
+	//组合键0 包含3个按键 索引分别为 0，2，4，开启单击释放、长按、双击回调
+	uint8_t indexList1[] = {0,2};
+	BSP_KEY_COMB_StructInit( &CombStruct,  2, indexList1, (KEY_Flag_R|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Comb_Register(0 , CombStruct);
+	uint8_t indexList2[] = {0,3};
+	BSP_KEY_COMB_StructInit( &CombStruct,  2, indexList2, (KEY_Flag_R|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Comb_Register(1 , CombStruct);
+
+	//再注册电位计按键
+	KEY_Pot_TypeDef PotStruct;
+	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_0);
+	BSP_KEY_Pot_Register(0,  PotStruct);
+	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_1);
+	BSP_KEY_Pot_Register(1,  PotStruct);
+	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_2);
+	BSP_KEY_Pot_Register(2,  PotStruct);
+	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_3);
+	BSP_KEY_Pot_Register(3,  PotStruct);
+
+
+	BSP_KEY_GpioConfig();
+
+
+
+	//重复执行 Key_TickTask 更新io状态
+	//根据需求重复执行void KeyDetectButton(void)更新按键FIFO
+
+	uint32_t nowTime = 0;
+	uint32_t timeDiff = 0;
+
+
+	uint32_t Key_TickTaskTime = 10;
+	uint32_t Key_TickTask_LastRunTime = 0;
+
+	uint32_t KeyDetectButton_Time = 50;
+	uint32_t KeyDetectButton_LastRunTime = 0;
+
+	uint32_t ReadFIFO_Time = 200;
+	uint32_t LastReadFIFO_Time = 0;	
+	uint16_t tmpFlag;
+	while (1)
+	{
+		//非中断式扫描
+
+		nowTime = Key_GetTime();
+
+		timeDiff = nowTime - Key_TickTask_LastRunTime;
+		if (timeDiff > Key_TickTaskTime)
+		{
+			Key_TickTask();
+			Key_TickTask_LastRunTime = nowTime;
+		}
+
+
+		timeDiff = nowTime - KeyDetectButton_LastRunTime;
+		if (timeDiff > KeyDetectButton_Time)
+		{
+			KeyDetectButton();
+			KeyDetectButton_LastRunTime = nowTime;
+		}
+
+
+		uint8_t FlagCount=0;
+		KEY_FIFO_t Flag[KEY_FIFO_CAPACITY];
+		
+		//读取所有flag
+		timeDiff = nowTime - LastReadFIFO_Time;
+		if (timeDiff > ReadFIFO_Time)
+		{
+			LastReadFIFO_Time = nowTime;
+			FlagCount = KeyGetFIFOFlag(Flag,  KEY_FIFO_CAPACITY);
+
+			uint8_t tmpV1;
+			uint8_t tmpV2;
+			uint8_t potIndex;
+			for (uint8_t i = 0; i < FlagCount; i++)
+			{
+
+				if (Flag[i] & KEY_POT_FIFO_FLAG)
+				{
+					//电位计数据
+
+					KEY_POT_PCT_t potData = (KEY_POT_PCT_t)(Flag[i]&KEY_POT_FIFO_MASK);
+					potIndex = (Flag[i]&KEY_POT_FIFO_I_MASK)>>KEY_POT_FIFO_I_BIT_S;
+					KEY_DEBUG("pot%d data%d", potIndex, potData);
+					continue;
+				}
+				
+				// if (Flag[i]==Key1_P)
+				// {
+				// 	//按键1按下
+				// }
+				// else if (Flag[i]==Key2_P)
+				// {
+				// 	//按键2按下
+				// }
+				//.......
+				tmpFlag = Flag[i]&KEY_BUTTON_FIFO_MASK;
+				KEY_DEBUG("KeyFlag:%d", tmpFlag);
+				tmpV1 = tmpFlag/KEY_FLAG_NUM;
+				tmpV2 = tmpFlag%KEY_FLAG_NUM;
+				if (tmpV2==Key1_P)
+				{
+					KEY_DEBUG("Key%d单击按下", tmpV1);
+				}
+				else if (tmpV2==Key1_R)
+				{
+					KEY_DEBUG("Key%d单击释放", tmpV1);
+				}
+				else if (tmpV2==Key1_DPR)
+				{
+					KEY_DEBUG("Key%d双击释放", tmpV1);
+				}
+				else if (tmpV2==Key1_LP)
+				{
+					KEY_DEBUG("Key%d长按", tmpV1);
+				}
+				
+			}
+		}
+		
+	}
+	
+	//重新配置前需清除原有配置
+	// BSP_KEY_ClearButton();
+
+}
+
+
 /**
-  * @brief   按键测试程序
+  * @brief   获取时间戳/ms
   * @param   
   * @retval  
 **/
-void KeyTest(void)
+uint32_t Key_GetTime(void) 
 {
+	unsigned long count;
+	get_tick_count(&count);
+	return count;
+}
 
-	KeyInit();
 
-	KEY_Flag_enumt rFlag;
-	KEY_DEBUG("key test\n");
-	uint8_t tmpIndex;
-	while (1)
+/**
+  * @brief   配置所有按钮的外设
+  * @param   
+  * @retval  
+**/
+ void BSP_KEY_GpioConfig(void)
+{
+	GPIO_TypeDef* GPIO_POTRx;
+	uint16_t GPIO_PINx;
+	GPIOMode_TypeDef GPIO_Mode;
+	for (uint8_t i = 0; i < SG_KEY_Registered_Button_Count; i++)
 	{
+		GPIO_POTRx = SG_KEY_ButtonStruct_List[i].IO_Struct.gpio;
+		GPIO_PINx = SG_KEY_ButtonStruct_List[i].IO_Struct.pin;
+		GPIO_Mode = (SG_KEY_ButtonStruct_List[i].IO_Struct.pressedLevel==KEY_PL_RESET)? GPIO_Mode_IPU:GPIO_Mode_IPD;
+		BSP_GPIO_Config(GPIO_POTRx,  GPIO_PINx,  GPIO_Mode);
+	}
+	
+	uint32_t ADCx_Mode = ADC_Mode_Independent;
+	uint8_t ADC_Channel_xList[SG_KEY_Registered_Pot_Count] ;
+
+	//默认采用ADC1 开启DMA
+	for (uint8_t i = 0; i < SG_KEY_Registered_Pot_Count; i++)
+	{
+		ADC_Channel_xList[i] = SG_KeyPotStruct_List[i].ADC_Channel_x;
+
+	}
+	if (SG_KEY_Registered_Pot_Count)
+	{
+		ADCx_CHx_IndependentCongfig(SG_KeyPotStruct_List[0].ADCx, ADC_Channel_xList,SG_KEY_Registered_Pot_Count);
 		
-		do
-		{
-			/* 一直读取FIFO */
-			rFlag = KeyReadFIFO();
-			if (rFlag != KeyDummy)
-			{
-				/* 读取到有效标识 */
-				tmpIndex = rFlag/4;
-				if (tmpIndex < G_KEY_NUM) //普通按键
-				{
-					/* 按键回调较全，采用回调函数列表方式执行 */
-					#if KEY_USE_DEFAULT_CBF //使用默认按键回调函数
-					KeyCallBackListExe(SG_KeyCallBackFunList, rFlag);
-					#else
-					KeyCallBackListExe(UserDefined_KeyCallBackFunList, rFlag%4);
-					#endif //KEY_USE_DEFAULT_CBF
-				}
-				else if (tmpIndex < (G_KEY_NUM+G_KEYPOT_NUM))//电位计按键
-				{
-					/*  */
-					KeyPot_CBF_List( rFlag);
-					
-
-				}
-				else //组合键
-				{
-					/* 按键回调较少较分散，采用switch执行 */
-					//KeyCallBackSwitchExe(rFlag);
-				}
-			}
-		} while (rFlag);
-
+		ADC_START(SG_KeyPotStruct_List[0].ADCx,  ADCx_Mode);
 	}
 	
-	//return;
+
+	
+}
+
+/**
+  * @brief   按默认方式初始化按钮对象
+  * @param   Button: 需要初始化的按键对象
+  * @param   gpio: 
+  * @param   pin: 
+  * @param   pressedLevel: 触发电平 @ref BSP_KEY_PressedLevel
+  * @param   keyEnableFlag: 使能的按键状态输出标识 @ref KEY_Enable_Flag
+  * @retval  
+**/
+void BSP_KEY_Button_StructInit(KEY_Button_TypeDef* Button, GPIO_TypeDef* gpio, uint16_t pin, 
+								uint16_t pressedLevel,uint8_t keyEnableFlag)
+{
+	Button->IO_Struct.gpio = gpio;
+	Button->IO_Struct.pin = pin;
+	Button->IO_Struct.pressedLevel = pressedLevel;
+	Button->IO_Struct.currentLevel = !pressedLevel;
+	Button->IO_Struct.updataTime = 0;
+
+	Button->Sta_Struct.status = keySta_dummy;
+	Button->Sta_Struct._LPFTime = G_KEY_LP_FT;
+	Button->Sta_Struct._LPRPeriod = G_KEY_LP_RT;
+	Button->Sta_Struct.updataTime = 0;
+	Button->Sta_Struct.keyEnableFlag = keyEnableFlag;
+
+
+	return;
+}
+
+/**
+  * @brief   按默认方式初始化按钮对象
+  * @param   Comb: 需要初始化的按键对象
+  * @param   keyCount: 该组合键包含实体按键数量
+  * @param   keyIndexList: 所包含按键在按键列表中的索引  
+  * @param   keyEnableFlag: 使能的按键状态输出标识 @ref KEY_Enable_Flag
+  * @retval  
+**/
+void BSP_KEY_COMB_StructInit(KEY_COMBINATION_t* Comb, uint8_t keyCount, 
+						uint8_t* keyIndexList, uint8_t keyEnableFlag)
+{
+
+	uint32_t keyPressFlag = 0;
+	Comb->keyCount = keyCount;
+	Comb->keyIndexList = (uint8_t*)malloc(keyCount*sizeof(uint8_t));
+	if (Comb->keyIndexList==NULL)
+	{
+		KEY_DEBUG("key comb struct init failed!");
+		return;
+	}
+	
+	for (uint8_t i = 0; i < keyCount; i++)
+	{
+		Comb->keyIndexList[i] = keyIndexList[i];
+		keyPressFlag |= (uint32_t)1 << keyIndexList[i];
+	}
+	Comb->keyPressFlag = keyPressFlag;
+	Comb->keyNowFlagSta = 0;
+
+	Comb->Sta_Struct.status = keySta_dummy;
+	Comb->Sta_Struct._LPFTime = G_KEY_LP_FT;
+	Comb->Sta_Struct._LPRPeriod = G_KEY_LP_RT;
+	Comb->Sta_Struct.updataTime = 0;
+	Comb->Sta_Struct.keyEnableFlag = keyEnableFlag;
+
+	return;
+}
+
+/**
+  * @brief   按键注册配置
+  * @param   Index: 该按键在按键列表中的索引(应小于实体按键的数量)
+  * @param   Button_Struct: 按键对象
+  * @retval  0:成功，else：失败
+**/
+uint8_t BSP_KEY_Button_Register(uint8_t Index, KEY_Button_TypeDef Button_Struct)
+{
+	uint8_t rVal=0;
+	if (Index<SG_KEY_Registered_Button_Count)
+	{
+		SG_KEY_ButtonStruct_List[Index] = Button_Struct;
+	}
+	else
+	{
+		rVal = 1;
+		KEY_DEBUG("too many buttons! ignore button with index:%d", Index);
+	}
+	return rVal;
 }
 
 
 /**
-  * @brief   通过回调函数列表形式执行按键回调
-  * @param   CBFList //用户自定义按键回调列表
-  * @param   i //需要执行的回调函数在列表中的索引
-  * @retval  
+  * @brief   组合键注册配置
+  * @param   Index: 该按键在按键列表中的索引(应小于实体按键的数量)
+  * @param   Comb_Struct: 按键对象
+  * @retval  0:成功，else：失败
 **/
-void KeyCallBackListExe(KEY_CALLBACK_FUN_t *CBFList, uint8_t i)
+uint8_t BSP_KEY_Comb_Register(uint8_t Index, KEY_COMBINATION_t Comb_Struct)
 {
-	switch (i%4)
+	uint8_t rVal=0;
+	if (Index<SG_KEY_Registered_Comb_Count)
 	{
-	case Key1_P:
-	{
-		/* code */
-		CBFList[i/KEY_FIFOFLAG_NUM].pressedFun();
-	}break;
-	case Key1_R:
-	{
-		/* code */
-		CBFList[i/KEY_FIFOFLAG_NUM].releaseFun();
-	}break;
-	case Key1_DPR:
-	{
-		/* code */
-		CBFList[i/KEY_FIFOFLAG_NUM].doubleReleaseFun();
-	}break;
-	case Key1_LP:
-	{
-		/* code */
-		CBFList[i/KEY_FIFOFLAG_NUM].longPressedFun();
-	}break;
-	
-	default:
-		break;
+		SG_KEY_CombStruct_List[Index] = Comb_Struct;
 	}
-	
-	
-	return;
+	else
+	{
+		rVal = 1;
+		KEY_DEBUG("too many combination buttons! ignore button with index:%d", Index);
+	}
+	return rVal;
 }
 
 
 /**
-  * @brief   通过回调函数列表形式执行按键回调
-  * @param   keyFlag //按键回调标识
+  * @brief   按键初始化参数
+  * @param   Button_Count: 所有实体按键数，不包括电位计
+  * @param   Comb_Count: 组合键数量
+  * @param   Pot_Count: 电位计键数量
+  * @retval  0：成功，else：失败
+**/
+uint8_t BSP_KEY_InitParam(uint8_t Button_Count, uint8_t Comb_Count, uint8_t Pot_Count)
+{
+	uint8_t rVal=0;
+
+	SG_KEY_Registered_Button_Count = Button_Count;
+
+	SG_KEY_Registered_Comb_Count = Comb_Count;
+
+	SG_KEY_Registered_Pot_Count = Pot_Count;
+
+	SG_KEY_ButtonStruct_List = (KEY_Button_TypeDef*)malloc(Button_Count*sizeof(KEY_Button_TypeDef));
+	
+	SG_KEY_CombStruct_List = (KEY_COMBINATION_t*)malloc(Comb_Count*sizeof(KEY_COMBINATION_t));
+
+	SG_KeyPotStruct_List = (KEY_Pot_TypeDef*)malloc(Pot_Count*sizeof(KEY_Pot_TypeDef));
+
+
+
+	if ((SG_KEY_ButtonStruct_List==NULL) || (SG_KEY_CombStruct_List==NULL) || (SG_KeyPotStruct_List==NULL))
+	{
+		rVal = 1;
+		BSP_KEY_ClearButton();
+		KEY_DEBUG("key init param failed!");
+	}
+	
+	return rVal;
+}
+
+
+/**
+  * @brief   清除所有按钮配置
+  * @param   
   * @retval  
 **/
-void KeyCallBackSwitchExe(KEY_Flag_enumt keyFlag )
+void BSP_KEY_ClearButton(void)
 {
-	switch (keyFlag)
+	for (uint8_t i = 0; i < SG_KEY_Registered_Comb_Count; i++)
 	{
-	case Key10_P:
-	{
-		/* Key10 单击按下回调标识 */
-		KeyComb2PressedCBF();
-	}break;
-	case Key11_P:
-	{
-		/* Key11 单击按下回调标识 */
-		KeyComb3PressedCBF();
-	}break;
-	case Key12_P:
-	{
-		/* Key12 单击按下回调标识 */
-		KeyComb4PressedCBF();
-	}break;
-	case Key13_P:
-	{
-		/* Key13 单击按下回调标识 */
-		KeyComb5PressedCBF();
-	}break;
-	
-	default:
-		break;
+		free(SG_KEY_CombStruct_List[i].keyIndexList);
 	}
-	return;
+	
+	free(SG_KEY_CombStruct_List);
+	free(SG_KEY_ButtonStruct_List);
+	free(SG_KeyPotStruct_List);
+
+	SG_KEY_Registered_Button_Count = 0;
+	SG_KEY_Registered_Comb_Count = 0;
+	SG_KEY_Registered_Pot_Count = 0;
 }
 
 
@@ -299,879 +412,23 @@ void KeyCallBackSwitchExe(KEY_Flag_enumt keyFlag )
   * @param   maxFlagNum 最多返回多少个Flag
   * @retval  0：未读取到Flag，else：实际返回的Flag个数
 **/
-uint8_t KeyGetFIFOFlag(uint8_t *Flag, uint8_t maxFlagNum)
+uint8_t KeyGetFIFOFlag(KEY_FIFO_t *Flag, uint8_t maxFlagNum)
 {
 	uint8_t ret = 0;
-	KEY_Flag_enumt rFlag;
+	KEY_FIFO_t rFlag;
 	do
 	{
 		/* 一直读取FIFO */
 		rFlag = KeyReadFIFO();
-		if (rFlag != KeyDummy)
+		if (rFlag != KEY_FIFO_DUMMY)
 		{
 			/* 读取到有效标识 */
-			Flag[ret] = (uint8_t)(rFlag);
+			Flag[ret] = rFlag;
 			ret++;
 		}
-	} while ((rFlag != KeyDummy)&&(ret<maxFlagNum));
+	} while ((rFlag != KEY_FIFO_DUMMY)&&(ret<maxFlagNum));
 
 	return ret;
-}
-
-
-/**
-  * @brief   按键初始化
-  * @param   
-  * @retval  
-**/
-void KeyInit(void)
-{
-
-	for (uint8_t i = 0; i < G_KEY_NUM; i++)
-	{
-		/* 普通按键状态参数初始化 */
-		SG_KeyStaList[i].status = keySta_dummy;
-		SG_KeyStaList[i].pressFilteringTime = 0;
-		SG_KeyStaList[i].releaseFilteringTime = 0;
-		SG_KeyStaList[i].longPressTime = 0;
-		SG_KeyStaList[i]._LPFTime = G_KEY_LP_FT;
-		SG_KeyStaList[i].longPressCount = 0;
-		SG_KeyStaList[i]._LPRTime = G_KEY_LP_RT;
-		SG_KeyStaList[i].doublePressTime = 0;
-	}
-
-	#if KEY_COMB_ON //
-
-	for (uint8_t i = 0; i < G_KEYCOMBANCHOR_NUM; i++)
-	{
-		/* 锚键状态参数初始化 */
-		SG_AnchorKeyStaList[i].status = keySta_dummy;
-		SG_AnchorKeyStaList[i].pressFilteringTime = 0;
-		SG_AnchorKeyStaList[i].releaseFilteringTime = 0;
-		SG_AnchorKeyStaList[i].longPressTime = 0;
-		SG_AnchorKeyStaList[i]._LPFTime = G_KEY_LP_FT;
-		SG_AnchorKeyStaList[i].longPressCount = 0;
-		SG_AnchorKeyStaList[i]._LPRTime = G_KEY_LP_RT;
-		SG_AnchorKeyStaList[i].doublePressTime = 0;
-	}
-	#endif //KEY_COMB_ON
-
-
-	#if KEY_POT_ON
-	for (uint8_t i = 0; i < G_KEYPOT_NUM; i++)
-	{
-		/* 电位计按键结构体初始化 */
-		KEY_Pot_t_structInit(&SG_KeyPotList[i]);
-	}
-	//其余参数配置
-	SG_KeyPotList[0].gpio = GPIOA;
-	SG_KeyPotList[0].pin = GPIO_Pin_0;
-	SG_KeyPotList[0].ADCx = ADC1;
-	SG_KeyPotList[0].ADC_Channel_x = ADC_Channel_0;
-	SG_KeyPotList[0].lpCBF = KeyPot1_lpCBF;
-	
-	SG_KeyPotList[1].gpio = GPIOA;
-	SG_KeyPotList[1].pin = GPIO_Pin_1;
-	SG_KeyPotList[1].ADCx = ADC1;
-	SG_KeyPotList[1].ADC_Channel_x = ADC_Channel_1;
-	SG_KeyPotList[1].lpCBF = KeyPot2_lpCBF;
-
-	SG_KeyPotList[2].gpio = GPIOA;
-	SG_KeyPotList[2].pin = GPIO_Pin_2;
-	SG_KeyPotList[2].ADCx = ADC1;
-	SG_KeyPotList[2].ADC_Channel_x = ADC_Channel_2;
-	SG_KeyPotList[2].lpCBF = KeyPot3_lpCBF;
-	
-	SG_KeyPotList[3].gpio = GPIOA;
-	SG_KeyPotList[3].pin = GPIO_Pin_3;
-	SG_KeyPotList[3].ADCx = ADC1;
-	SG_KeyPotList[3].ADC_Channel_x = ADC_Channel_3;
-	SG_KeyPotList[3].lpCBF = KeyPot4_lpCBF;
-
-	#endif //KEY_POT_ON
-
-	KeyGpioConfig();
-	KeyClearFIFO();
-
-	#if KEY_COMB_ON //
-	for (uint8_t i = 0; i < G_KEYCOMB_NUM; i++)
-	{
-		/* 组合键状态标识复位 */
-		SG_CombKeyFlagList[i] = 0;
-	}
-	#endif //KEY_COMB_ON
-
-	return;
-}
-
-
-/**
-  * @brief   按键IO及按下电平配置
-  * @param   
-  * @retval  
-**/
-void KeyGpioConfig(void)
-{
-	GPIOMode_TypeDef GPIO_Mode_tmp;
-	for (uint8_t i = 0; i < G_KEY_NUM; i++)
-	{
-		/* code */
-		if (SG_KeyIOList[i].pressedLevel == Pressed_Level_High)
-		{
-			GPIO_Mode_tmp = GPIO_Mode_IPD;
-		}
-		else
-		{
-			GPIO_Mode_tmp = GPIO_Mode_IPU;
-		}
-		
-		BSP_GPIO_Config(SG_KeyIOList[i].gpio, SG_KeyIOList[i].pin, GPIO_Mode_tmp);
-	}
-
-	#if KEY_POT_ON // 
-	uint8_t ADC_Channel_xList[G_KEYPOT_NUM];
-	for (uint8_t i = 0; i < G_KEYPOT_NUM; i++)
-	{
-		/* code */
-		ADC_Channel_xList[i] = SG_KeyPotList[i].ADC_Channel_x;
-	}
-	ADCx_CHx_IndependentCongfig(SG_KeyPotList[0].ADCx, ADC_Channel_xList);
-	ADC_START(SG_KeyPotList[0].ADCx, ADC_Mode_Independent);
-	#endif //KEY_POT_ON
-
-
-	#if KEY_COMB_ON // 
-
-	for (uint8_t i = 0; i < G_KEYCOMBANCHOR_NUM; i++)
-	{
-		/* code */
-		if (SG_CombAnchorKeyIOList[i].pressedLevel == Pressed_Level_High)
-		{
-			GPIO_Mode_tmp = GPIO_Mode_IPD;
-		}
-		else
-		{
-			GPIO_Mode_tmp = GPIO_Mode_IPU;
-		}
-		
-		BSP_GPIO_Config(SG_CombAnchorKeyIOList[i].gpio, SG_CombAnchorKeyIOList[i].pin, GPIO_Mode_tmp);
-	}
-	#endif //KEY_COMB_ON
-
-	return;
-}
-
-
-/**
-  * @brief   修改按键状态判断参数
-  * @param   KeyStaObj : 按键状态对象 
-  * @param   LPFTime : 长按滤波时间/10ms 
-  * @param   LPRTime : 长按重复触发间隔/10ms 
-  * @retval  
-**/
-void KeySetParam(KEY_STA_t *KeyStaObj , uint8_t LPFTime, uint8_t LPRTime)
-{
-	(*KeyStaObj)._LPFTime = LPFTime;
-	(*KeyStaObj)._LPRTime = LPRTime;
-	return;
-}
-
-/**
-  * @brief   电位计按键结构体初始化函数
-  * @param   key[IN/OUT]:需要按默认值初始化的结构体
-  * @retval  
-**/
-void KEY_Pot_t_structInit(KEY_Pot_TypeDef* key)
-{
-	key->keyPot_PHLevel = G_KeyPot_PHL;
-	key->keyPot_PLLevel = G_KeyPot_PLL;
-	key->keyPot_NHLevel = G_KeyPot_NHL;
-	key->keyPot_NLLevel = G_KeyPot_NLL;
-	key->keyPot_Level = 0;
-	key->longPressCount = 0;
-	key->_LPRTime = G_KeyPot_RTime;
-	key->current_value = 0;
-	key->sum_value = 0;
-
-}
-
-/**
-  * @brief   按键任务扫描周期处理函数
-  * @param   
-  * @retval  
-**/
-void KeyTesks_SysTick_Handler(void)
-{
-    G_key_TesksTick++;
-    if (G_key_TesksTick >= KEY_TESKS_PERIOD)
-    {
-		G_key_TesksTick = 0;
-		KeyScan10ms();
-    }
-
-	return;
-}
-
-
-#if KEY_COMB_ON
-/**
-  * @brief   扫描检测组合键锚键
-  * @param   
-  * @retval  
-**/
-void KeyDetectAnchor(void)
-{
-	uint16_t tmpPPLevel;
-	uint8_t tmpIndex;
-	uint8_t tmpCombFlag;
-	for (uint8_t i = 0; i < G_KEYCOMBANCHOR_NUM; i++)
-	{
-		/* 分别扫描每个按键的状态，切换时重置下一状态所使用参数 */
-		tmpPPLevel = SG_CombAnchorKeyIOList[i].gpio->IDR & SG_CombAnchorKeyIOList[i].pin;
-
-		switch (SG_AnchorKeyStaList[i].status)
-		{
-			/* 锚键只有按下（keySta_pressed）和释放（keySta_dummy）两种状态  */
-		case keySta_dummy:
-		{
-			/* 锚键空闲 */
-			if (tmpPPLevel == SG_CombAnchorKeyIOList[i].pressedLevel)
-			{
-				/* 按键被按下，开始滤波 */
-				SG_AnchorKeyStaList[i].pressFilteringTime++;
-				if (SG_AnchorKeyStaList[i].pressFilteringTime>G_KEY_FILTER_TIME)
-				{
-					/* 滤波时间达到要求，重置滤波时间，修改组合键实时标志及锚键状态 */
-					for (uint8_t j = 0; j < SG_CombAnchorKeyIOList[i].keyCombShareNum; j++)
-					{
-						/* 修改锚键所属的所有组合键的实时标志 */
-						tmpIndex = SG_CombAnchorKeyIOList[i].keyCombIndexList[j];
-						SG_CombKeyFlagList[tmpIndex] |= SG_CombAnchorKeyIOList[i].keyCombFlagList[j];
-						SG_KeyCombStaList[tmpIndex].pressFilteringTime = 0;
-					
-					}
-					
-					SG_AnchorKeyStaList[i].status = keySta_pressed;
-					SG_AnchorKeyStaList[i].releaseFilteringTime = 0;
-
-					/* 锚键 单击/短按 按下回调 */
-				}
-				
-			}
-			else
-			{
-				/* 存在抖动，重置消抖 */
-				SG_AnchorKeyStaList[i].pressFilteringTime = 0;
-			}
-		}break;
-		case keySta_pressed:
-		{
-			/* 已经是按下状态 */
-			if (tmpPPLevel != SG_CombAnchorKeyIOList[i].pressedLevel)
-			{
-				/* 按键松开，开始滤波 */
-				SG_AnchorKeyStaList[i].releaseFilteringTime++;
-				if (SG_AnchorKeyStaList[i].releaseFilteringTime>G_KEY_FILTER_TIME)
-				{
-					/* 滤波时间达到要求，重置滤波时间，修改组合键实时标志及锚键状态 */
-					for (uint8_t j = 0; j < SG_CombAnchorKeyIOList[i].keyCombShareNum; j++)
-					{
-						/* 修改锚键所属的所有组合键的实时标志 */
-						tmpCombFlag = SG_CombAnchorKeyIOList[i].keyCombFlagList[j];
-						if ( tmpCombFlag == G_KEYCOMBANCHOR_FLAG)
-						{
-							/* 该键为组合键中的锚键 */
-							SG_CombKeyFlagList[SG_CombAnchorKeyIOList[i].keyCombIndexList[j]] = 0;//清除所有标志
-						}
-						else
-						{
-							/* 该键在组合键中作为普通按键 */
-							SG_CombKeyFlagList[SG_CombAnchorKeyIOList[i].keyCombIndexList[j]] &= ~(tmpCombFlag);//清除所有标志
-						}
-					}
-					SG_AnchorKeyStaList[i].status = keySta_dummy;
-					SG_AnchorKeyStaList[i].pressFilteringTime = 0;
-
-					/* 锚键 单击/短按 释放回调 */
-				}
-
-			}
-			else
-			{
-				/* 存在抖动，重置消抖 */
-				SG_AnchorKeyStaList[i].releaseFilteringTime = 0;
-			}
-			
-		}break;
-		default:
-			break;
-		}
-			
-	}
-	
-	return;
-}
-
-#endif //KEY_COMB_ON
-
-/**
-  * @brief   扫描检测普通按键
-  * @param   
-  * @retval  
-**/
-void KeyDetectCommon(void)
-{
-		uint16_t tmpPPLevel;
-	#if KEY_COMB_ON //
-
-	uint8_t tmpIndex;
-	uint8_t tmpFlag=0;
-	uint8_t tmpPressFilteringOk;
-	uint8_t tmpReleaseFilteringOk;
-	#endif //#if KEY_COMB_ON //
-	for (uint8_t i = 0; i < G_KEY_NUM; i++)
-	{
-		/* 分别扫描每个按键的状态，切换时重置下一状态所使用参数 */
-		tmpPPLevel = SG_KeyIOList[i].gpio->IDR & SG_KeyIOList[i].pin;
-	#if KEY_COMB_ON //
-		tmpFlag=0;
-		tmpPressFilteringOk = 0;
-		tmpReleaseFilteringOk = 0;
-		if (SG_KeyIOList[i].keyCombShareNum > 0)
-		{
-			/* 属于某组合键 */
-			for (uint8_t j = 0; j < SG_KeyIOList[i].keyCombShareNum; j++)
-			{
-				/* 遍历按键所属的每个组合键 */
-				tmpIndex = SG_KeyIOList[i].keyCombIndexList[j];
-				if (SG_CombKeyFlagList[tmpIndex] & G_KEYCOMBANCHOR_FLAG)
-				{
-					/* 锚键已按下，进入组合键模式 */
-					tmpFlag = 1;
-					if (SG_CombKeyFlagList[tmpIndex]&SG_KeyIOList[i].keyCombFlagList[j])
-					{
-						/* 在组合键中 已为按下状态 等待释放*/
-						if (tmpPPLevel == SG_KeyIOList[i].pressedLevel)
-						{
-							/* 存在抖动 ，重置滤波*/
-							SG_KeyStaList[i].releaseFilteringTime=0;
-						}
-						else
-						{
-							/* 按键松开，开始滤波 */
-							SG_KeyStaList[i].releaseFilteringTime++;
-							if (tmpReleaseFilteringOk||(SG_KeyStaList[i].releaseFilteringTime>G_KEY_FILTER_TIME))
-							{
-								/* 滤波时间达到要求，修改组合键标志 */
-								SG_CombKeyFlagList[tmpIndex] &= ~(SG_KeyIOList[i].keyCombFlagList[j]); 
-								SG_KeyStaList[i].pressFilteringTime = 0;
-								tmpReleaseFilteringOk = 1;
-								SG_KeyStaList[i].releaseFilteringTime = 0;//防止溢出
-							}
-							else
-							{
-								/* 未达到滤波时间，结束当前循环 */
-								break;
-							}
-						}
-					}
-					else
-					{
-						/* 在组合键中 为未按下状态 等待按下 */
-						if (tmpPPLevel == SG_KeyIOList[i].pressedLevel)
-						{
-							/* 按键按下 开始滤波 */
-							SG_KeyStaList[i].pressFilteringTime++;
-							if (tmpPressFilteringOk||(SG_KeyStaList[i].pressFilteringTime>G_KEY_FILTER_TIME))
-							{
-								/* 滤波时间达到要求，修改组合键标志 */
-								SG_CombKeyFlagList[tmpIndex] |= SG_KeyIOList[i].keyCombFlagList[j];
-								SG_KeyStaList[i].releaseFilteringTime = 0;
-								tmpPressFilteringOk = 1;
-								SG_KeyStaList[i].pressFilteringTime = 0;//防止溢出
-							}
-							else
-							{
-								/* 未达到滤波时间，结束当前循环 */
-								break;
-							}
-						}
-						else
-						{
-							/* 存在抖动 ，重置滤波*/
-							SG_KeyStaList[i].pressFilteringTime=0;
-						}
-					}
-				}
-			}
-		}
-		if (tmpFlag)
-		{
-			/* 锚键已按下，进入组合键模式 */
-			continue;
-		}
-	#endif //KEY_COMB_ON
-
-		switch (SG_KeyStaList[i].status)
-		{
-		/* 独立按键模式 */
-		case keySta_dummy:
-		{
-			/* 空闲 */
-			if (tmpPPLevel == SG_KeyIOList[i].pressedLevel)
-			{
-				/* 按键被按下,开始滤波 */
-				SG_KeyStaList[i].pressFilteringTime++;
-				if (SG_KeyStaList[i].pressFilteringTime>G_KEY_FILTER_TIME)
-				{
-					/* 滤波时间达到要求，切换为按下状态  */
-					SG_KeyStaList[i].status = keySta_pressed;
-					SG_KeyStaList[i].releaseFilteringTime = 0;
-					SG_KeyStaList[i].longPressTime = 0;
-					
-					/* 独立按键 单击按下回调 */
-					if (SG_KeyEnableFlag[i] & (0x01<<Key1_P))
-					{
-						/* 对应回调使能，将回调标识写入FIFO */
-						KeyWriteFIFO((KEY_Flag_enumt)(Key1_P+(i*4)));
-					}
-					
-				}
-			}
-			else
-			{
-				/* 存在抖动，重置消抖 */
-				SG_KeyStaList[i].pressFilteringTime = 0;
-			}
-		}break;
-		case keySta_pressed:
-		{
-			/* 已经是按下状态 */
-			if (tmpPPLevel == SG_KeyIOList[i].pressedLevel)
-			{
-				/* 继续按下 长按计时 */
-				SG_KeyStaList[i].longPressTime++;
-				SG_KeyStaList[i].releaseFilteringTime = 0;//重置释放消抖
-				if (SG_KeyStaList[i].longPressTime > SG_KeyStaList[i]._LPFTime)
-				{
-					/* 达到长按判断条件，重置判断时间，切换为长按状态 */
-					SG_KeyStaList[i].status = keySta_longpress;
-					SG_KeyStaList[i].longPressCount = 0;
-					SG_KeyStaList[i].releaseFilteringTime = 0;
-
-					/* 执行长按回调 */
-					if (SG_KeyEnableFlag[i] & (0x01<<Key1_LP))
-					{
-						/* 对应回调使能，将回调标识写入FIFO */
-						KeyWriteFIFO( (KEY_Flag_enumt)(Key1_LP+(i*4)));
-					}
-					
-				}
-			}
-			else
-			{
-				/* 松开，软件消抖滤波 */
-				SG_KeyStaList[i].releaseFilteringTime++;
-				SG_KeyStaList[i].longPressTime = 0;//重置长按判断
-				if (SG_KeyStaList[i].releaseFilteringTime > G_KEY_FILTER_TIME)
-				{
-					/* 达到消抖时间，重置消抖时间，切换为短按/单击释放状态 */
-					SG_KeyStaList[i].status = keySta_release;
-					SG_KeyStaList[i].doublePressTime = 0;
-					SG_KeyStaList[i].pressFilteringTime = 0;
-
-					/* 执行单击释放回调 */
-					if (SG_KeyEnableFlag[i] & (0x01<<Key1_LP))
-					{
-						/* 对应回调使能，将回调标识写入FIFO */
-						KeyWriteFIFO( (KEY_Flag_enumt)(Key1_R+(i*4)));
-					}
-				}
-			}
-			
-		}break;
-		case keySta_release:
-		{
-			/* 短按释放*/
-
-			if (SG_KeyStaList[i].doublePressTime < G_KEY_DOUBLEPRESS_TIME)
-			{
-				/* 在双击间隔内 */
-				if (tmpPPLevel == SG_KeyIOList[i].pressedLevel)
-				{
-					/* 再次按下，开始消抖 */
-					SG_KeyStaList[i].pressFilteringTime++;
-					if (SG_KeyStaList[i].pressFilteringTime > G_KEY_FILTER_TIME)
-					{
-						/* 消抖完成 */
-						if (SG_KeyStaList[i].doublePressTime < G_KEY_DOUBLEPRESS_TIME)
-						{
-							/* 在双击时间间隔内再次按下，切换为双击 */
-							SG_KeyStaList[i].status = keySta_doublepress;
-							SG_KeyStaList[i].longPressTime = 0;
-							SG_KeyStaList[i].releaseFilteringTime = 0;
-
-							/* 双击按下回调 */
-						}
-					}
-				}
-				else
-				{
-					/* 未按下，双击间隔计时 */
-					SG_KeyStaList[i].doublePressTime++;
-					SG_KeyStaList[i].pressFilteringTime=0;
-				}
-			}
-			else
-			{
-				/* 超出双击时间间隔，切换为空闲 */
-				SG_KeyStaList[i].pressFilteringTime = 0;
-				SG_KeyStaList[i].status = keySta_dummy;
-
-				/* 空闲回调 */
-			}
-			
-		}break;
-		case keySta_longpress:
-		{
-			/*  */
-			if (tmpPPLevel == SG_KeyIOList[i].pressedLevel)
-			{
-				/* 仍然按下，长按计数 */
-				SG_KeyStaList[i].longPressCount++;
-				SG_KeyStaList[i].releaseFilteringTime = 0;//重置释放消抖
-				if (SG_KeyStaList[i].longPressCount > SG_KeyStaList[i]._LPRTime)
-				{
-					/* 再次达到长按触发时间，重置触发计数 */
-					SG_KeyStaList[i].longPressCount = 0;
-
-					/* 再次执行长按回调 */
-					if (SG_KeyEnableFlag[i] & (0x01<<Key1_LP))
-					{
-						/* 对应回调使能，将回调标识写入FIFO */
-						KeyWriteFIFO( (KEY_Flag_enumt)(Key1_LP+(i*4)));
-					}
-				}
-			}
-			else
-			{
-				/* 松开，软件消抖滤波 */
-				SG_KeyStaList[i].releaseFilteringTime++;
-				SG_KeyStaList[i].longPressCount=0;
-				if (SG_KeyStaList[i].releaseFilteringTime > G_KEY_FILTER_TIME)
-				{
-					/* 达到消抖时间，重置消抖时间，切换为空闲/释放状态 */
-					SG_KeyStaList[i].status = keySta_dummy;
-					SG_KeyStaList[i].pressFilteringTime = 0;
-
-					/* 长按释放回调 */
-					/* 空闲回调 */
-				}
-			}
-		}break;
-		case keySta_doublepress:
-		{
-			/* 双击 */
-			if (tmpPPLevel == SG_KeyIOList[i].pressedLevel)
-			{
-				/* 继续按下，开始长按判断 */
-				SG_KeyStaList[i].longPressTime++;
-				SG_KeyStaList[i].releaseFilteringTime = 0;//重置释放消抖
-				if (SG_KeyStaList[i].longPressTime > SG_KeyStaList[i]._LPFTime)
-				{
-					/* 达到长按判断条件，重置判断时间，切换为长按状态 */
-					SG_KeyStaList[i].status = keySta_longpress;
-					SG_KeyStaList[i].longPressCount = 0;
-					SG_KeyStaList[i].releaseFilteringTime = 0;
-
-					/* 执行长按回调 */
-					if (SG_KeyEnableFlag[i] & (0x01<<Key1_LP))
-					{
-						/* 对应回调使能，将回调标识写入FIFO */
-						KeyWriteFIFO( (KEY_Flag_enumt)(Key1_LP+(i*4)));
-					}
-				}
-				
-			}
-			else
-			{
-				/* 松开，软件消抖滤波 */
-				SG_KeyStaList[i].releaseFilteringTime++;
-				SG_KeyStaList[i].longPressTime = 0;//重置长按判断
-				if (SG_KeyStaList[i].releaseFilteringTime > G_KEY_FILTER_TIME)
-				{
-					/* 达到消抖时间，重置按下消抖时间，切换为空闲/释放状态 */
-					SG_KeyStaList[i].status = keySta_dummy;
-					SG_KeyStaList[i].pressFilteringTime = 0;
-
-					/* 执行双击释放回调 */
-					if (SG_KeyEnableFlag[i] & (0x01<<Key1_DPR))
-					{
-						/* 对应回调使能，将回调标识写入FIFO */
-						KeyWriteFIFO( (KEY_Flag_enumt)(Key1_DPR+(i*4)));
-					}
-				}
-			}
-		}break;
-		default:
-			break;
-		}
-	}
-	
-	return;
-}
-
-
-
-
-/**
-  * @brief   扫描检测电位计按键
-  * @param   
-  * @retval  
-**/
-void KeyDetectPot(void)
-{
-	uint16_t tmp_keyLevel;
-	for (uint8_t i = 0; i < G_KEYPOT_NUM; i++)
-	{
-		/* 分别扫描每个按键的状态，切换时重置下一状态所使用参数 */
-		SG_KeyPotList[i].longPressCount++;
-		ADC_Get_CHx_Data(&tmp_keyLevel, i);
-		SG_KeyPotList[i].keyPot_Level = tmp_keyLevel;
-		if (tmp_keyLevel > SG_KeyPotList[i].keyPot_PLLevel)
-		{
-			/* 正向 */
-			if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_P))
-			{
-				/* 对应回调使能，将回调标识写入FIFO */
-				KeyWriteFIFO((KEY_Flag_enumt)(Key1_P+((G_KEY_NUM+i)*4)));
-			}
-		}
-		else if (tmp_keyLevel < SG_KeyPotList[i].keyPot_NHLevel)
-		{
-			/* 逆向 */
-			if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_R))
-			{
-				/* 对应回调使能，将回调标识写入FIFO */
-				KeyWriteFIFO((KEY_Flag_enumt)(Key1_R+((G_KEY_NUM+i)*4)));
-			}
-		}
-		else
-		{
-			/* 中位 */
-			if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_DPR))
-			{
-				/* 对应回调使能，将回调标识写入FIFO */
-				KeyWriteFIFO((KEY_Flag_enumt)(Key1_DPR+((G_KEY_NUM+i)*4)));
-			}
-		}
-		
-		/* 重复 */
-		if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_LP))
-		{
-			/*对应回调使能*/
-			if (SG_KeyPotList[i].longPressCount > SG_KeyPotList[i]._LPRTime)
-			{
-				/* 达到重复周期数 */
-				SG_KeyPotList[i].longPressCount = 0;
-				/* 将回调标识写入FIFO */
-				KeyWriteFIFO((KEY_Flag_enumt)(Key1_LP+((G_KEY_NUM+i)*4)));
-			}
-		}
-	}
-}
-
-
-#if KEY_COMB_ON
-/**
-  * @brief   扫描检测组合按键
-  * @param   
-  * @retval  
-**/
-void KeyDetectCombination(void)
-{
-	uint8_t tmpCombTrigFlag;
-	for (uint8_t i = 0; i < G_KEYCOMB_NUM; i++)
-	{
-		/* 扫描所有组合键 */
-		tmpCombTrigFlag = ( SG_CombKeyFlagList[i] == SG_CombKeyTrigFlagList[i] );
-
-		switch (SG_KeyCombStaList[i].status)
-		{
-		case keySta_dummy:
-		{	
-			/* 空闲 */
-			if (tmpCombTrigFlag)
-			{
-				/* 组合键触发，切换为按下状态(锚键独立按键已滤波 组合键无需滤波) */
-				SG_KeyCombStaList[i].status = keySta_pressed;
-				SG_KeyCombStaList[i].longPressTime = 0;
-
-				/* 单击/短按 按下回调 */
-				if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_P))
-				{
-					/* 对应回调使能，将回调标识写入FIFO */
-					KeyWriteFIFO( (KEY_Flag_enumt)(Key1_P+((G_KEY_NUM+i)*4)));
-				}
-			}
-		}break;
-		case keySta_pressed:
-		{	
-			/* 按下 */
-			if (tmpCombTrigFlag)
-			{
-				/* 仍然按下，长按计时 */
-				SG_KeyCombStaList[i].longPressTime++;
-				if (SG_KeyCombStaList[i].longPressTime>SG_KeyCombStaList[i]._LPFTime)
-				{
-					/* 长按滤波达到，切换为长按状态 */
-					SG_KeyCombStaList[i].status = keySta_longpress;
-					SG_KeyCombStaList[i].longPressCount = 0;
-
-					/* 长按按下回调 */
-					if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_LP))
-					{
-						/* 对应回调使能，将回调标识写入FIFO */
-						KeyWriteFIFO( (KEY_Flag_enumt)(Key1_LP+((G_KEY_NUM+i)*4)));
-					}
-				}
-			}
-			else
-			{
-				/* 松开，切换为单击/短按释放 */
-				SG_KeyCombStaList[i].status = keySta_release;
-				SG_KeyCombStaList[i].doublePressTime = 0;
-
-				/* 单击/短按 释放回调 */
-				if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_R))
-				{
-					/* 对应回调使能，将回调标识写入FIFO */
-					KeyWriteFIFO( (KEY_Flag_enumt)(Key1_R+((G_KEY_NUM+i)*4)));
-				}
-			}
-		}break;
-		case keySta_release:
-		{	
-			/* 单击/短按 释放，双击间隔计时 */
-			SG_KeyCombStaList[i].doublePressTime++;
-			if (SG_KeyCombStaList[i].doublePressTime < G_KEY_DOUBLEPRESS_TIME)
-			{
-				/* 双击间隔内 */
-				if (tmpCombTrigFlag)
-				{
-					/* 再次按下，切换为双击按下 */
-					SG_KeyCombStaList[i].status = keySta_doublepress;
-					SG_KeyCombStaList[i].longPressTime = 0;
-
-					/* 双击按下回调 */
-					
-				}
-			}
-			else
-			{
-				/* 超出双击间隔，切换为空闲 */
-				SG_KeyCombStaList[i].status = keySta_dummy;
-
-				/* 空闲回调 */
-			}
-		}break;
-		case keySta_longpress:
-		{	
-			/* 长按， */
-			if (tmpCombTrigFlag)
-			{
-				/* 继续按下 长按重复触发计数 */
-				SG_KeyCombStaList[i].longPressCount++;
-				if (SG_KeyCombStaList[i].longPressCount > SG_KeyCombStaList[i]._LPRTime)
-				{
-					/* 达到重复触发条件 */
-					SG_KeyCombStaList[i].longPressCount=0;
-	
-					/* 长按重复触发回调 */
-					if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_LP))
-					{
-						/* 对应回调使能，将回调标识写入FIFO */
-						KeyWriteFIFO( (KEY_Flag_enumt)(Key1_LP+((G_KEY_NUM+i)*4)));
-					}
-				}
-			}
-			else
-			{
-				/* 释放，切换为空闲 */
-				SG_KeyCombStaList[i].status = keySta_dummy;
-
-				/* 空闲回调 */
-			}
-		}break;
-		case keySta_doublepress:
-		{	
-			/* 双击按下 */
-			if (tmpCombTrigFlag)
-			{
-				/* 仍然按下，长按计时 */
-				SG_KeyCombStaList[i].longPressTime++;
-				if (SG_KeyCombStaList[i].longPressTime>SG_KeyCombStaList[i]._LPFTime)
-				{
-					/* 长按滤波达到，切换为长按状态 */
-					SG_KeyCombStaList[i].status = keySta_longpress;
-					SG_KeyCombStaList[i].longPressCount = 0;
-
-					/* 长按按下回调 */
-					if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_LP))
-					{
-						/* 对应回调使能，将回调标识写入FIFO */
-						KeyWriteFIFO( (KEY_Flag_enumt)(Key1_LP+((G_KEY_NUM+i)*4)));
-					}
-				}
-			}
-			else
-			{
-				/* 释放，切换为空闲 */
-				SG_KeyCombStaList[i].status = keySta_dummy;
-
-				/* 双击释放回调 */
-				if (SG_KeyEnableFlag[G_KEY_NUM+i] & (0x01<<Key1_DPR))
-				{
-					/* 对应回调使能，将回调标识写入FIFO */
-					KeyWriteFIFO( (KEY_Flag_enumt)(Key1_DPR+((G_KEY_NUM+i)*4)));
-				}
-			}
-		}break;
-		default:
-			break;
-		}
-	}
-	
-	return;
-}
-
-#endif //KEY_COMB_ON
-
-
-/**
-  * @brief   按键扫描程序，在中断中每10ms执行一次，每次扫描并切换所有按键的状态
-  * @param   
-  * @retval  
-**/
-void KeyScan10ms(void)
-{
-	#if KEY_COMB_ON //
-	KeyDetectAnchor();//扫描锚键
-	#endif //KEY_COMB_ON
-
-	#if KEY_COMMON_ON //
-	KeyDetectCommon();//扫描普通按键
-	#endif //KEY_COMMON_ON
-
-	#if KEY_POT_ON //
-	KeyDetectPot(); //扫描电位计按键
-	#endif //KEY_POT_ON
-
-	#if KEY_COMB_ON //
-	KeyDetectCombination();//扫描组合键
-	#endif //KEY_COMB_ON
-
-	return;
 }
 
 
@@ -1180,15 +437,26 @@ void KeyScan10ms(void)
   * @param   KeyFlag : 按键回调标识
   * @retval  
 **/
-void KeyWriteFIFO(KEY_Flag_enumt KeyFlag)
+void KeyWriteFIFO(KEY_FIFO_t KeyFlag)
 {
-	SG_KeyCBFlagFIFO[SG_KeyFifoRW_Obj.WPoint] = KeyFlag;
-
-	SG_KeyFifoRW_Obj.WPoint++;
-	if (SG_KeyFifoRW_Obj.WPoint >= KEY_FIFO_CAPACITY)
+	SG_KeyCBFlagFIFO[SG_KeyFifoRW_Obj.WP] = KeyFlag;
+	SG_KeyFifoRW_Obj.DataLen++;
+	SG_KeyFifoRW_Obj.WP++;
+	if (SG_KeyFifoRW_Obj.WP >= KEY_FIFO_CAPACITY)
 	{
 		/* 超出边界重置指针 */
-		SG_KeyFifoRW_Obj.WPoint = 0;
+		SG_KeyFifoRW_Obj.WP = 0;
+	}
+	if (SG_KeyFifoRW_Obj.DataLen>KEY_FIFO_CAPACITY)
+	{
+		//数据溢出，覆盖旧数据
+		SG_KeyFifoRW_Obj.DataLen=KEY_FIFO_CAPACITY;
+		SG_KeyFifoRW_Obj.RP++;
+		if (SG_KeyFifoRW_Obj.RP >= KEY_FIFO_CAPACITY)
+		{
+			/* 超出边界重置指针 */
+			SG_KeyFifoRW_Obj.RP = 0;
+		}
 	}
 	
 	return;
@@ -1196,28 +464,29 @@ void KeyWriteFIFO(KEY_Flag_enumt KeyFlag)
 
 
 /**
-  * @brief   从按键FIFO里储存器里读取按键标识
+  * @brief   从按键FIFO储存器里读取按键标识
   * @param   
-  * @retval  KeyDummy: 无标识 else: 读取的第一个按键回调标识
+  * @retval  KEY_FIFO_DUMMY: 无标识 else: 读取的第一个按键回调标识
 **/
-KEY_Flag_enumt KeyReadFIFO(void)
+KEY_FIFO_t KeyReadFIFO(void)
 {
-	KEY_Flag_enumt ret = KeyDummy;
-	if (SG_KeyFifoRW_Obj.WPoint != SG_KeyFifoRW_Obj.RPoint)
+	KEY_FIFO_t ret = KEY_FIFO_DUMMY;
+
+	if ( SG_KeyFifoRW_Obj.DataLen>0)
 	{
 		/* 可读 */
-		ret = SG_KeyCBFlagFIFO[SG_KeyFifoRW_Obj.RPoint];
-		SG_KeyFifoRW_Obj.RPoint++;
-		if (SG_KeyFifoRW_Obj.RPoint >= KEY_FIFO_CAPACITY)
+		ret = SG_KeyCBFlagFIFO[SG_KeyFifoRW_Obj.RP];
+		SG_KeyFifoRW_Obj.DataLen--;
+		SG_KeyFifoRW_Obj.RP++;
+		if (SG_KeyFifoRW_Obj.RP >= KEY_FIFO_CAPACITY)
 		{
 			/* 超出边界重置指针 */
-			SG_KeyFifoRW_Obj.RPoint = 0;
+			SG_KeyFifoRW_Obj.RP = 0;
 		}
 	}
 
 	return ret;
 }
-
 
 /**
   * @brief   清除按键FIFO储存器
@@ -1226,798 +495,411 @@ KEY_Flag_enumt KeyReadFIFO(void)
 **/
 void KeyClearFIFO(void)
 {
-	SG_KeyFifoRW_Obj.RPoint = 0;
-	SG_KeyFifoRW_Obj.WPoint = 0;
-
+	SG_KeyFifoRW_Obj.RP = 0;
+	SG_KeyFifoRW_Obj.WP = 0;
+	SG_KeyFifoRW_Obj.DataLen = 0;
 	return;
 }
 
 
-
-#if KEY_POT_ON
-
-
 /**
-  * @brief   电位计按键计算电位百分比
-  * @param   Flag[IN]:按键触发标识
-  * @retval  key:按键对象
-**/
-KEY_Pot_TypeDef* KeyPot_FindByFlag(uint8_t Flag)
-{
-
-
-	KEY_Pot_TypeDef* keyPot;
-	keyPot = &(SG_KeyPotList[Flag/4 - G_KEY_NUM]);
-	return keyPot;
-
-}
-
-
-/**
-  * @brief   电位计按键计算电位百分比
-  * @param   p[OUT]:百分比
-  * @param   key[IN]:按键
-  * @retval  
-**/
-void KeyPot_CalPercentage(int *p, KEY_Pot_TypeDef* keyPot)
-{
-	float tmp_proportion;
-	
-	if (keyPot->keyPot_Level > keyPot->keyPot_PLLevel)
-	{
-		/* 正向 */
-		tmp_proportion = ((float)(keyPot->keyPot_Level - keyPot->keyPot_PLLevel))/(keyPot->keyPot_PHLevel-keyPot->keyPot_PLLevel);
-	}
-	else if (keyPot->keyPot_Level < keyPot->keyPot_NHLevel)
-	{
-		/* 逆向 */
-		tmp_proportion = ((float)(keyPot->keyPot_Level - keyPot->keyPot_NHLevel))/(keyPot->keyPot_NHLevel - keyPot->keyPot_NLLevel);
-	}
-	else
-	{
-		/* 中位 */
-		tmp_proportion = 0;
-	}
-
-	*p = (int)(tmp_proportion * 100.0);
-
-
-}
-
-
-#endif //KEY_POT_ON
-
-
-/***************************按键状态回调函数***********************/
-#if KEY_USE_DEFAULT_CBF //使用默认按键回调函数
-
-
-/**
-  * @brief   电位计按键回调函数调度函数
+  * @brief   扫描检测所有按键包括电位计，并更新状态
   * @param   
   * @retval  
 **/
-void KeyPot_CBF_List(KEY_Flag_enumt kflag)
+void KeyDetectButton(void)
 {
-	uint8_t tmp_flag = kflag%4;
-	KEY_Pot_TypeDef* keyPot;
-	keyPot = &(SG_KeyPotList[kflag/4 - G_KEY_NUM]);
-	switch (tmp_flag)
+	uint8_t isPressed;
+	uint32_t tmpFlag;
+	uint32_t nowTime;
+	uint32_t diffTime;
+	for (uint8_t i = 0; i < SG_KEY_Registered_Comb_Count; i++)
 	{
-	case Key1_P:
+		tmpFlag = SG_KEY_CombStruct_List[i].keyPressFlag;
+		if (((tmpFlag & SG_KEY_CombPressFlag)==tmpFlag)&&(tmpFlag != SG_KEY_CombPressFlag))
 		{
-			/* code */
-			keyPot->pCBF(keyPot);
+			continue;//跳过被包含的组合键
+		}
 		
-		}break;
-	case Key1_R:
+		isPressed = ((tmpFlag & SG_KEY_ButtonPressFlag)==tmpFlag) ? 1:0;
+		KeyUpdataButtonSta(&(SG_KEY_CombStruct_List[i].Sta_Struct), isPressed, i+SG_KEY_Registered_Button_Count);
+		if (SG_KEY_CombStruct_List[i].Sta_Struct.status==keySta_dummy)
 		{
-			/* code */
-			keyPot->dpCBF(keyPot);
-		
-		}break;
-	case Key1_DPR:
+			SG_KEY_CombPressFlag &= ~(tmpFlag);
+		}
+		else
 		{
-			/* code */
-			keyPot->rCBF(keyPot);
-		
-		}break;
-	case Key1_LP:
-		{
-			/* code */
-			keyPot->lpCBF(keyPot);
-		
-		}break;
+			SG_KEY_CombPressFlag |= (tmpFlag);
+		}
+	}
 	
+	for (uint8_t i = 0; i < SG_KEY_Registered_Button_Count; i++)
+	{
+		tmpFlag = (uint32_t)1<<i;
+		nowTime = Key_GetTime();
+		if (tmpFlag & SG_KEY_CombPressFlag)
+		{
+			
+			SG_KEY_ButtonStruct_List[i].Sta_Struct.status = keySta_dummy;
+			SG_KEY_ButtonStruct_List[i].intoCombTime = nowTime;
+			continue;//跳过触发组合键的按钮
+		}
+		diffTime = nowTime - SG_KEY_ButtonStruct_List[i].intoCombTime;
+		if (diffTime > G_KEY_OUT_COMB_TIME)
+		{
+			//达到再次触发单键条件
+			isPressed = ((tmpFlag & SG_KEY_ButtonPressFlag)==tmpFlag) ? 1:0;
+			KeyUpdataButtonSta(&(SG_KEY_ButtonStruct_List[i].Sta_Struct), isPressed, i);
+		}
+		
+	}
+
+
+	KeyDetectPot();
+	
+}
+
+
+/**
+  * @brief	按键重复任务，建议10ms执行一次以保证按键响应速度
+  * @param  
+  * @retval  
+**/
+void Key_TickTask(void)
+{
+	for (uint8_t i = 0; i < SG_KEY_Registered_Button_Count; i++)
+	{
+		UpdataButtonIOLevel(&SG_KEY_ButtonStruct_List[i], i);
+	}
+}
+
+
+/**
+  * @brief	读取并更新按键GPIO电平
+  * @param   Button_Struct: 需要更新的按键
+  * @param   keyIndexBias: 按键在列表中的索引
+  * @retval  
+**/
+static void UpdataButtonIOLevel(KEY_Button_TypeDef *Button_Struct, uint8_t keyIndexBias)
+{
+
+	uint8_t tmpLevel = KEY_GET_IO_STA(Button_Struct->IO_Struct.gpio, Button_Struct->IO_Struct.pin) ? 1:0;
+	uint32_t nowTime = Key_GetTime();
+	uint32_t timeDiff = nowTime - Button_Struct->IO_Struct.updataTime;
+	if (tmpLevel!=Button_Struct->IO_Struct.currentLevel)
+	{
+		if (timeDiff > G_KEY_FILTER_TIME)
+		{
+			//消抖完成
+			Button_Struct->IO_Struct.currentLevel = tmpLevel;
+			Button_Struct->IO_Struct.updataTime = nowTime;
+			if (tmpLevel==Button_Struct->IO_Struct.pressedLevel)
+			{
+				SG_KEY_ButtonPressFlag |= ((uint32_t)1 << keyIndexBias);
+			}
+			else
+			{
+				SG_KEY_ButtonPressFlag &= ~((uint32_t)1 << keyIndexBias);
+			}
+		}
+	}
+	
+	return ;
+}
+
+
+/**
+  * @brief	更新按键状态
+  * @param   Sta_Struct: 需要更新的按键
+  * @param   isPressed: 按键是否按下
+  * @param   keyIndexBias: 按键在列表中的索引(组合键排在实体按键之后)
+  * @retval  
+**/
+static void KeyUpdataButtonSta(KEY_STA_TypeDef* Sta_Struct, uint8_t isPressed, uint8_t keyIndexBias)
+{
+	uint32_t nowTime = Key_GetTime();
+	uint32_t timeDiff = nowTime - Sta_Struct->updataTime;
+	switch (Sta_Struct->status)
+	{
+	case keySta_dummy:
+	{
+		if (isPressed)
+		{
+			//按键被按下
+			Sta_Struct->status = keySta_pressed;
+			Sta_Struct->updataTime = nowTime;
+			
+			if (Sta_Struct->keyEnableFlag & KEY_Flag_P)
+			{
+				//对应回调使能，将回调标识写入FIFO 
+				KeyWriteFIFO((KEY_FIFO_t)(Key1_P+(keyIndexBias*4)));
+			}
+		}
+	}break;
+	case keySta_pressed:
+	{
+		if (isPressed)
+		{
+			if (timeDiff > Sta_Struct->_LPFTime)
+			{
+				// 达到长按判断条件 
+				Sta_Struct->status = keySta_longpress;
+				Sta_Struct->updataTime = nowTime;
+		
+				//执行长按回调 
+				if (Sta_Struct->keyEnableFlag & KEY_Flag_LP)
+				{
+					//对应回调使能，将回调标识写入FIFO 
+					KeyWriteFIFO( (KEY_FIFO_t)(Key1_LP+(keyIndexBias*4)));
+				}
+			}
+		}
+		else
+		{
+			// 切换为短按/单击释放状态 
+			Sta_Struct->status = keySta_release;
+			Sta_Struct->updataTime = nowTime;
+			// 执行单击释放回调 ,为确保双击不输出单击，需先判断是否触发双击
+			// if (Sta_Struct->keyEnableFlag & KEY_Flag_R)
+			// {
+			// 	//对应回调使能，将回调标识写入FIFO 
+			// 	KeyWriteFIFO( (KEY_FIFO_t)(Key1_R+(keyIndexBias*4)));
+			// }
+		}
+	}break;
+	case keySta_release:
+	{
+		if (timeDiff < G_KEY_DOUBLEPRESS_TIME)
+		{
+			//在双击间隔内
+			if (isPressed)
+			{
+				//再次按下，切换为双击
+				Sta_Struct->status = keySta_doublepress;
+				Sta_Struct->updataTime = nowTime;
+			}
+		}
+		else
+		{
+			// 超出双击时间间隔，视为单击，切换为空闲 
+			Sta_Struct->status = keySta_dummy;
+			Sta_Struct->updataTime = nowTime;
+
+			// 执行单击释放回调 ,为确保双击不输出单击，需先判断是否触发双击
+			if (Sta_Struct->keyEnableFlag & KEY_Flag_R)
+			{
+				//对应回调使能，将回调标识写入FIFO 
+				KeyWriteFIFO( (KEY_FIFO_t)(Key1_R+(keyIndexBias*4)));
+			}
+
+			// 空闲回调 
+		}
+	}break;
+	case keySta_longpress:
+	{
+		if (isPressed)
+		{
+			if (timeDiff > Sta_Struct->_LPRPeriod)
+			{
+				// 再次达到长按触发时间 再次执行长按回调 
+				Sta_Struct->updataTime = nowTime;
+				if (Sta_Struct->keyEnableFlag & KEY_Flag_LP)
+				{
+					//对应回调使能，将回调标识写入FIFO 
+					KeyWriteFIFO( (KEY_FIFO_t)(Key1_LP+(keyIndexBias*4)));
+				}
+			}
+		}
+		else
+		{
+			// 切换为空闲/释放状态 
+			Sta_Struct->status = keySta_dummy;
+			Sta_Struct->updataTime = nowTime;
+
+			// 长按释放回调 
+			// 空闲回调 
+			
+		}
+	}break;
+	case keySta_doublepress:
+	{
+		if (isPressed)
+		{
+			if (timeDiff > Sta_Struct->_LPFTime)
+			{
+				// 达到长按判断条件，切换为长按状态 
+				Sta_Struct->status = keySta_longpress;
+				Sta_Struct->updataTime = nowTime;
+	
+				//执行长按回调 
+				if (Sta_Struct->keyEnableFlag & KEY_Flag_LP)
+				{
+					//对应回调使能，将回调标识写入FIFO 
+					KeyWriteFIFO( (KEY_FIFO_t)(Key1_LP+(keyIndexBias*4)));
+				}
+			}
+		}
+		else
+		{
+			//松开 切换为空闲/释放状态 
+			Sta_Struct->status = keySta_dummy;
+			Sta_Struct->updataTime = nowTime;
+
+			//执行双击释放回调 
+			if (Sta_Struct->keyEnableFlag & KEY_Flag_DPR)
+			{
+				//对应回调使能，将回调标识写入FIFO 
+				KeyWriteFIFO( (KEY_FIFO_t)(Key1_DPR+(keyIndexBias*4)));
+			}
+		}
+	}break;
 	default:
 		break;
 	}
-	
+
+
 }
 
 
-
-
 /**
-  * @brief   电位计按键重复回调函数
+  * @brief   扫描检测电位计按键,并更新FIFO
   * @param   
   * @retval  
 **/
-void KeyPot1_lpCBF( KEY_Pot_TypeDef* keyPot)
+void KeyDetectPot(void)
 {
-	float tmp_proportion;
-	
-	if (keyPot->keyPot_Level > keyPot->keyPot_PLLevel)
+	KEY_POT_Level_t tmp_keyLevel;
+
+	uint32_t nowTime;
+	uint32_t diffTime;
+	KEY_POT_PCT_t tmpPct;
+	nowTime = Key_GetTime();
+	for (uint8_t i = 0; i < SG_KEY_Registered_Pot_Count; i++)
 	{
-		/* 正向 */
-		tmp_proportion = ((float)(keyPot->keyPot_Level - keyPot->keyPot_PLLevel))/(keyPot->keyPot_PHLevel-keyPot->keyPot_PLLevel);
-	}
-	else if (keyPot->keyPot_Level < keyPot->keyPot_NHLevel)
-	{
-		/* 逆向 */
-		tmp_proportion = ((float)(keyPot->keyPot_Level - keyPot->keyPot_NHLevel))/(keyPot->keyPot_NHLevel - keyPot->keyPot_NLLevel);
-	}
-	else
-	{
-		/* 中位 */
-		tmp_proportion = 0;
-	}
+		
+		diffTime = nowTime - SG_KeyPotStruct_List[i].updataTime;
 
-	int proportion = (int)(tmp_proportion * 100.0);
-	
-	KEY_DEBUG("p1=%d", proportion);
-	KEY_DEBUG("keyPot_Level=%d", keyPot->keyPot_Level);
-}
-
-
-/**
-  * @brief   电位计按键重复回调函数
-  * @param   
-  * @retval  
-**/
-void KeyPot2_lpCBF( KEY_Pot_TypeDef* keyPot)
-{
-	float tmp_proportion;
-	
-	if (keyPot->keyPot_Level > keyPot->keyPot_PLLevel)
-	{
-		/* 正向 */
-		tmp_proportion = (float)(keyPot->keyPot_Level - keyPot->keyPot_PLLevel)/(keyPot->keyPot_PHLevel-keyPot->keyPot_PLLevel);
-	}
-	else if (keyPot->keyPot_Level < keyPot->keyPot_NHLevel)
-	{
-		/* 逆向 */
-		tmp_proportion = (float)(keyPot->keyPot_Level - keyPot->keyPot_NHLevel)/(keyPot->keyPot_NHLevel - keyPot->keyPot_NLLevel);
-	}
-	else
-	{
-		/* 中位 */
-		tmp_proportion = 0;
-	}
-
-	int proportion = (int)(tmp_proportion * 100.0);
-	
-	KEY_DEBUG("p2=%d", proportion);
-
-}
-
-
-
-/**
-  * @brief   电位计按键重复回调函数
-  * @param   
-  * @retval  
-**/
-void KeyPot3_lpCBF( KEY_Pot_TypeDef* keyPot)
-{
-	float tmp_proportion;
-	
-	if (keyPot->keyPot_Level > keyPot->keyPot_PLLevel)
-	{
-		/* 正向 */
-		tmp_proportion = (float)(keyPot->keyPot_Level - keyPot->keyPot_PLLevel)/(keyPot->keyPot_PHLevel-keyPot->keyPot_PLLevel);
-	}
-	else if (keyPot->keyPot_Level < keyPot->keyPot_NHLevel)
-	{
-		/* 逆向 */
-		tmp_proportion = (float)(keyPot->keyPot_Level - keyPot->keyPot_NHLevel)/(keyPot->keyPot_NHLevel - keyPot->keyPot_NLLevel);
-	}
-	else
-	{
-		/* 中位 */
-		tmp_proportion = 0;
-	}
-
-	int proportion = (int)(tmp_proportion * 100.0);
-	
-	KEY_DEBUG("p3=%d", proportion);
-
-}
-
-
-
-/**
-  * @brief   电位计按键重复回调函数
-  * @param   
-  * @retval  
-**/
-void KeyPot4_lpCBF( KEY_Pot_TypeDef* keyPot)
-{
-	float tmp_proportion;
-	
-	if (keyPot->keyPot_Level > keyPot->keyPot_PLLevel)
-	{
-		/* 正向 */
-		tmp_proportion = (float)(keyPot->keyPot_Level - keyPot->keyPot_PLLevel)/(keyPot->keyPot_PHLevel-keyPot->keyPot_PLLevel);
-	}
-	else if (keyPot->keyPot_Level < keyPot->keyPot_NHLevel)
-	{
-		/* 逆向 */
-		tmp_proportion = (float)(keyPot->keyPot_Level - keyPot->keyPot_NHLevel)/(keyPot->keyPot_NHLevel - keyPot->keyPot_NLLevel);
-	}
-	else
-	{
-		/* 中位 */
-		tmp_proportion = 0;
-	}
-
-	int proportion = (int)(tmp_proportion * 100.0);
-	
-	KEY_DEBUG("p4=%d", proportion);
-
-}
-
-/************************KEY_UP******************/
-
-/**
-  * @brief   按键KEY_UP 单击/短按释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyUpReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key up release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键KEY_UP 长按回调函数
-  * @param   
-  * @retval  
-**/
-void KeyUpLongPressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key up long pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键KEY_UP 双击释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyUpDoubleReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key up double release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-
-/************************KEY_DOWN******************/
-
-/**
-  * @brief   按键 KEY_DOWN 单击/短按释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyDownReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key down release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_DOWN 长按回调函数
-  * @param   
-  * @retval  
-**/
-void KeyDownLongPressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key down long pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_DOWN 双击释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyDownDoubleReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key up double release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-
-/************************KEY_LEFT******************/
-
-/**
-  * @brief   按键 KEY_LEFT 单击/短按释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyLeftReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key left release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_LEFT 长按回调函数
-  * @param   
-  * @retval  
-**/
-void KeyLeftLongPressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key left long pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_LEFT 双击释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyLeftDoubleReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key left double release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-
-/************************KEY_RIGHT******************/
-
-/**
-  * @brief   按键 KEY_RIGHT 单击/短按释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyRightReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key right  release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_RIGHT 长按回调函数
-  * @param   
-  * @retval  
-**/
-void KeyRightLongPressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key right long pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_RIGHT 双击释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyRightDoubleReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key right double release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-
-/************************KEY_A******************/
-
-/**
-  * @brief   按键 KEY_A 单击/短按释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyAReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key a  release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_A 长按回调函数
-  * @param   
-  * @retval  
-**/
-void KeyALongPressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key a long pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_A 双击释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyADoubleReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key a double release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-
-/************************KEY_B******************/
-
-/**
-  * @brief   按键 KEY_B 单击/短按释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyBReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key b  release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_B 长按回调函数
-  * @param   
-  * @retval  
-**/
-void KeyBLongPressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key b long pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_B 双击释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyBDoubleReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key b double release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-
-/************************KEY_C******************/
-
-/**
-  * @brief   按键 KEY_C 单击/短按释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyCReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key c  release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_C 长按回调函数
-  * @param   
-  * @retval  
-**/
-void KeyCLongPressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key c long pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_C 双击释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyCDoubleReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key c double release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-
-/************************KEY_D******************/
-
-/**
-  * @brief   按键 KEY_D 单击/短按释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyDReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key d  release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_D 长按回调函数
-  * @param   
-  * @retval  
-**/
-void KeyDLongPressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key d long pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-/**
-  * @brief   按键 KEY_D 双击释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyDDoubleReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key d double release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-
-/**
-  * @brief   组合键1 单击/短按释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyComb1ReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key Comb1 release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-/**
-  * @brief   组合键1 双击释放回调函数
-  * @param   
-  * @retval  
-**/
-void KeyComb1DoubleReleaseCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key Comb1 double release");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-/**
-  * @brief   组合键1 长按回调函数
-  * @param   
-  * @retval  
-**/
-void KeyComb1LongPressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key Comb1 long pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-
-
-/**
-  * @brief   组合键2 单击按下回调函数
-  * @param   
-  * @retval  
-**/
-void KeyComb2PressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key Comb2 pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-/**
-  * @brief   3 单击按下回调函数
-  * @param   
-  * @retval  
-**/
-void KeyComb3PressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key Comb3 pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-/**
-  * @brief   组合键4 单击按下回调函数
-  * @param   
-  * @retval  
-**/
-void KeyComb4PressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key Comb4 pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-/**
-  * @brief   组合键5 单击按下回调函数
-  * @param   
-  * @retval  
-**/
-void KeyComb5PressedCBF(void)
-{
-	#if KEY_DEBUG_ON
-	KEY_INFO("key Comb5 pressed");
-	#endif //KEY_DEBUG_ON
-
-	return;
-}
-
-#endif // KEY_USE_DEFAULT_CBF
-/****************************************************************/
-
-
-
-
-
-
-static void Modify_LED_List(uint8_t KEY_num, GPIO_TypeDef* KEY_GPIO_POTRx, uint16_t KEY_GPIO_PINx)
-{
-	uint8_t i=0;
-	for(i=0; i<Registered_KEY_Count;i++)//查找LED是否注册
-	{
-		if(KEY_NUM_List[i]==KEY_num)
+		if (diffTime > SG_KeyPotStruct_List[i]._RTime)
 		{
-			KEY_GPIO_POTRx_List[i] = KEY_GPIO_POTRx;
-			KEY_GPIO_PINx_List[i] = KEY_GPIO_PINx;
-		
-		
-			break;
+			//达到更新要求
+			tmp_keyLevel = KEY_getPotVal(i);
+			tmpPct = KEY_calPotPct(tmp_keyLevel,i);
+			if (BSP_KEY_CmpDiff(tmpPct, SG_KeyPotStruct_List[i].pct_value, SG_KeyPotStruct_List[i]._PctStep))
+			{
+				continue;
+			}
+			
+			SG_KeyPotStruct_List[i].pct_value = tmpPct;
+			KeyWriteFIFO((KEY_FIFO_t)((KEY_POT_FIFO_FLAG|(SG_KeyPotStruct_List[i].pct_value&KEY_POT_FIFO_MASK))|(i<<KEY_POT_FIFO_I_BIT_S)));
+			SG_KeyPotStruct_List[i].updataTime = nowTime;
 		}
-	
+		
 	}
-	
-	if(i>=Registered_KEY_Count)//输入LED序号未注册
-	{
-		KEY_NUM_List[Registered_KEY_Count] = KEY_num;
-		KEY_GPIO_POTRx_List[Registered_KEY_Count] = KEY_GPIO_POTRx;
-		KEY_GPIO_PINx_List[Registered_KEY_Count] = KEY_GPIO_PINx;
-	
-		Registered_KEY_Count++;
-	}
-	return;
+
 }
 
 
 /**
-  * @brief   初始化KEY
-  * @param   
-  *		@arg KEY_num ：按键序号 <=MAX_KEY_NUM
-  *		@arg KEY_GPIO_POTRx ：按键绑定的IO端口
-  *		@arg KEY_GPIO_PINx ：按键绑定的IO引脚
-  * @retval  
-  */
-void KEY_Register(uint8_t KEY_num, GPIO_TypeDef* KEY_GPIO_POTRx, uint16_t KEY_GPIO_PINx)
-{	
-	if(KEY_num==0||KEY_num>MAX_KEY_NUM) return; 
-	GPIO_InitTypeDef GPIO_InitStruct;
-	
-
-	GPIO_InitStruct.GPIO_Mode=GPIO_Mode_IPU;
-	GPIO_InitStruct.GPIO_Speed=GPIO_Speed_50MHz;
-	
-
-	uint32_t KEY_RCC_APB2Periph_GPIOx  = RCC_APB2Periph_GPIOA << \
-										(((uint32_t)KEY_GPIO_POTRx - (uint32_t)GPIOA) / 0x0400 );
-	
-	RCC_APB2PeriphClockCmd(KEY_RCC_APB2Periph_GPIOx, ENABLE);//打开KEY的外设时钟
-	GPIO_InitStruct.GPIO_Pin = KEY_GPIO_PINx;
-	GPIO_Init(KEY_GPIO_POTRx, &GPIO_InitStruct);//初始化LED灯对应的端口，将配置\
-                                              的模式、速度等写入寄存器中	
-	
-	Modify_LED_List( KEY_num,  KEY_GPIO_POTRx,  KEY_GPIO_PINx);
-
-}
-
-/**
-  * @brief   扫描按键是否被按下
-  * @param   
-  *		@arg KEY_num ：KEY序号
-* @retval  Key_Sta : 1被按下  0未按下
-  */
-_Bool KEY_Scan(uint8_t KEY_num)
+  * @brief    读取电位计数值
+  * @param    index: 电位计索引
+  * @retval   读取的数值
+**/
+static KEY_POT_Level_t KEY_getPotVal(uint8_t index)
 {
-	
-	if(KEY_num==0||KEY_num>MAX_KEY_NUM) return 0;
-	
-	_Bool Key_Sta = 0;
-	
-	
-	uint8_t i;
-	for(i=0; i<Registered_KEY_Count;i++)
-	{
-		if(KEY_NUM_List[i]==KEY_num)break;
-	}
-	
-	if(GPIO_ReadInputDataBit(KEY_GPIO_POTRx_List[i], KEY_GPIO_PINx_List[i])==Bit_SET)
-	{
-		while(GPIO_ReadInputDataBit(KEY_GPIO_POTRx_List[i], KEY_GPIO_PINx_List[i])==Bit_SET);
-		Key_Sta = 1;
-	}
 
-	return Key_Sta;
+	uint16_t val;
+	KEY_GET_POT_VAL(&val, index);
+
+	return ((KEY_POT_Level_t)val);
 }
 
 
+/**
+  * @brief    计算电位计数值百分比
+  * @param    level: 电位计数值
+  * @param    index: 电位计索引
+  * @retval   百分比
+**/
+static KEY_POT_PCT_t KEY_calPotPct(KEY_POT_Level_t level ,uint8_t index)
+{
+	KEY_POT_PCT_t pct;
+	if (level > SG_KeyPotStruct_List[index]._PLLevel )
+	{
+		pct = (KEY_POT_PCT_t)(((float)(level - SG_KeyPotStruct_List[index]._PLLevel)*100.0)/ SG_KeyPotStruct_List[index]._PRange);
+	}
+	else if (level < SG_KeyPotStruct_List[index]._NHLevel)
+	{
+		pct = (KEY_POT_PCT_t)(-((float)(SG_KeyPotStruct_List[index]._NHLevel - level)*100.0)/ SG_KeyPotStruct_List[index]._NRange);
+	}
+	else
+	{
+		pct = 0;
+	}
+	return pct;
+
+}
+
+
+/**
+  * @brief    比较两数的差值大小
+  * @param    A: 
+  * @param    B: 
+  * @param    diff: 需比较的差值
+  * @retval   0：|A-B| > diff  else: |A-B| <= diff
+**/
+static uint8_t BSP_KEY_CmpDiff(int16_t A, int16_t B, uint16_t diff)
+{
+	uint8_t rVal = 0;
+
+	rVal = (abs(A-B)>diff) ? 0 : 1;
+
+	return rVal;
+}
+
+
+/**
+  * @brief   电位计按键结构体初始化函数
+  * @param   key[IN/OUT]:需要按默认值初始化的结构体
+  * @param   ADCx[IN]:按键使用的ADC
+  * @param   ADC_Channel_x[IN]:按键使用的ADC通道
+  * @retval  
+**/
+void KEY_Pot_StructInit(KEY_Pot_TypeDef* key, ADC_TypeDef* ADCx, uint8_t ADC_Channel_x)
+{
+
+	key->ADCx = ADCx;
+	key->ADC_Channel_x = ADC_Channel_x;
+	key->_PRange = G_KeyPot_PR;
+	key->_PLLevel = G_KeyPot_PLL;
+	key->_NHLevel = G_KeyPot_NHL;
+	key->_NRange = G_KeyPot_NR;
+	key->_RTime = G_KeyPot_RTime;
+	key->_PctStep = G_KeyPot_PctStep;
+	key->pct_value = 0;
+	key->updataTime = 0;
+
+
+}
+
+
+/**
+  * @brief   电位计按键结构体初始化函数
+  * @param   Index [IN]:该按键在按键列表中的索引
+  * @param   potStruct[IN]:按键
+  * @retval  0:成功，else：失败
+**/
+uint8_t BSP_KEY_Pot_Register(uint8_t Index, KEY_Pot_TypeDef potStruct)
+{
+	uint8_t rVal = 1;
+	if (Index < SG_KEY_Registered_Pot_Count)
+	{
+		SG_KeyPotStruct_List[Index] = potStruct;
+		rVal = 0;
+	}
+	
+	return rVal;
+
+}
 
 
 

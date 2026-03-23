@@ -6,6 +6,19 @@
 #include "bsp_spi.h"	
 
 
+/* The following functions must be defined for this platform:
+ *
+ * read/write length Bytes into/from RByte/WByte return 0 if successful
+ * int NRF_RWBytes(unsigned char* WByte, unsigned char* RByte, unsigned char length);
+ * 
+ * 
+ * 
+ * 
+ */
+
+#define NRF_RWBytes(A, B, C) SPIx_2Line_RWBytes(NRF24L01_SPIx, A, B, C)
+
+
 static uint8_t NRF_G_STATE;//NRF中断状态
 
 /*
@@ -98,7 +111,6 @@ void NRF24L01_RX_ModeConfig(void)
 {
 	NRF24L01_CE_LOW();//切换为待机
 
-	
 	NRF_W_Reg(NRF_WRITE_REG_CMD |RX_PW_P0, WRX_PAYLOAD_WIDTH);//设置接收数据管道P0有效数据宽度
 	NRF_W_Reg(NRF_WRITE_REG_CMD |SETUP_AW, Addr_Width5);//设置地址宽度为5字节
 	NRF_W_nByte(NRF_WRITE_REG_CMD +TX_ADDR, (uint8_t*)NRFRX_TX_ADDRESS, TX_ADDRESS_WIDTH);//设置数据发送地址
@@ -111,8 +123,6 @@ void NRF24L01_RX_ModeConfig(void)
 	NRF_W_Reg(NRF_WRITE_REG_CMD |CONFIG, 0x0f);//打开所有中断（产生中断IRQ脚被拉低），使能16位CRC，芯片上电，设置为接收模式
 	NRF_W_Reg(FLUSH_TX_CMD , NRF_DUMMY);//清除TX_FIFO寄存器
 	NRF_W_Reg(FLUSH_RX_CMD , NRF_DUMMY);//清除RX_FIFO寄存器
-	
-	
 	
 	NRF24L01_CE_HIGH();//切换为收发
 }
@@ -141,7 +151,6 @@ void NRF24L01_TX_ModeConfig(void)
 	
 	NRF24L01_CE_HIGH();//切换为收发
 }
-
 
 
 /**	
@@ -183,7 +192,6 @@ void NRF24L01_TXRX_Mode_Switch(uint8_t* TxAddr, uint8_t SwFlag)
 }
 
 
-
 /**	写入001X XXXX(X为寄存器地址)命令，表示写对应寄存器
   * @brief   写NRF24L01+寄存器或命令
   * @param   Reg ：寄存器
@@ -198,7 +206,7 @@ void NRF_W_Reg(uint8_t Reg, uint8_t WData)
 	WByte[0] = Reg;
 	WByte[1] = WData;
 	NRF24L01_NSS_LOW();//片选
-	SPIx_2Line_RWBytes( NRF24L01_SPIx,  WByte, RByte,  2);
+	NRF_RWBytes(  WByte, RByte,  2);
 	NRF24L01_NSS_HIGH();//取消片选
 }
 
@@ -215,9 +223,9 @@ uint8_t NRF_R_Reg(uint8_t Reg)
 
 	WByte = Reg;
 	NRF24L01_NSS_LOW();//片选
-	SPIx_2Line_RWBytes( NRF24L01_SPIx,  &WByte, &RByte,  1);
+	NRF_RWBytes(  &WByte, &RByte,  1);
 	WByte = NRF_DUMMY;
-	SPIx_2Line_RWBytes( NRF24L01_SPIx,  &WByte, &RByte,  1);
+	NRF_RWBytes(  &WByte, &RByte,  1);
 	NRF24L01_NSS_HIGH();//取消片选
 	return RByte;
 }
@@ -233,8 +241,8 @@ uint8_t NRF_W_nByte(uint8_t Reg, uint8_t* WDataBuf, uint8_t n)
 
 	uint32_t sta;
 	NRF24L01_NSS_LOW();//片选
-	sta = SPIx_2Line_RWBytes( NRF24L01_SPIx,  &Reg, RByte,  1);
-	if(!sta) sta = SPIx_2Line_RWBytes( NRF24L01_SPIx,  WDataBuf, RByte,  n);
+	sta = NRF_RWBytes(  &Reg, RByte,  1);
+	if(!sta) sta = NRF_RWBytes(  WDataBuf, RByte,  n);
 	NRF24L01_NSS_HIGH();//取消片选
 	return sta;
 }
@@ -256,8 +264,8 @@ uint8_t NRF_R_nByte(uint8_t Reg, uint8_t* RDataBuf, uint8_t n)
 		WByte[i] = NRF_DUMMY;
 	}
 	NRF24L01_NSS_LOW();//片选
-	sta = SPIx_2Line_RWBytes( NRF24L01_SPIx,  &Reg, RDataBuf,  1);
-	if(!sta) sta = SPIx_2Line_RWBytes( NRF24L01_SPIx,  WByte, RDataBuf,  n);
+	sta = NRF_RWBytes(  &Reg, RDataBuf,  1);
+	if(!sta) sta = NRF_RWBytes(  WByte, RDataBuf,  n);
 	NRF24L01_NSS_HIGH();//取消片选
 	return sta;
 }
@@ -279,8 +287,8 @@ void NRF24L01_IRQ_Handler(void)
 		NRF_G_STATE = NRF_R_Reg(STATUS);//读取状态寄存器
 		NRF_W_Reg(NRF_WRITE_REG_CMD |STATUS, NRF_G_STATE);//清除所有中断标志
 		/**************************************************/
+		EXTI_ClearITPendingBit(NRF24L01_IRQ_EXTI_Line);//完成中断后清除中断标志位
 	}
-	EXTI_ClearITPendingBit(NRF24L01_IRQ_EXTI_Line);//完成中断后清除中断标志位
 	
 }
 

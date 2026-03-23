@@ -24,7 +24,7 @@ void ADC_Test()
 													ADC_Channel_3};
 
 	
-	ADCx_CHx_IndependentCongfig(ADC1, ADC_Channel_xList);
+	ADCx_CHx_IndependentCongfig(ADC1, ADC_Channel_xList,4);
 	ADC_START(ADC1,  ADCx_Mode);
 
 	if (ADCx_Mode==ADC_Mode_RegSimult)
@@ -90,13 +90,13 @@ void ADC_Get_CHx_Data(uint16_t* data, uint8_t i)
 
 /**
   * @brief   初始化ADC，独立模式，单/多通道
-  * @param   
-  *		@arg ADCx ： where x can be 1, 2 or 3 to select the ADC peripheral.
-  *		@arg ADC_Channel_xList[ADC_NbrOfChannel] ：需要初始化的ADC通道列表, ADC_Channel_x  where x can be 0,1,...,9 .
+  * @param   ADCx ： where x can be 1, 2 or 3 to select the ADC peripheral.
+  * @param   ADC_Channel_xList[ADC_NbrOfChannel] ：需要初始化的ADC通道列表, ADC_Channel_x  where x can be 0,1,...,9 .
+  * @param   ChannelCount:通道数
   * @retval  
   * 注：C8T6只有ADC1和ADC2 的CH0-CH9；ADC2没有DMA功能
   */
-void ADCx_CHx_IndependentCongfig( ADC_TypeDef* ADCx, uint8_t* ADC_Channel_xList )	
+void ADCx_CHx_IndependentCongfig( ADC_TypeDef* ADCx, uint8_t* ADC_Channel_xList, uint8_t ChannelCount )	
 {
 
 	/*****************GPIO Config*********************/
@@ -107,7 +107,7 @@ void ADCx_CHx_IndependentCongfig( ADC_TypeDef* ADCx, uint8_t* ADC_Channel_xList 
 	
 	GPIO_InitTypeDef GPIO_InitStruct;
 	
-	for(uint8_t i=0; i<ADC_NumOfChannel; i++ )
+	for(uint8_t i=0; i<ChannelCount; i++ )
 	{
 		if(ADC_Channel_xList[i] <= ADC_Channel_7)
 		{
@@ -143,11 +143,11 @@ void ADCx_CHx_IndependentCongfig( ADC_TypeDef* ADCx, uint8_t* ADC_Channel_xList 
 	ADC_InitTypeDef ADC_InitStruct;
 	
 	ADC_InitStruct.ADC_Mode = ADC_Mode_Independent;//ADC模式
-	ADC_InitStruct.ADC_ScanConvMode =  ADC_NumOfChannel>1 ?  ENABLE : DISABLE;//扫描模式（是否多通道）
+	ADC_InitStruct.ADC_ScanConvMode =  ChannelCount>1 ?  ENABLE : DISABLE;//扫描模式（是否多通道）
 	ADC_InitStruct.ADC_ContinuousConvMode = ENABLE;//是否连续转换
 	ADC_InitStruct.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;//外部触转换方式
 	ADC_InitStruct.ADC_DataAlign = ADC_DataAlign_Right;//转换结果对齐方式
-	ADC_InitStruct.ADC_NbrOfChannel = ADC_NumOfChannel;//转换通道个数
+	ADC_InitStruct.ADC_NbrOfChannel = ChannelCount;//转换通道个数
 	
 	ADC_Init(ADCx,  &ADC_InitStruct);
 	
@@ -157,7 +157,7 @@ void ADCx_CHx_IndependentCongfig( ADC_TypeDef* ADCx, uint8_t* ADC_Channel_xList 
 	RCC_ADCCLKConfig(RCC_PCLK2_Div8);//ADC最大支持频率14M，配置频率应小于14M
 	
 	
-	for(uint8_t i=0; i<ADC_NumOfChannel; i++)
+	for(uint8_t i=0; i<ChannelCount; i++)
 	{
 		//通道转换顺序和采样时间
 		ADC_RegularChannelConfig(ADCx, ADC_Channel_xList[i], i+1,  ADC_SampleTime_28Cycles5);
@@ -168,7 +168,7 @@ void ADCx_CHx_IndependentCongfig( ADC_TypeDef* ADCx, uint8_t* ADC_Channel_xList 
 	/**************************DMA Config***********************/
 	if(ADCx==ADC1)
 	{
-		ADC1_DMA_Config(DMA_PeripheralDataSize_HalfWord, DMA_MemoryDataSize_HalfWord, (uint32_t)ADCx_Independent_DMA_MemoryBaseAddr );
+		ADC1_DMA_Config(DMA_PeripheralDataSize_HalfWord, DMA_MemoryDataSize_HalfWord, (uint32_t)ADCx_Independent_DMA_MemoryBaseAddr, ChannelCount);
 	}
 	
 
@@ -180,13 +180,13 @@ void ADCx_CHx_IndependentCongfig( ADC_TypeDef* ADCx, uint8_t* ADC_Channel_xList 
 
 /**
   * @brief   初始化ADC，双ADC同步模式，单/多通道
-  * @param   
-  *		@arg ADC_Channel_xList[ADC_NbrOfChannel] ：需要使用的ADC1通道列表, ADC_Channel_x  where x can be 0,1,...,9 . 
+  * @param   ADC_Channel_xList[ADC_NbrOfChannel] ：需要使用的ADC1通道列表, ADC_Channel_x  where x can be 0,1,...,9 . 
 													（ADC1_CH0~9对应ADC2_CH9~0）
+  * @param   ChannelCount: 通道数												
   * @retval  
   * 注：C8T6只有ADC1和ADC2 的CH0-CH9；ADC2没有DMA功能
   */
-void ADCx_CHx_RegSimultCongfig( uint8_t* ADC_Channel_xList )	
+void ADCx_CHx_RegSimultCongfig( uint8_t* ADC_Channel_xList, uint8_t ChannelCount )	
 {
 	
 	/*****************GPIO Config*********************/
@@ -282,7 +282,7 @@ void ADCx_CHx_RegSimultCongfig( uint8_t* ADC_Channel_xList )
 	
 	/**************************DMA Config***********************/
 	
-	ADC1_DMA_Config(DMA_PeripheralDataSize_Word, DMA_MemoryDataSize_Word,   (uint32_t)ADCx_RegSimult_DMA_MemoryBaseAddr);
+	ADC1_DMA_Config(DMA_PeripheralDataSize_Word, DMA_MemoryDataSize_Word,   (uint32_t)ADCx_RegSimult_DMA_MemoryBaseAddr,ChannelCount);
 
 
 	/***********************************************************/
@@ -292,14 +292,14 @@ void ADCx_CHx_RegSimultCongfig( uint8_t* ADC_Channel_xList )
 
 /**
   * @brief   配置ADC1的DMA
-  * @param   
-  *		@arg DMA_PeripheralDataSize ： 外设数据宽度
-  *		@arg DMA_MemoryDataSize ： 储存器数据宽度
-  *		@arg DMA_MemoryBaseAddr ： 储存器地址
+  * @param   DMA_PeripheralDataSize ： 外设数据宽度
+  * @param   DMA_MemoryDataSize ： 储存器数据宽度
+  * @param   DMA_MemoryBaseAddr ： 储存器地址
+  * @param   ChannelCount ： 传输数目
   * @retval  
   * 注：C8T6只有ADC1和ADC2 的CH0-CH9；ADC2没有DMA功能
   */
-static  void ADC1_DMA_Config(uint32_t DMA_PeripheralDataSize, uint32_t DMA_MemoryDataSize ,uint32_t DMA_MemoryBaseAddr)	
+void ADC1_DMA_Config(uint32_t DMA_PeripheralDataSize, uint32_t DMA_MemoryDataSize ,uint32_t DMA_MemoryBaseAddr, uint8_t ChannelCount)	
 {
 	DMA_DeInit(DMA1_Channel1);
 	DMA_InitTypeDef DMA_InitStruct;
@@ -310,7 +310,7 @@ static  void ADC1_DMA_Config(uint32_t DMA_PeripheralDataSize, uint32_t DMA_Memor
 	DMA_InitStruct.DMA_PeripheralBaseAddr 	= (uint32_t)ADC1 + 0x4c;//配置外设数据地址
 	DMA_InitStruct.DMA_MemoryBaseAddr 		= (uint32_t)DMA_MemoryBaseAddr; //配置接收数据地址
 	DMA_InitStruct.DMA_DIR 					= DMA_DIR_PeripheralSRC;//设置传输方向(从储存器读或从外设读)
-	DMA_InitStruct.DMA_BufferSize 			= ADC_NumOfChannel;//设置传输数目
+	DMA_InitStruct.DMA_BufferSize 			= ChannelCount;//设置传输数目
 	DMA_InitStruct.DMA_MemoryInc 			= DMA_MemoryInc_Enable;//设置寄存器地址增量模式，
 	DMA_InitStruct.DMA_PeripheralInc 		= DMA_PeripheralInc_Disable;//设置外设地址增量模式，
 	DMA_InitStruct.DMA_MemoryDataSize 		= DMA_MemoryDataSize;//设置寄存器数据宽度，

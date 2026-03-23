@@ -2,6 +2,8 @@
                       仅支持某一个或一批同样的开发板
 					  		  
 #include "bsp_520Motor.h"
+#include "bsp_encoder.h"
+
 
 static float KP_ver 	= 420; //700; //直立环比例
 static float KD_ver 	= 36; //60直立环微分

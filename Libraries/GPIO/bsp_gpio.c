@@ -8,7 +8,7 @@
   * @param   
   *		@arg GPIO_POTRx ：需要配置的端口
   *		@arg GPIO_PINx ：需要配置的引脚 GPIO_Pin_x
-  *		@arg GPIO_Mode ：需要配置的输入输出模式
+  *		@arg GPIO_Mode ：需要配置的输入输出模式 GPIO_Mode_IPD/GPIO_Mode_IPU/GPIO_Mode_Out_PP...
   * @retval  
   */
 void BSP_GPIO_Config(GPIO_TypeDef* GPIO_POTRx, uint16_t GPIO_PINx, GPIOMode_TypeDef GPIO_Mode)

@@ -19,6 +19,7 @@
 #define NRF_CTRL_WHEEL2MOVETURN 1 //是否将两轮速度解码成移动和转向
 #define NRF_CTRL_MODIFYSPEED 1 //是否修改小车速度
 /***************************************************************/
+#define NRF_CTRL_TICK_PERIOD  1  //定义心跳周期/ms
 #define NRF_CTRL_TICKDET_TIMEOUT 2000 //定义心跳检测超时时间/ms
 /****************************End Of User Modified****************************/
 
@@ -50,12 +51,19 @@
 #define NRF_CTRL_REQ_DUMMY              ((uint8_t)0x00)// 空请求
 /**************************************************************************/
 
+/** @defgroup NRF_CTRL_STA_FLAG 连接器状态标志位
+  * @{
+  */
+#define NRF_CTRL_STA_CONNECTED          ((uint32_t)0x00000001)//设备已连接
 
 
+/**
+  * @}
+  */
 
 /*信息输出*/
-#define NRF_CTRL_INFO(fmt,arg...)           printf("<<-NRF_CTRL-INFO->> "fmt"\n",##arg)
-#define NRF_CTRL_ERROR(fmt,arg...)          printf("<<-NRF_CTRL-ERROR->> "fmt"\n",##arg)
+#define NRF_CTRL_INFO(fmt,arg...)           UsartPrintf(USART_DEBUG,"<<-NRF_CTRL-INFO->> "fmt"\n",##arg)
+#define NRF_CTRL_ERROR(fmt,arg...)          UsartPrintf(USART_DEBUG,"<<-NRF_CTRL-ERROR->> "fmt"\n",##arg)
 #define NRF_CTRL_DEBUG(fmt,arg...)          do{\
                                           if(NRF_CTRL_DEBUG_ON)\
                                           UsartPrintf(USART_DEBUG,"<<-NRF_CTRL-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
@@ -68,6 +76,7 @@ uint8_t NRF_Controller_Config(void);
 uint8_t NRF_CTRL_SendMsg(uint8_t CMD, uint8_t* Msg, uint8_t MsgLen);
 uint8_t NRF_CTRL_ConnectionDetect(void);
 void NRF_CTRL_TickIncrease(void);
+void NRF_CTRL_TickDetect(uint32_t tic);
 uint8_t NRF_CTRL_SendTick(void);
 void NRF_CTRL_RecvMsg(void);
 

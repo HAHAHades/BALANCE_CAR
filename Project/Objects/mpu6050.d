@@ -37,15 +37,9 @@
 .\objects\mpu6050.o: ..\User\main.h
 .\objects\mpu6050.o: ..\Libraries\LED\bsp_led.h
 .\objects\mpu6050.o: ..\Libraries\UART\bsp_usart.h
-.\objects\mpu6050.o: ..\Libraries\IIC\bsp_iic.h
-.\objects\mpu6050.o: ..\Libraries\OLED\oled.h
-.\objects\mpu6050.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
-.\objects\mpu6050.o: ..\Libraries\MOTOR\bsp_520Motor.h
-.\objects\mpu6050.o: ..\Libraries\MOTOR\bsp_control.h
-.\objects\mpu6050.o: ..\Libraries\MPU6050\mpu6050.h
-.\objects\mpu6050.o: ..\Libraries\TIM\bsp_encoder.h
-.\objects\mpu6050.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\mpu6050.o: ..\Libraries\IIC\bsp_hard_i2c.h
+.\objects\mpu6050.o: ..\Libraries\KEY\bsp_key.h
+.\objects\mpu6050.o: ..\Libraries\ADC\bsp_adc.h
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu_dmp_motion_driver.h
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\mllite\invensense.h
@@ -64,6 +58,7 @@
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\mllite\results_holder.h
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\mllite\start_manager.h
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\mllite\storage_manager.h
+.\objects\mpu6050.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\driver\include\log.h
 .\objects\mpu6050.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\driver\include\mlinclude.h
