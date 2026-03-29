@@ -1,28 +1,467 @@
 #include "nrf_controller.h"
-					  
-#include "nrf24l01p.h"
 #include "bsp_exti.h"
-#include "bsp_usart.h"
 #include "string.h"
+
+
 #if NRF_CTRL_OLED_ON                                          
 #include "oled.h"
 #endif
 
-#if NRF_CTRL_USE_CTRLDECODE //使用控制端解码
-#include "controller_decode.h"
-#endif // NRF_CTRL_USE_CTRLDECODE
+
 
 #if NRF_CTRL_MODIFYSPEED // 修改小车速度
-extern int32_t G_BSPCTRL_TargetSpeed ;//前后速度
-extern int32_t G_BSPCTRL_TurnSpeed ;//转向速度，正为左转，负为右转
+// extern int32_t G_BSPCTRL_TargetSpeed ;//前后速度
+// extern int32_t G_BSPCTRL_TurnSpeed ;//转向速度，正为左转，负为右转
 #endif // NRF_CTRL_MODIFYSPEED
 
-#if 0
-uint8_t NRF_CTRL_Recvbuf[WRX_PAYLOAD_WIDTH] ; //被控端接收的数据
-uint32_t G_NRF_CTRL_STA_Flag;//连接器状态标志
+#if 1
 static uint32_t SG_NRF_CTRL_CD_Tick; //长连接心跳
-static uint8_t SG_NRF_CTRL_CD_Status; //连接检测状态，0：未连接，else：已连接
+// static uint8_t SG_NRF_CTRL_CD_Status; //连接检测状态，0：未连接，else：已连接
 
+
+static NRF24L01P_Hard_Typedef SG_NRF_CTRL_NRF_HardStruct;//遥控器使用的硬件对象
+
+void NRF_Controller_UsageDemo(void)
+{
+    #if NRF_CTRL_MASTER
+    //主控端
+
+	uint8_t initSta; 
+	uint8_t Button_Count = 4;
+	uint8_t Comb_Count = 2;
+	uint8_t Pot_Count = 4;
+
+	initSta = BSP_KEY_InitParam( Button_Count,  Comb_Count, Pot_Count);
+	if (initSta)
+	{
+		//return init failed code
+		return;
+	}
+	
+	//先注册配置实体按钮，索引从0开始，小于Button_Count
+	KEY_Button_TypeDef ButtonStruct;
+	//设置按钮0参数为 PA0引脚 低电平有效，开启单击按下、长按、双击回调
+	BSP_KEY_Button_StructInit(&ButtonStruct,  GPIOA, GPIO_Pin_8, KEY_PL_RESET, (KEY_Flag_R|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Button_Register( 0,  ButtonStruct);
+	BSP_KEY_Button_StructInit(&ButtonStruct,  GPIOA, GPIO_Pin_9, KEY_PL_RESET, (KEY_Flag_P|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Button_Register( 1,  ButtonStruct);
+	BSP_KEY_Button_StructInit(&ButtonStruct,  GPIOA, GPIO_Pin_10, KEY_PL_RESET, (KEY_Flag_R|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Button_Register( 2,  ButtonStruct);
+	BSP_KEY_Button_StructInit(&ButtonStruct,  GPIOA, GPIO_Pin_11, KEY_PL_RESET, (KEY_Flag_P|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Button_Register( 3,  ButtonStruct);
+
+
+	//再注册配置组合键，按键数多的索引应越小，否则会出现歧义(比如A+B+C会触发A+B)，索引从0开始，小于Comb_Count
+	KEY_COMBINATION_t CombStruct;
+	//组合键0 包含3个按键 索引分别为 0，2，4，开启单击释放、长按、双击回调
+	uint8_t indexList1[] = {0,2};
+	BSP_KEY_COMB_StructInit( &CombStruct,  2, indexList1, (KEY_Flag_R|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Comb_Register(0 , CombStruct);
+	uint8_t indexList2[] = {0,3};
+	BSP_KEY_COMB_StructInit( &CombStruct,  2, indexList2, (KEY_Flag_R|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Comb_Register(1 , CombStruct);
+
+	//再注册电位计按键
+	KEY_Pot_TypeDef PotStruct;
+	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_0);
+	BSP_KEY_Pot_Register(0,  PotStruct);
+	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_1);
+	BSP_KEY_Pot_Register(1,  PotStruct);
+	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_2);
+	BSP_KEY_Pot_Register(2,  PotStruct);
+	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_3);
+	BSP_KEY_Pot_Register(3,  PotStruct);
+
+	BSP_KEY_GpioConfig();
+
+	//重复执行 Key_TickTask 更新io状态
+	//根据需求重复执行void KeyDetectButton(void)更新按键FIFO
+
+
+    uint8_t tmpR;
+
+    //全局指针方便调用中断函数
+    G_NRF_HardStruct_ForEXTI0 = &SG_NRF_CTRL_NRF_HardStruct;
+    NRF_HardStruct_Init(&SG_NRF_CTRL_NRF_HardStruct, NRF_Mode_Tx, NRF_ACK_PAY_EN ,SPI1,  SPI1_IO_Reamp0, GPIOB,  GPIO_Pin_1,  GPIOB,  GPIO_Pin_0);
+    tmpR = NRF24L01P_Init( &SG_NRF_CTRL_NRF_HardStruct);//测试硬件是否异常
+    if (tmpR)
+    {
+      NRF_CTRL_DEBUG("NRF24L01P_Init Failed!");
+      return;
+    }
+    tmpR = NRF_TXRX_TEST( &SG_NRF_CTRL_NRF_HardStruct, 10000 );
+
+    if (tmpR)
+    {
+      NRF_CTRL_DEBUG("NRF_TXRX_TEST successful!");
+    }
+    else
+    {
+      NRF_CTRL_DEBUG("NRF_TXRX_TEST failed!");
+      return;
+    }
+
+    uint8_t FlagCount=0;
+    KEY_FIFO_t keyFifo[KEY_FIFO_CAPACITY];
+    
+    uint32_t nowTime = 0;
+    uint32_t timeDiff = 0;
+    uint32_t NRFCTRL_LastGetFIFOTime = 0;
+    uint32_t NRFCTRL_LastTRMSGTime = 0;
+    uint32_t Key_TickTask_LastRunTime = 0;
+    uint32_t Key_TickTaskTime = 10;
+
+    uint8_t msg[WRX_PAYLOAD_WIDTH];   
+    uint8_t copedFifoCount;   
+
+    while (1)
+    {
+        nowTime = NRFCTR_GetTime();
+
+        timeDiff = nowTime - Key_TickTask_LastRunTime;
+        if (timeDiff > Key_TickTaskTime)
+        {
+          Key_TickTask();
+          KeyDetectButton();
+          Key_TickTask_LastRunTime = NRFCTR_GetTime();;
+        }
+
+        timeDiff = nowTime - NRFCTRL_LastGetFIFOTime;
+
+        if (timeDiff > NRF_CTRL_GetFIFO_Period)
+        {
+          FlagCount = KeyGetFIFOFlag(keyFifo,  KEY_FIFO_CAPACITY);
+          for (uint8_t i = 0; i < FlagCount; i++)
+          {
+            if (keyFifo[i] & KEY_POT_FIFO_FLAG)
+            {
+              //电位计数据
+
+              KEY_POT_PCT_t potData = (KEY_POT_PCT_t)(keyFifo[i]&KEY_POT_FIFO_MASK);
+              uint8_t potIndex = (keyFifo[i]&KEY_POT_FIFO_I_MASK)>>KEY_POT_FIFO_I_BIT_S;
+              NRF_CTRL_DEBUG("pot%d data%d", potIndex, potData);
+              
+            }
+          }
+          NRFCTRL_LastGetFIFOTime = nowTime;
+        }
+        timeDiff = nowTime - NRFCTRL_LastTRMSGTime;
+        if (timeDiff > NRT_CTRL_TRMsg_Period)
+        {
+            #if NRF_CTRL_USE_CTRLDECODE
+            copedFifoCount = 0;
+            while (FlagCount)
+            {
+                //一次最多处理发送6组数据
+                copedFifoCount = CTRL_M_DECODE_CopeKeyFIFO( &keyFifo[copedFifoCount],  FlagCount, msg);
+                NRF_CTRL_SendMsg( NRF_CTRL_CMD_KEY,  msg,  copedFifoCount);
+                //NRF_CTRL_PrintMsg(msg);
+                FlagCount -= copedFifoCount;
+            }
+
+            #else
+            do
+            {
+              copedFifoCount = NRF_CTRL_FIFO2MSG(keyFifo, FlagCount, msg);
+              NRF_CTRL_SendMsg( NRF_CTRL_CMD_KEY,  msg,  copedFifoCount);
+            } while (FlagCount);
+
+            #endif //NRF_CTRL_USE_CTRLDECODE
+            NRFCTRL_LastTRMSGTime = nowTime;
+        }
+    }
+
+    #else 
+    //被控端
+
+    uint8_t tmpR;
+
+    //全局指针方便调用中断函数
+    G_NRF_HardStruct_ForEXTI0 = &SG_NRF_CTRL_NRF_HardStruct;
+
+    NRF_HardStruct_Init(&SG_NRF_CTRL_NRF_HardStruct, NRF_Mode_Rx, NRF_ACK_PAY_EN, SPI1,  SPI1_IO_Reamp0, GPIOB,  GPIO_Pin_1,  GPIOB,  GPIO_Pin_0);
+    tmpR = NRF24L01P_Init( &SG_NRF_CTRL_NRF_HardStruct);//测试硬件是否异常
+    if (tmpR)
+    {
+      NRF_CTRL_DEBUG("NRF24L01P_Init Failed!");
+      return;
+    }
+
+    tmpR = NRF_TXRX_TEST( &SG_NRF_CTRL_NRF_HardStruct, 10000);//测试主控与被控端通信是否异常
+    if (tmpR)
+    {
+      NRF_CTRL_DEBUG("NRF_TXRX_TEST successful!");
+    }
+    else
+    {
+      NRF_CTRL_DEBUG("NRF_TXRX_TEST failed!");
+      return;
+    }
+
+    uint32_t nowTime = 0;
+    uint32_t timeDiff = 0;
+    uint32_t NRFCTRL_LastTRMSGTime = 0;
+
+    uint8_t msg[WRX_PAYLOAD_WIDTH];      
+
+    while (1)
+    {
+        nowTime = NRFCTR_GetTime();
+        timeDiff = nowTime - NRFCTRL_LastTRMSGTime;
+        if (timeDiff > NRT_CTRL_TRMsg_Period)
+        {
+          if (!NRF_CTRL_RecvMsg( msg))
+          {
+            //接收到数据 处理数据
+            NRF_CTRL_PrintMsg(msg);
+            CTRL_S_DECODE_CopeKeyFIFO( msg);
+          }
+          NRFCTRL_LastTRMSGTime = NRFCTR_GetTime();
+        }
+    }
+    #endif //NRF_CTRL_MASTER
+
+}
+
+
+/** 
+  * @brief   配置控制器
+  * @param   
+  * @retval  0表示成功
+  */
+uint8_t NRF_Controller_Config(void)
+{
+    #if NRF_CTRL_MASTER
+    //主控端
+
+	uint8_t initSta; 
+	uint8_t Button_Count = 4;
+	uint8_t Comb_Count = 2;
+	uint8_t Pot_Count = 4;
+
+	initSta = BSP_KEY_InitParam( Button_Count,  Comb_Count, Pot_Count);
+	if (initSta)
+	{
+		//return init failed code
+		return 1;
+	}
+	
+	//先注册配置实体按钮，索引从0开始，小于Button_Count
+	KEY_Button_TypeDef ButtonStruct;
+	//设置按钮0参数为 PA0引脚 低电平有效，开启单击按下、长按、双击回调
+	BSP_KEY_Button_StructInit(&ButtonStruct,  GPIOA, GPIO_Pin_8, KEY_PL_RESET, (KEY_Flag_R|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Button_Register( 0,  ButtonStruct);
+	BSP_KEY_Button_StructInit(&ButtonStruct,  GPIOA, GPIO_Pin_9, KEY_PL_RESET, (KEY_Flag_P|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Button_Register( 1,  ButtonStruct);
+	BSP_KEY_Button_StructInit(&ButtonStruct,  GPIOA, GPIO_Pin_10, KEY_PL_RESET, (KEY_Flag_R|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Button_Register( 2,  ButtonStruct);
+	BSP_KEY_Button_StructInit(&ButtonStruct,  GPIOA, GPIO_Pin_11, KEY_PL_RESET, (KEY_Flag_P|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Button_Register( 3,  ButtonStruct);
+
+
+	//再注册配置组合键，按键数多的索引应越小，否则会出现歧义(比如A+B+C会触发A+B)，索引从0开始，小于Comb_Count
+	KEY_COMBINATION_t CombStruct;
+	//组合键0 包含3个按键 索引分别为 0，2，4，开启单击释放、长按、双击回调
+	uint8_t indexList1[] = {0,2};
+	BSP_KEY_COMB_StructInit( &CombStruct,  2, indexList1, (KEY_Flag_R|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Comb_Register(0 , CombStruct);
+	uint8_t indexList2[] = {0,3};
+	BSP_KEY_COMB_StructInit( &CombStruct,  2, indexList2, (KEY_Flag_R|KEY_Flag_LP|KEY_Flag_DPR));
+	BSP_KEY_Comb_Register(1 , CombStruct);
+
+	//再注册电位计按键
+	KEY_Pot_TypeDef PotStruct;
+	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_0);
+	BSP_KEY_Pot_Register(0,  PotStruct);
+	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_1);
+	BSP_KEY_Pot_Register(1,  PotStruct);
+	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_2);
+	BSP_KEY_Pot_Register(2,  PotStruct);
+	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_3);
+	BSP_KEY_Pot_Register(3,  PotStruct);
+
+	BSP_KEY_GpioConfig();
+
+	//重复执行 Key_TickTask 更新io状态
+	//根据需求重复执行void KeyDetectButton(void)更新按键FIFO
+
+
+    uint8_t tmpR;
+
+    //全局指针方便调用中断函数
+    G_NRF_HardStruct_ForEXTI0 = &SG_NRF_CTRL_NRF_HardStruct;
+    NRF_HardStruct_Init(&SG_NRF_CTRL_NRF_HardStruct, NRF_Mode_Tx, NRF_ACK_PAY_EN ,SPI1,  SPI1_IO_Reamp0, GPIOB,  GPIO_Pin_1,  GPIOB,  GPIO_Pin_0);
+    tmpR = NRF24L01P_Init( &SG_NRF_CTRL_NRF_HardStruct);//测试硬件是否异常
+    if (tmpR)
+    {
+      NRF_CTRL_DEBUG("NRF24L01P_Init Failed!");
+      return 1;
+    }
+
+
+    #else 
+    //被控端
+
+    uint8_t tmpR;
+
+    //全局指针方便调用中断函数
+    G_NRF_HardStruct_ForEXTI0 = &SG_NRF_CTRL_NRF_HardStruct;
+    NRF_HardStruct_Init(&SG_NRF_CTRL_NRF_HardStruct, NRF_Mode_Rx, NRF_ACK_PAY_EN, SPI1,  SPI1_IO_Reamp0, GPIOB,  GPIO_Pin_1,  GPIOB,  GPIO_Pin_0);
+    tmpR = NRF24L01P_Init( &SG_NRF_CTRL_NRF_HardStruct);//测试硬件是否异常
+    if (tmpR)
+    {
+      NRF_CTRL_DEBUG("NRF24L01P_Init Failed!");
+      return 1;
+    }
+
+
+
+
+
+
+#endif //NRF_CTRL_MASTER
+
+return 0;
+
+}
+
+void NRF_Controller_Run(void)
+{
+    #if NRF_CTRL_MASTER
+    //主控端
+
+    uint8_t FlagCount=0;
+    KEY_FIFO_t keyFifo[KEY_FIFO_CAPACITY];
+    
+    uint32_t nowTime = 0;
+    uint32_t timeDiff = 0;
+    uint32_t NRFCTRL_LastGetFIFOTime = 0;
+    uint32_t NRFCTRL_LastTRMSGTime = 0;
+    uint32_t Key_TickTask_LastRunTime = 0;
+    uint32_t Key_TickTaskTime = 10;
+
+    uint8_t msg[WRX_PAYLOAD_WIDTH];   
+    uint8_t copedFifoCount;   
+
+   
+    {
+        nowTime = NRFCTR_GetTime();
+
+        timeDiff = nowTime - Key_TickTask_LastRunTime;
+        if (timeDiff > Key_TickTaskTime)
+        {
+          Key_TickTask();
+          KeyDetectButton();
+          Key_TickTask_LastRunTime = NRFCTR_GetTime();;
+        }
+
+        timeDiff = nowTime - NRFCTRL_LastGetFIFOTime;
+
+        if (timeDiff > NRF_CTRL_GetFIFO_Period)
+        {
+          FlagCount = KeyGetFIFOFlag(keyFifo,  KEY_FIFO_CAPACITY);
+          for (uint8_t i = 0; i < FlagCount; i++)
+          {
+            if (keyFifo[i] & KEY_POT_FIFO_FLAG)
+            {
+              //电位计数据
+
+              KEY_POT_PCT_t potData = (KEY_POT_PCT_t)(keyFifo[i]&KEY_POT_FIFO_MASK);
+              uint8_t potIndex = (keyFifo[i]&KEY_POT_FIFO_I_MASK)>>KEY_POT_FIFO_I_BIT_S;
+              NRF_CTRL_DEBUG("pot%d data%d", potIndex, potData);
+              
+            }
+          }
+          NRFCTRL_LastGetFIFOTime = nowTime;
+        }
+        timeDiff = nowTime - NRFCTRL_LastTRMSGTime;
+        if (timeDiff > NRT_CTRL_TRMsg_Period)
+        {
+            #if NRF_CTRL_USE_CTRLDECODE
+            copedFifoCount = 0;
+            while (FlagCount)
+            {
+                //一次最多处理发送6组数据
+                copedFifoCount = CTRL_M_DECODE_CopeKeyFIFO( &keyFifo[copedFifoCount],  FlagCount, msg);
+                NRF_CTRL_SendMsg( NRF_CTRL_CMD_KEY,  msg,  copedFifoCount);
+                //NRF_CTRL_PrintMsg(msg);
+                FlagCount -= copedFifoCount;
+            }
+
+            #else
+            do
+            {
+              copedFifoCount = NRF_CTRL_FIFO2MSG(keyFifo, FlagCount, msg);
+              NRF_CTRL_SendMsg( NRF_CTRL_CMD_KEY,  msg,  copedFifoCount);
+            } while (FlagCount);
+
+            #endif //NRF_CTRL_USE_CTRLDECODE
+            NRFCTRL_LastTRMSGTime = nowTime;
+        }
+    }
+
+    #else 
+    //被控端
+
+    uint32_t nowTime = 0;
+    uint32_t timeDiff = 0;
+    uint32_t NRFCTRL_LastTRMSGTime = 0;
+
+    uint8_t msg[WRX_PAYLOAD_WIDTH];      
+
+
+    {
+        nowTime = NRFCTR_GetTime();
+        timeDiff = nowTime - NRFCTRL_LastTRMSGTime;
+        if (timeDiff > NRT_CTRL_TRMsg_Period)
+        {
+          if (!NRF_CTRL_RecvMsg( msg))
+          {
+            //接收到数据 处理数据
+            NRF_CTRL_PrintMsg(msg);
+            CTRL_S_DECODE_CopeKeyFIFO( msg);
+          }
+          NRFCTRL_LastTRMSGTime = NRFCTR_GetTime();
+        }
+    }
+    #endif //NRF_CTRL_MASTER
+
+}
+
+
+
+
+
+/**
+  * @brief   获取时间戳/ms
+  * @param   
+  * @retval  
+**/
+uint32_t NRFCTR_GetTime(void) 
+{
+	unsigned long count;
+	get_tick_count(&count);
+	return count;
+}
+
+
+/**
+  * @brief   按键信息处理，根据按键标识，做出相应处理，输出处理后的MSG数据。
+  * @param   Keys[IN] : 接受到的按键数据
+  * @param   keys_num[IN] : 接受到的按键数据个数
+  * @param   Msg[IN/OUT] : 输出的数据, 固定32个uint8_t
+  * @retval  已处理的Keys个数
+**/
+uint8_t NRF_CTRL_FIFO2MSG(KEY_FIFO_t* Keys, uint8_t keys_num, uint8_t* Msg)
+{
+
+  uint8_t rVal;
+
+  return  rVal;
+
+}
+
+#if 0
 /**
   * @brief   NRF遥控器/被控器运行函数，单次运行无阻塞
   * @param   
@@ -55,55 +494,87 @@ void NRF_Controller_RunOnce(void)
   return;
 }
 
-
-/**
-  * @brief   基于NRF的遥控器/被控器初始化
-  * @param   
-  * @retval  1：初始化成功  0：初始化失败
-**/
-uint8_t NRF_Controller_Config(void)
-{
-    uint8_t ret;
-    SG_NRF_CTRL_CD_Tick = 0;
-    SG_NRF_CTRL_CD_Status = 0;
-    #if NRF_CTRL_MASTER  //主控/遥控端
-      #if NRF_CTRL_USE_KEYIOSCAN 
-        KeyInit();
-      #endif // NRF_CTRL_USE_KEYIOSCAN
-      ret = NRF24L01P_Init(NRF_MODE_TX);//初始化NRF为遥控端
-    #else // 被控端
-      ret = NRF24L01P_Init(NRF_MODE_RX);//初始化NRF为被控端
-    #endif //NRF_CTRL_MASTER
-
-    #if NRF_CTRL_DEBUG_ON
-    NRF_CTRL_DEBUG("Configuring NRF Conctroller...");
-    #endif //NRF_CTRL_DEBUG_ON
-
-    return ret;
-}
+#endif
 
 
 /**
-  * @brief   发送数据，第一字节为指令，第二字节为有效数据长度，后面30字节为数据
+  * @brief   发送数据，第一字节为指令，第二字节为有效数据长度，后面每5个字节为一组数据
   * @param   CMD : 指令
   * @param   Msg : 数据
-  * @param   MsgLen : 数据长度,最大30Bytes
+  * @param   MsgLen : 数据个数，最大6组
   * @retval  0表示成功
 **/
 uint8_t NRF_CTRL_SendMsg(uint8_t CMD, uint8_t* Msg, uint8_t MsgLen)
 {
-  uint8_t TxBuf[32];
-  TxBuf[0] = CMD;
-  TxBuf[1] = MsgLen;
-  if (MsgLen>0)
-  {
-    memcpy(&(TxBuf[2]), Msg, MsgLen);
-  }
-  
-  return NRF24L01_TxPacket(TxBuf);
+  // uint8_t TxBuf[32];
+  Msg[0] = CMD;
+  Msg[1] = MsgLen;
+
+
+  // if (MsgLen>0)
+  // {
+  //   memcpy((void*)(&(TxBuf[2])), (const void*)Msg, MsgLen*NRF_CTRL_MsgBytes);//此处memcpy赋值不了
+  // }
+  // NRF_CTRL_DEBUG("Msg[2]:%d", Msg[2]);
+  // NRF_CTRL_DEBUG("Msg[5]:%d", Msg[5]);
+  // NRF_CTRL_DEBUG("Msg[6]:%d", Msg[6]);
+  // NRF_CTRL_DEBUG("TxBuf[2]:%d", TxBuf[2]);
+  // NRF_CTRL_DEBUG("TxBuf[5]:%d", TxBuf[5]);
+  // NRF_CTRL_DEBUG("TxBuf[6]:%d", TxBuf[6]);
+  NRF_CTRL_PrintMsg(Msg);
+  return NRF24L01_TxPacket(Msg, NRF_CTRL_MsgTimeOut, &SG_NRF_CTRL_NRF_HardStruct);
 }
 
 
+/**
+  * @brief   接收发来的数据并处理，单次检测，无阻塞
+  * @param   Msg[OUT]: 接收的数据，固定32Bytes
+  * @retval  0表示成功
+**/
+uint8_t NRF_CTRL_RecvMsg(uint8_t* Msg)
+{
+  uint8_t tmp=0;
+  //接收测试数据
+  tmp = NRF24L01_RxPacket(Msg, 1, &SG_NRF_CTRL_NRF_HardStruct);
+  if(!tmp)//接收到数据
+  {
+    SG_NRF_CTRL_CD_Tick = SG_NRF_CTRL_CD_Tick? 0:SG_NRF_CTRL_CD_Tick;
+    return 0;
+  }
+
+  return 1;
+}
+
+
+/**
+  * @brief   输出收到的数据
+  * @param   Msg[IN]: 接收的数据，固定32Bytes
+  * @retval  
+**/
+void NRF_CTRL_PrintMsg(uint8_t* Msg)
+{
+  uint8_t cmd = Msg[0];
+  uint8_t msgLen = Msg[1];
+  if (msgLen > NRF_CTRL_MAXMsgPerPackage)
+  {
+    NRF_CTRL_DEBUG("RecvMsg Len:%d, Msg err", msgLen);
+    return;
+  }
+  
+  NRF_CTRL_DEBUG("RecvMsg CMD:%d", cmd);
+  NRF_CTRL_DEBUG("RecvMsg Len:%d", msgLen);
+  
+  for (uint8_t i = 0; i < msgLen; i++)
+  {
+    for (uint8_t j = 0; j < NRF_CTRL_MsgBytes; j++)
+    {
+      NRF_CTRL_DEBUG("RecvMsg[%d,%d]:%d", i, j, Msg[2+NRF_CTRL_MsgBytes*i+j]);
+    }
+  }
+}
+
+
+#if 0
 /**
   * @brief   NRF主控端被控端连接检测
   * @param   
@@ -248,28 +719,15 @@ uint8_t NRF_CTRL_SendTick(void)
 }
 
 
-/**
-  * @brief   接收发来的数据并处理，单次检测，无阻塞
-  * @param   
-  * @retval  
-**/
-void NRF_CTRL_RecvMsg(void)
-{
-  uint8_t tmp=0xff ;
 
-  tmp=NRF24L01_FastRxPacket( NRF_CTRL_Recvbuf);//接收测试数据
-  
-  if(!tmp)//接收到数据
-  {
-    SG_NRF_CTRL_CD_Tick = 0;
-    NRF_CTRL_CopeMsg(NRF_CTRL_Recvbuf);//处理数据
-  }
 
-  return;
-}
+
+#endif
 
 
 #if NRF_CTRL_MASTER //主控/遥控端
+
+#if 0
 
 /**
   * @brief  主控/遥控端，检测并发送按键状态
@@ -580,8 +1038,12 @@ void NRF_CTRL_CopeREQ(uint8_t reqMode, uint8_t dataBytes, uint8_t reqObj,  uint8
   return ;
 }
 
+#endif 
+
 #else //NRF_CTRL_MASTER 被控端
 
+
+#if 0
 
 /**
   * @brief   被控端 处理接收的32Bytes数据，第一字节为指令，第二字节为有效数据长度，后面30字节为有效数据数据
@@ -774,6 +1236,8 @@ void NRF_CTRL_CopeREQ(uint8_t reqMode, uint8_t dataBytes, uint8_t reqObj,  uint8
   return ;
 }
 
+
+#endif
 
 #endif //NRF_CTRL_MASTER
 

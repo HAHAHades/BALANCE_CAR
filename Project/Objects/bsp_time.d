@@ -1,6 +1,5 @@
 .\objects\bsp_time.o: ..\Libraries\TIM\bsp_time.c
 .\objects\bsp_time.o: ..\Libraries\TIM\bsp_time.h
-.\objects\bsp_time.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\bsp_time.o: ..\Libraries\CMSIS\stm32f10x.h
 .\objects\bsp_time.o: ..\Libraries\CMSIS\core_cm3.h
 .\objects\bsp_time.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
@@ -30,4 +29,5 @@
 .\objects\bsp_time.o: ..\Libraries\FWlib\inc\stm32f10x_usart.h
 .\objects\bsp_time.o: ..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 .\objects\bsp_time.o: ..\Libraries\FWlib\inc\misc.h
+.\objects\bsp_time.o: ..\Libraries\TIM\bsp_tim.h
 .\objects\bsp_time.o: ..\Libraries\TIM\bsp_encoder.h

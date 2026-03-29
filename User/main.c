@@ -39,8 +39,11 @@ void Hardware_Init(void)
 
 #if USART_Print_ON
 	//串口初始化
+	#if BANLANCE_CAR_ON
+	BSP_USARTx_Init(USART_DEBUG, BSP_USARTxStructInit(115200) , USART2_IO_Reamp0);
+	#else 
 	BSP_USARTx_Init(USART_DEBUG, BSP_USARTxStructInit(115200) , USART1_IO_Reamp1);
-	
+	#endif //BANLANCE_CAR_ON
 	UsartPrintf(USART_DEBUG, "TEST...\n");
 
 	UsartPrintf(USART_DEBUG, "HCLK_Frequency:%d\n", RCC_Clocks.HCLK_Frequency);
@@ -91,9 +94,9 @@ void Hardware_Init(void)
     //检测MPU6050
     if(MPU6050ReadID() == 0)
     {
-		#if UART_Printtf
+		#if USART_Print_ON
         UsartPrintf(USART_DEBUG,"\r\n没有检测到MPU6050传感器！\r\n");
-		#endif //UART_Printtf
+		#endif //USART_Print_ON
         LED_ON(1); 
         while(1);	
     }
@@ -101,22 +104,9 @@ void Hardware_Init(void)
 
 	//NRF遥控器配置
 	#if NRF_CTRL_ON //
-	uint8_t tmpret=0;
-	tmpret = NRF_Controller_Config();
-	if (!tmpret)
-	{
-		#if UART_Printtf
-		UsartPrintf(USART_DEBUG, "NRF Controller Config failed!\n");
-		#endif
-		LED_ON(1);
-		while (1);
-	}
-	else
-	{
-		#if UART_Printtf
-		UsartPrintf(USART_DEBUG, "NRF Controller Config OK!\n");
-		#endif
-	}
+
+
+
 	#endif // NRF_CTRL_ON
 
 	#if HC_SR04_ON //
@@ -185,7 +175,29 @@ int main(void)
 		SisTic_Delay_ms(500);
 	}
 	
-	BSP_KEY_UsageDemo();
+#if NRF_CTRL_ON
+	if (NRF_Controller_Config())
+	{
+		LED_ON(1);
+		UsartPrintf(USART_DEBUG, "NRF_Controller_Config err\n");
+		while(1);
+	}
+#endif //NRF_CTRL_ON
+
+#if NRF_CTRL_M_ON
+	if (NRF_Controller_Config())
+	{
+		LED_ON(1);
+		UsartPrintf(USART_DEBUG, "NRF_Controller_Config err\n");
+		while(1);
+	}
+	while (1)
+	{
+
+		NRF_Controller_Run();
+	}
+#endif //NRF_CTRL_M_ON
+
 
 	#if USART_DEBUG_MPU
 	while (1)
@@ -201,24 +213,49 @@ int main(void)
 
 #if BANLANCE_CAR_ON //平衡车测试 	
 	//2.开始控制小车
+
+
+
+
 	#if CONTROL_CAR_IN_IT
+
+    uint32_t nowTime = 0;
+    uint32_t timeDiff = 0;
+    uint32_t LED_LastRunTime = 0;
+    uint32_t LED_RunPeriod = 300;
+
 	while(1)
 	{
-		#if NRF_CTRL_ON
-		NRF_Controller_RunOnce();
-		#endif // NRF_CTRL_ON
+        nowTime = NRFCTR_GetTime();
+        timeDiff = nowTime - LED_LastRunTime;
+        if (timeDiff > 2*LED_RunPeriod)
+        {
+          	
+			LED_OFF(1);
+			LED_LastRunTime = NRFCTR_GetTime();
+        }
+		else if (timeDiff > LED_RunPeriod)
+		{
+			LED_ON(1);
+		}
+		
+#if NRF_CTRL_ON
+		NRF_Controller_Run();
+#endif //NRF_CTRL_ON
+
+
+
 
 		#if OLED_ON
 		OLED_Display_XxX_ASCII( 0, 16,  8, 12, 1, "%5.2f %5.2f %5.2f\n", G_Euler_RPY[0], G_Euler_RPY[1], G_Euler_RPY[2]);
 		OLED_Refresh();
 		#endif //OLED_ON
-		LED_ON(1);
-		SisTic_Delay_ms(500);
-		LED_OFF(1);
-		SisTic_Delay_ms(500);
+
 	}	
 	#endif //CONTROL_CAR_IN_IT
 	
+	#if MPU_GetEuler_IN_IT
+	#else
 	while(1)
 	{
 
@@ -237,7 +274,7 @@ int main(void)
 //		OLED_Refresh();
 		SisTic_Delay_ms(8);//
 	}
-		
+	#endif //MPU_GetEuler_IN_IT
 		#if OLED_SHOW_HC_SR04
 		float HC_distance;
 		HC_SR04_StartMeasure();
@@ -285,50 +322,12 @@ int main(void)
 		}
 	#endif //OLED_SHOW_Encoder_Speed
 #else //BANLANCE_CAR_ON
-	#if KEY_TEST_ON
-	/* code */
-	KeyTest();
-	#endif //KEY_TEST_ON
 
-	#if NRF_CTRL_ON
-	while (1)
-	{
-		NRF_Controller_RunOnce();
-	}
-	#endif // NRF_CTRL_ON
-
-	#if HC_SR04_ON //
-	float hrc_dis;
-	while (1)
-	{
-		HC_SR04_StartMeasure();
-		SisTic_Delay_ms(50);
-		if(HC_SR04_get_distance(&hrc_dis))
-		{
-			#if UART_Printtf
-			UsartPrintf(USART_DEBUG, "HRC OK\nHRC_DIS:%.5fm\n",hrc_dis);
-			#endif //UART_Printtf
-		}
-		else
-		{
-			#if UART_Printtf
-			UsartPrintf(USART_DEBUG, "HRC ERR\nHRC_DIS:%.5fm\n",hrc_dis);
-			#endif //UART_Printtf
-		}
-		SisTic_Delay_ms(500);
-	}
-	#endif // HC_SR04_ON
 
 #endif // BANLANCE_CAR_ON
 
 
-	while (1)
-	{
-		LED_ON(1);
-		SisTic_Delay_ms(150);
-		LED_OFF(1);
-		SisTic_Delay_ms(150);
-	}
+
 
 }
 

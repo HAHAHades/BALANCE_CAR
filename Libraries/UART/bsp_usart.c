@@ -1,8 +1,8 @@
 #include "bsp_usart.h"//板级支持包board support package\
                       仅支持某一个或一批同样的开发板
+#include "bsp_gpio.h"
 
-
-#ifdef BSP_USE_F103
+#if 1
 
 
 /**
@@ -165,7 +165,7 @@ void BSP_USARTx_Init(USART_TypeDef *USARTx, USART_InitTypeDef USART_InitStruct, 
 #endif //BSP_USE_F103
 
 
-#ifdef BSP_USE_F401
+#if 0
 
 /**
   * @brief   初始化串口

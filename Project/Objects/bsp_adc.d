@@ -30,13 +30,5 @@
 .\objects\bsp_adc.o: ..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 .\objects\bsp_adc.o: ..\Libraries\FWlib\inc\misc.h
 .\objects\bsp_adc.o: ..\Libraries\UART\bsp_usart.h
-.\objects\bsp_adc.o: ..\User\main.h
 .\objects\bsp_adc.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\bsp_adc.o: ..\Libraries\SysTick\bsp_SysTick.h
-.\objects\bsp_adc.o: ..\Libraries\GPIO\bsp_gpio.h
-.\objects\bsp_adc.o: ..\User\main.h
-.\objects\bsp_adc.o: ..\Libraries\LED\bsp_led.h
-.\objects\bsp_adc.o: ..\Libraries\UART\bsp_usart.h
-.\objects\bsp_adc.o: ..\Libraries\IIC\bsp_hard_i2c.h
-.\objects\bsp_adc.o: ..\Libraries\KEY\bsp_key.h
-.\objects\bsp_adc.o: ..\Libraries\ADC\bsp_adc.h

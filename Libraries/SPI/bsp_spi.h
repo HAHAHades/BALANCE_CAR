@@ -2,9 +2,8 @@
 #define _BSP_SPI_H
 
 
-
-#include "main.h"
-
+#include "stm32f10x.h"
+#include "bsp_usart.h"
 /*
 SPI双线模式：
 双机共地
@@ -39,7 +38,6 @@ SPI4       E4      E2      E5          E6          SPI4_IO_Reamp1
 /** @defgroup SPIx_IO_Reamp
   * @{
   */
-
 #define SPI1_IO_Reamp0  ((uint32_t)0x00010000)  //
 #define SPI1_IO_Reamp1  ((uint32_t)0x00010001)  //
 #define SPI2_IO_Reamp0  ((uint32_t)0x00020000)  //
@@ -52,159 +50,29 @@ SPI4       E4      E2      E5          E6          SPI4_IO_Reamp1
 #define SPI3_IO_Reamp3  ((uint32_t)0x00030003)  //
 #define SPI4_IO_Reamp0  ((uint32_t)0x00040000)  //
 #define SPI4_IO_Reamp1  ((uint32_t)0x00040001)  //
-
 /**
   * @}
   */
 
-
-typedef struct BSP_spix_TypeDef
+typedef struct 
 {
 
 	SPI_TypeDef* SPIx;
-	uint32_t SPI_GPIO_Remap;//@ref SPIx_IO_Reamp
+	uint32_t SPI_GPIO_Remap;// @ref SPIx_IO_Reamp
 	SPI_InitTypeDef SPI_InitStruct;
-	GPIO_TypeDef* SPI_NSS_PORTx;
+	GPIO_TypeDef* SPI_NSS_PORTx;//NSS引脚无需输入，初始化时按SPIx的默认NSS配置
 	uint16_t SPI_NSS_PINx;
-	void (*SPI_NSS_LOW)(struct BSP_spix_TypeDef*);
-	void (*SPI_NSS_HIGH)(struct BSP_spix_TypeDef*);
 }BSP_SPIx_TypeDef;
 
 
-extern BSP_SPIx_TypeDef BSP_SPI1_Struct;
-extern BSP_SPIx_TypeDef BSP_SPI2_Struct;
-
-
+#define SPIx_NSS_LOW(A)				GPIO_ResetBits(A.SPI_NSS_PORTx, A.SPI_NSS_PINx)
+#define SPIx_NSS_HIGH(A)	 		GPIO_SetBits(A.SPI_NSS_PORTx, A.SPI_NSS_PINx)
 
 
 /* 标志代码 */
 #define SPIx_RET_Flag_OK  	        ((uint8_t)0x00)	//								  
 #define SPIx_RET_Flag_Init_Error  	((uint8_t)0x01)	//初始化错误
 
-
-#ifdef SPI1_IO_Reamp0
-#define SPI1_NSS_LOW()				GPIO_ResetBits(GPIOA, GPIO_Pin_4)
-#define SPI1_NSS_HIGH()	 			GPIO_SetBits(GPIOA, GPIO_Pin_4)
-#endif //SPI1_IO_Reamp0
-
-// #ifdef SPI1_IO_Reamp1
-// #define SPI1_NSS_LOW()				GPIO_ResetBits(GPIOA, GPIO_Pin_15)
-// #define SPI1_NSS_HIGH()	 			GPIO_SetBits(GPIOA, GPIO_Pin_15)
-// #endif //SPI1_IO_Reamp1
-
-#ifdef SPI2_IO_Reamp0
-#define SPI2_NSS_LOW()				GPIO_ResetBits(GPIOB, GPIO_Pin_12)
-#define SPI2_NSS_HIGH()	 			GPIO_SetBits(GPIOB, GPIO_Pin_12)
-#endif //SPI2_IO_Reamp0
-
-
-#if 0
-
-/**************************************SPI预设******************************************/
-#define USE_SPI1 //使用SPI1
-//#define USE_SPI2 //使用SPI2
-
-
-#define Master 1//定义为主机
-//#define Master 0//定义为从机
-
-#define NSS_Soft  1//NSS为软件控制
-//#define NSS_Soft  0//NSS为硬件控制
-
-#define SINGLE_LINE  1//定义单线
-//#define SINGLE_LINE  0//定义双线
-
-#if SINGLE_LINE
-	//#define SINGLE_LINE_ReadOnly 1 //定义单线读模式
-	#define SINGLE_LINE_ReadOnly 0 //定义单线写模式
-#endif /*SINGLE_LINE*/
-/****************************************************************************************/
-
-#ifdef USE_SPI1
-
-/***************************硬件SPI接口定义*******************************/
-#define SPI_NUM SPI1 //指定使用的SPI端口号
-#define SPI_CLK_PORT RCC_APB2Periph_SPI1//定义使用的SPI时钟端口
-#define SPI_CLKCMD_FUNC RCC_APB2PeriphClockCmd//定义使用的SPI时钟端口使能函数
-
-/***************************SPI的CS/NSS片选引脚定义*******************************/
-#define SPI_NSS_PORT GPIOA //NSS片选引脚端口
-#define SPI_NSS_PIN GPIO_Pin_4//NSS片选引脚
-#define SPI_NSS_CLK RCC_APB2Periph_GPIOA//定义使用的SPI时钟端口
-#define SPI_NSS_CLKCMD_FUNC RCC_APB2PeriphClockCmd//定义使用的NSS时钟端口使能函数
-
-/*************************SPI的NSS片选脚电平函数定义*****************************/
-#if Master
-	#define SPI_NSS_LOW() GPIO_ResetBits(SPI_NSS_PORT, SPI_NSS_PIN) //NSS片选引脚端口置0
-	#define SPI_NSS_HIGH() GPIO_SetBits(SPI_NSS_PORT, SPI_NSS_PIN) //NSS片选引脚端口置1
-#else
-	#define SPI_NSS_LOW() SPI_NSSInternalSoftwareConfig(SPI_NUM, SPI_NSSInternalSoft_Reset) //NSS片选引脚端口置0
-	#define SPI_NSS_HIGH() SPI_NSSInternalSoftwareConfig(SPI_NUM, SPI_NSSInternalSoft_Set) //NSS片选引脚端口置1
-#endif /*Master*/
-
-/***************************SPI的CK时钟引脚定义*******************************/
-#define SPI_CK_PORT GPIOA 
-#define SPI_CK_PIN GPIO_Pin_5
-#define SPI_CK_CLK RCC_APB2Periph_GPIOA
-#define SPI_CK_CLKCMD_FUNC RCC_APB2PeriphClockCmd
-
-/***************************SPI的MISO主收从发引脚定义*******************************/
-#define SPI_MISO_PORT GPIOA 
-#define SPI_MISO_PIN GPIO_Pin_6
-#define SPI_MISO_CLK RCC_APB2Periph_GPIOA
-#define SPI_MISO_CLKCMD_FUNC RCC_APB2PeriphClockCmd
-
-/***************************SPI的MOSI主发从收引脚定义*******************************/
-#define SPI_MOSI_PORT GPIOA 
-#define SPI_MOSI_PIN GPIO_Pin_7
-#define SPI_MOSI_CLK RCC_APB2Periph_GPIOA
-#define SPI_MOSI_CLKCMD_FUNC RCC_APB2PeriphClockCmd
-
-
-#endif //USE_SPI1
-
-#ifdef USE_SPI2
-/***************************硬件SPI接口定义*******************************/
-#define SPI_NUM SPI2 //指定使用的SPI端口号
-#define SPI_CLK_PORT RCC_APB1Periph_SPI2//定义使用的SPI时钟端口
-#define SPI_CLKCMD_FUNC RCC_APB1PeriphClockCmd//定义使用的SPI时钟端口使能函数
-
-/***************************SPI的CS/NSS片选引脚定义*******************************/
-#define SPI_NSS_PORT GPIOB //NSS片选引脚端口
-#define SPI_NSS_PIN GPIO_Pin_12//NSS片选引脚
-#define SPI_NSS_CLK RCC_APB2Periph_GPIOB//定义使用的SPI时钟端口
-#define SPI_NSS_CLKCMD_FUNC RCC_APB2PeriphClockCmd//定义使用的NSS时钟端口使能函数
-
-/*************************SPI的NSS片选脚电平函数定义*****************************/
-#if Master
-	#define SPI_NSS_LOW() GPIO_ResetBits(SPI_NSS_PORT, SPI_NSS_PIN) //NSS片选引脚端口置0
-	#define SPI_NSS_HIGH() GPIO_SetBits(SPI_NSS_PORT, SPI_NSS_PIN) //NSS片选引脚端口置1
-#else
-	#define SPI_NSS_LOW() SPI_NSSInternalSoftwareConfig(SPI_NUM, SPI_NSSInternalSoft_Reset) //NSS片选引脚端口置0
-	#define SPI_NSS_HIGH() SPI_NSSInternalSoftwareConfig(SPI_NUM, SPI_NSSInternalSoft_Set) //NSS片选引脚端口置1
-#endif /*Master*/
-
-/***************************SPI的CK时钟引脚定义*******************************/
-#define SPI_CK_PORT GPIOB 
-#define SPI_CK_PIN GPIO_Pin_13
-#define SPI_CK_CLK RCC_APB2Periph_GPIOB
-#define SPI_CK_CLKCMD_FUNC RCC_APB2PeriphClockCmd
-
-/***************************SPI的MISO主收从发引脚定义*******************************/
-#define SPI_MISO_PORT GPIOB 
-#define SPI_MISO_PIN GPIO_Pin_14
-#define SPI_MISO_CLK RCC_APB2Periph_GPIOB
-#define SPI_MISO_CLKCMD_FUNC RCC_APB2PeriphClockCmd
-
-/***************************SPI的MOSI主发从收引脚定义*******************************/
-#define SPI_MOSI_PORT GPIOB 
-#define SPI_MOSI_PIN GPIO_Pin_15
-#define SPI_MOSI_CLK RCC_APB2Periph_GPIOB
-#define SPI_MOSI_CLKCMD_FUNC RCC_APB2PeriphClockCmd
-
-#endif //USE_SPI2
-
-#endif //if 0
 
 /*等待超时时间*/
 #define SPIx_FLAG_TIMEOUT         ((uint32_t)0x1000)
@@ -239,8 +107,6 @@ void 		Spi_WriteByte	(uint8_t* WByte,uint8_t* RByte);
 uint8_t 	Spi_ReadByte	(uint8_t* WByte,uint8_t* RByte);
 #endif /*SINGLE_LINE*/
 
-void BSP_SPIx_NSS_STA_LOW(BSP_SPIx_TypeDef* BSP_SPIx_Struct);
-void BSP_SPIx_NSS_STA_HIGH(BSP_SPIx_TypeDef* BSP_SPIx_Struct);
 uint8_t BSP_SPIx_Init(BSP_SPIx_TypeDef* BSP_SPIx_Struct);
 // SPI_InitTypeDef BSP_SPIxStructInit(uint16_t SPI_Mode, uint16_t SPI_Direction, uint16_t SPI_NSS, uint8_t SPI_SSOE, uint16_t SPI_CPOL, 
 // 								   uint16_t SPI_CPHA, uint16_t SPI_FirstBit, uint16_t SPI_BaudRatePrescaler, uint16_t SPI_DataSize);

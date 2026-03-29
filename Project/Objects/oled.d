@@ -33,14 +33,6 @@
 .\objects\oled.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\objects\oled.o: ..\Libraries\IIC\bsp_iic.h
 .\objects\oled.o: ..\Libraries\UART\bsp_usart.h
-.\objects\oled.o: ..\User\main.h
 .\objects\oled.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
-.\objects\oled.o: ..\Libraries\GPIO\bsp_gpio.h
-.\objects\oled.o: ..\User\main.h
-.\objects\oled.o: ..\Libraries\LED\bsp_led.h
-.\objects\oled.o: ..\Libraries\UART\bsp_usart.h
-.\objects\oled.o: ..\Libraries\IIC\bsp_hard_i2c.h
-.\objects\oled.o: ..\Libraries\KEY\bsp_key.h
-.\objects\oled.o: ..\Libraries\ADC\bsp_adc.h
 .\objects\oled.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\oled.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

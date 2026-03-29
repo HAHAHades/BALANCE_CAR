@@ -1,171 +1,21 @@
 
 #include "bsp_spi.h"
+#include "bsp_gpio.h"
 
-
-#if 0
-void BSP_SPI_Init(void)
-{
-	SPI_InitTypeDef SPI_InitStruct;
-	GPIO_InitTypeDef GPIO_InitStruct;
-	
-	
-	/******************************GPIO配置***********************************/
-	//模式配置见参考手册（通用复用功能I/O）
-	/*NSS引脚*/
-	SPI_NSS_CLKCMD_FUNC(SPI_NSS_CLK,ENABLE);//打开NSS引脚端口时钟
-	
-	#if Master //主机
-		#if NSS_Soft //选择NSS控制方式
-			GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;//选择NSS为软件控制
-		#else
-			GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;//选择NSS为硬件控制
-		#endif /*NSS_Soft*/
-	#else //从机
-		#if NSS_Soft //选择NSS控制方式
-			GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;//选择NSS为软件控制（暂无）
-		#else
-			GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;//选择NSS为硬件控制
-		#endif /*NSS_Soft*/
-	#endif /*Master*/
-	
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStruct.GPIO_Pin = SPI_NSS_PIN;
-	GPIO_Init(SPI_NSS_PORT, &GPIO_InitStruct);//将配置的NSS引脚参数写入寄存器
-	
-	/*CK引脚*/
-	SPI_CK_CLKCMD_FUNC(SPI_CK_CLK,ENABLE);//打开CK引脚端口时钟
-	#if Master //主机
-		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
-	#else //从机
-		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	#endif /*Master*/
-	//GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStruct.GPIO_Pin = SPI_CK_PIN;
-	GPIO_Init(SPI_CK_PORT, &GPIO_InitStruct);//将配置的NSS引脚参数写入寄存器
-	
-	/*MISO引脚*/
-	SPI_MISO_CLKCMD_FUNC(SPI_MISO_CLK,ENABLE);//打开MISO引脚端口时钟
-	#if Master //主机
-		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	#else //从机
-		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
-	#endif /*Master*/
-	//GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStruct.GPIO_Pin = SPI_MISO_PIN;
-	GPIO_Init(SPI_MISO_PORT, &GPIO_InitStruct);//将配置的MISO引脚参数写入寄存器
-	
-	/*MOSI引脚*/
-	SPI_MOSI_CLKCMD_FUNC(SPI_MOSI_CLK,ENABLE);//打开MOSI引脚端口时钟
-	#if Master //主机
-		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
-	#else //从机
-		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	#endif /*Master*/
-	//GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStruct.GPIO_Pin = SPI_MOSI_PIN;
-	GPIO_Init(SPI_MOSI_PORT, &GPIO_InitStruct);//将配置的MISO引脚参数写入寄存器
-	
-	
-	/******************************SPI配置************************************/
-	SPI_CLKCMD_FUNC(SPI_CLK_PORT,ENABLE);//打开SPI外设时钟
-	
-	#if SINGLE_LINE //单线模式
-		SPI_InitStruct.SPI_Direction = SPI_Direction_1Line_Tx ;//定义SPI数据收发方向| SPI_Direction_1Line_Rx
-	#else
-		SPI_InitStruct.SPI_Direction = SPI_Direction_2Lines_FullDuplex;//定义SPI数据收发方向
-	#endif /*SINGLE_LINE*/
-	
-	#if Master //主机模式
-		SPI_InitStruct.SPI_Mode = SPI_Mode_Master;//选择SPI主
-	#else
-		SPI_InitStruct.SPI_Mode = SPI_Mode_Slave;//选择SPI从
-	#endif /*Master*/
-	
-	#if NSS_Soft //选择NSS控制方式
-		SPI_InitStruct.SPI_NSS = SPI_NSS_Soft;//选择NSS为软件控制
-	#else
-		SPI_InitStruct.SPI_NSS = SPI_NSS_Hard;//选择NSS为硬件控制
-	#endif /*NSS_Soft*/
-	
-	SPI_InitStruct.SPI_DataSize = SPI_DataSize_8b;//选择单次收发数据大小
-	SPI_InitStruct.SPI_CPOL = SPI_CPOL_High;//选择时钟极性(空闲时钟电平)
-	SPI_InitStruct.SPI_CPHA = SPI_CPHA_2Edge;//选择时钟相位(数据奇边沿采样还是偶边沿采样)
-	SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;//设置波特率分频因子
-	SPI_InitStruct.SPI_FirstBit = SPI_FirstBit_MSB;//设置先发低字节还是高字节
-	SPI_InitStruct.SPI_CRCPolynomial = 0;//指定CRC校验的多项式，本实验不校验数据，多项式随便写
-	
-	SPI_Init(SPI_NUM, &SPI_InitStruct);//将配置的SPI参数写入寄存器
-	
-
-	
-	#if SINGLE_LINE //单线模式
-		#if SINGLE_LINE_ReadOnly //单线只读
-			SPI_BiDirectionalLineConfig(SPI_NUM, SPI_Direction_Rx);
-		#else //单线只写
-			SPI_BiDirectionalLineConfig(SPI_NUM, SPI_Direction_Tx);
-		#endif /*SINGLE_LINE_ReadOnly*/
-	#endif /*SINGLE_LINE*/
-	
-	#if Master //主机模式
-	SPI_NSS_HIGH();//取消选择从机
-	#endif /*Master*/
-
-	SPI_Cmd(SPI_NUM, DISABLE);
-	//SPI_Cmd(SPI_NUM, ENABLE);
-	
-	/******************配置中断******************/
-//	SPI_NVIC_Config();//中断配置
-//	SPI_I2S_ITConfig(SPI_NUM, SPI_I2S_IT_RXNE, DISABLE);//关闭接收中断
-//	SPI_I2S_ITConfig(SPI_NUM, SPI_I2S_IT_TXE, DISABLE);//关闭发送中断
-}	
-
-//static void SPI_NVIC_Config(void)
-//{
-//	NVIC_InitTypeDef NVIC_InitStruct;
-//	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//选择中断优先级分组
-//	
-//	NVIC_InitStruct.NVIC_IRQChannel = SPI1_IRQn;
-//	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;
-//	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 2;
-//	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-//	
-//	NVIC_Init(&NVIC_InitStruct);
-//}
-
-#endif //if 0
-
-
-BSP_SPIx_TypeDef BSP_SPI1_Struct;
-BSP_SPIx_TypeDef BSP_SPI2_Struct;
 
 void SPI_UsageDemo()
 {
+	BSP_SPIx_TypeDef  BSP_SPI1_Struct;
+
 	BSP_SPI1_Struct.SPIx = SPI1;
 	BSP_SPI1_Struct.SPI_GPIO_Remap = SPI1_IO_Reamp0;
 	BSP_SPI1_Struct.SPI_InitStruct = BSP_SPIxStructInit( SPI_Mode_Master,  SPI_Direction_2Lines_FullDuplex);
 	BSP_SPIx_Init( &BSP_SPI1_Struct);
-
 }
-
-
-
-void BSP_SPIx_NSS_STA_LOW(BSP_SPIx_TypeDef* BSP_SPIx_Struct)
-{
-	GPIO_ResetBits(BSP_SPIx_Struct->SPI_NSS_PORTx, BSP_SPIx_Struct->SPI_NSS_PINx);
-
-}
-void BSP_SPIx_NSS_STA_HIGH(BSP_SPIx_TypeDef* BSP_SPIx_Struct)
-{
-	GPIO_SetBits(BSP_SPIx_Struct->SPI_NSS_PORTx, BSP_SPIx_Struct->SPI_NSS_PINx);
-
-}
-
 
 /**
   * @brief   SPI 初始化
-  * @param   SPIx:  要使用的SPIx
-  * @param   SPI_InitStruct:  SPIx的配置
-  * @param   SPI_GPIO_Remap:  IO重映射 @ref SPIx_IO_Reamp
+  * @param   BSP_SPIx_Struct[IN/OUT]:  需要配置的SPIx
   * @retval  
   *		@arg SPIx_RET_Flag_OK:初始化成功
   *		@arg other:初始化失败
@@ -177,8 +27,6 @@ uint8_t BSP_SPIx_Init(BSP_SPIx_TypeDef* BSP_SPIx_Struct)
 	
 	uint32_t SPIx_RCC_APBxPeriph_CLK;//SPI外设时钟，spi2/3 APB1  spi1/4/5/6 APB2
 
-	BSP_SPIx_Struct->SPI_NSS_HIGH = BSP_SPIx_NSS_STA_HIGH;
-	BSP_SPIx_Struct->SPI_NSS_LOW = BSP_SPIx_NSS_STA_LOW;
 
 	GPIO_TypeDef* SPI_NSS_PORTx;
 	uint16_t SPI_NSS_PINx;
@@ -258,6 +106,8 @@ uint8_t BSP_SPIx_Init(BSP_SPIx_TypeDef* BSP_SPIx_Struct)
 	{
 		retVal = SPIx_RET_Flag_Init_Error;
 	}
+
+
 
 	SPIx_RCC_APBxPeriphClockCmd(SPIx_RCC_APBxPeriph_CLK, ENABLE);
 	SPI_Cmd(BSP_SPIx_Struct->SPIx, DISABLE);
@@ -369,9 +219,9 @@ SPI_InitTypeDef BSP_SPIxStructInit(uint16_t SPI_Mode, uint16_t SPI_Direction)
 	SPI_InitStruct.SPI_Direction = SPI_Direction;
 	SPI_InitStruct.SPI_NSS = SPI_NSS_Soft;//选择NSS为软件控制
 	SPI_InitStruct.SPI_DataSize = SPI_DataSize_8b;//选择单次收发数据大小
-	SPI_InitStruct.SPI_CPOL = SPI_CPOL_High;//选择时钟极性(空闲时钟电平)
-	SPI_InitStruct.SPI_CPHA = SPI_CPHA_2Edge;//选择时钟相位(数据奇边沿采样还是偶边沿采样)
-	SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;//设置波特率分频因子
+	SPI_InitStruct.SPI_CPOL = SPI_CPOL_Low;//选择时钟极性(空闲时钟电平)
+	SPI_InitStruct.SPI_CPHA = SPI_CPHA_1Edge;//选择时钟相位(数据奇边沿采样还是偶边沿采样)
+	SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;//设置波特率分频因子
 	SPI_InitStruct.SPI_FirstBit = SPI_FirstBit_MSB;//设置先发低字节还是高字节
 	SPI_InitStruct.SPI_CRCPolynomial = 0;//指定CRC校验的多项式，本实验不校验数据，多项式随便写
 	
@@ -383,7 +233,7 @@ SPI_InitTypeDef BSP_SPIxStructInit(uint16_t SPI_Mode, uint16_t SPI_Direction)
   * @brief   SPIx双线模式读写数据,无片选
   * @param   SPIx：需要操作的SPI：SPI1/2/3
   * @param   WByte ：需要发送的数据
-  * @param[OUT]   RByte ：读取的数据
+  * @param   RByte[OUT] ：读取的数据
   * @param   ByteLen ：读写的数据长度
   * @retval  读写状态
   *		@arg 0 ： 成功

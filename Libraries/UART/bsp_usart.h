@@ -1,7 +1,7 @@
 #ifndef _BSP_USART_H
 #define _BSP_USART_H
 
-#include "main.h"
+#include "stm32f10x.h"
 #include "stdio.h"
 
 /*                  USARTx_IO_Reamp 对照表
@@ -16,7 +16,7 @@ USART6       --      --      C6       C7      C8       USART6_IO_Reamp0
 USART6       --      --      A11      A12     C8       USART6_IO_Reamp1
 
 */
-# define DEBUG_USART   USART1
+# define DEBUG_USART   USART2
 
 # define USART_DEBUG  DEBUG_USART
 # define  DEBUG_USARTx DEBUG_USART
@@ -91,14 +91,14 @@ extern u8 USART_RX_BUF6[USART_REC_LEN6];//保存接收的数据
 
 /***************函数申明***************/
 
-#ifdef BSP_USE_F103
+#if 1
 
 USART_InitTypeDef BSP_USARTxStructInit(uint32_t BaudRate);
 void BSP_USARTx_Init(USART_TypeDef *USARTx, USART_InitTypeDef USART_InitStruct, uint32_t IO_Reamp);
 
 #endif //BSP_USE_F103
 
-#ifdef BSP_USE_F401
+#if 0
 void BSP_USARTx_Init(USART_TypeDef *USARTx, USART_InitTypeDef USART_InitStruct, uint32_t IO_Reamp);
 #endif //BSP_USE_F401
 

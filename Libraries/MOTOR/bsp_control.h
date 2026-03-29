@@ -6,8 +6,8 @@
 #include "mpu6050.h"
 
 
-extern int32_t G_BSPCTRL_TargetSpeed ;//????
-extern int32_t G_BSPCTRL_TurnSpeed ;//??????????????
+extern int32_t G_BSPCTRL_TargetSpeed ;//前后速度
+extern int32_t G_BSPCTRL_TurnSpeed ;//转向速度，正为左转，负为右转
 
 
 

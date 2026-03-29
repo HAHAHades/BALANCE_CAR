@@ -31,16 +31,7 @@
 .\objects\bsp_control.o: ..\Libraries\FWlib\inc\misc.h
 .\objects\bsp_control.o: ..\Libraries\MPU6050\mpu6050.h
 .\objects\bsp_control.o: ..\Libraries\UART\bsp_usart.h
-.\objects\bsp_control.o: ..\User\main.h
 .\objects\bsp_control.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
-.\objects\bsp_control.o: ..\Libraries\SysTick\bsp_SysTick.h
-.\objects\bsp_control.o: ..\Libraries\GPIO\bsp_gpio.h
-.\objects\bsp_control.o: ..\User\main.h
-.\objects\bsp_control.o: ..\Libraries\LED\bsp_led.h
-.\objects\bsp_control.o: ..\Libraries\UART\bsp_usart.h
-.\objects\bsp_control.o: ..\Libraries\IIC\bsp_hard_i2c.h
-.\objects\bsp_control.o: ..\Libraries\KEY\bsp_key.h
-.\objects\bsp_control.o: ..\Libraries\ADC\bsp_adc.h
 .\objects\bsp_control.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\bsp_control.o: ..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu_dmp_motion_driver.h
 .\objects\bsp_control.o: ..\Libraries\MPU6050\Middlewares\mllite\invensense.h
@@ -76,6 +67,7 @@
 .\objects\bsp_control.o: ..\Libraries\MPU6050\Middlewares\mpl\no_gyro_fusion.h
 .\objects\bsp_control.o: ..\Libraries\MPU6050\Middlewares\mpl\quaternion_supervisor.h
 .\objects\bsp_control.o: ..\Libraries\MPU6050\Middlewares\eMPL-hal\eMPL_outputs.h
+.\objects\bsp_control.o: ..\Libraries\SysTick\bsp_SysTick.h
 .\objects\bsp_control.o: ..\Libraries\MOTOR\bsp_520Motor.h
 .\objects\bsp_control.o: ..\Libraries\TIM\bsp_encoder.h
 .\objects\bsp_control.o: ..\Libraries\TIM\bsp_tim.h

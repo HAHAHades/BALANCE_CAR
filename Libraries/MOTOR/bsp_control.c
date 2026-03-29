@@ -1,6 +1,6 @@
 #include "bsp_control.h"//板级支持包board support package\
                       仅支持某一个或一批同样的开发板
-					  		  
+#include "bsp_SysTick.h"  		  
 #include "bsp_520Motor.h"
 #include "bsp_encoder.h"
 

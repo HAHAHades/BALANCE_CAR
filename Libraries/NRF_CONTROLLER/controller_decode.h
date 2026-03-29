@@ -3,14 +3,18 @@
 
 #include "stm32f10x.h"
 #include "bsp_key.h"
-#include "nrf_controller.h"
 
 /* 小车遥控器解码 */
+
+#define NRF_CTRL_ON 1
 
 /*******************************************************/
 #define CTRL_DECODE_SpeedIncrement 10 //小车速度单次增量(百分比)
 #define CTRL_DECODE_DIRSpeedLimit  10 //转弯限速倍数(速度=原速/CTRL_DECODE_DIRSpeedLimit)
 #define CTRL_DECODE_SpeedLimit     3 //直行限速倍数(速度=原速/CTRL_DECODE_SpeedLimit)
+
+#define CTRL_DECODE_POTDataRatio  16 //电位计按键控制比，  电位计输出数值 : 实际要控制数值
+
 
 /* 按键重定义 */
 //单击/长按
@@ -50,6 +54,12 @@
 
 
 /*函数声明*/
+
+
+
+uint8_t CTRL_M_DECODE_CopeKeyFIFO(KEY_FIFO_t* Keys, uint8_t keys_num, uint8_t* Msg);
+uint8_t CTRL_S_DECODE_CopeKeyFIFO(uint8_t* Msg);
+void CTRL_DECODE_PackMSG(uint8_t index, uint8_t* Msg, uint8_t* Package);
 void CTRL_DECODE_CopeCmdKeyMsg(uint8_t* Keys, uint8_t keys_num);
 void CTRL_DECODE_ModifyWheel(int32_t Lw, int32_t Rw);
 void CTRL_DECODE_ResetWheelSpeed(void);

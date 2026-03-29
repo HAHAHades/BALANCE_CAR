@@ -39,12 +39,3 @@
 .\objects\log_stm32.o: ..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 .\objects\log_stm32.o: ..\Libraries\FWlib\inc\misc.h
 .\objects\log_stm32.o: ..\Libraries\UART\bsp_usart.h
-.\objects\log_stm32.o: ..\User\main.h
-.\objects\log_stm32.o: ..\Libraries\SysTick\bsp_SysTick.h
-.\objects\log_stm32.o: ..\Libraries\GPIO\bsp_gpio.h
-.\objects\log_stm32.o: ..\User\main.h
-.\objects\log_stm32.o: ..\Libraries\LED\bsp_led.h
-.\objects\log_stm32.o: ..\Libraries\UART\bsp_usart.h
-.\objects\log_stm32.o: ..\Libraries\IIC\bsp_hard_i2c.h
-.\objects\log_stm32.o: ..\Libraries\KEY\bsp_key.h
-.\objects\log_stm32.o: ..\Libraries\ADC\bsp_adc.h

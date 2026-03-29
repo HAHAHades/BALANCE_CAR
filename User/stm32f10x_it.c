@@ -135,19 +135,6 @@ void PendSV_Handler(void)
 #include "main.h"
 #include "bsp_SysTick.h"
 
-
-/* 执行任务标志：读取MPU6050数据 */
-// - 标志置 1表示读取MPU6050数据完成，需要在主循环处理MPU6050数据
-// - 标志置 0表示未完成读取MPU6050数据，需要在中断中读取MPU6050数据
-int task_readdata_finish;
-// 声明外部变量
-// extern short Accel[3];
-// extern short Gyro[3];
-// extern float Temp;
-//nrf_controller.c/h
-#define NRF_CTRL_ON 0 //是否使用NRF遥控器
-extern void NRF_CTRL_TickIncrease(void);
-
 /**
   * @brief  This function handles SysTick Handler.
   * @param  None
@@ -157,13 +144,7 @@ void SysTick_Handler(void)
 {
   TimingDelay_Decrement();
   TimeStamp_Increment();
-// #if KEY_TEST_ON
-//   KeyTesks_SysTick_Handler();
 
-// #endif //KEY_TEST_ON
-// #if NRF_CTRL_ON
-//   NRF_CTRL_TickIncrease();
-// #endif //NRF_CTRL_ON
 }
 
 
@@ -202,21 +183,13 @@ void USART2_IRQHandler(void)
 
 #endif //USART_Print_ON
 
+#include "nrf24l01p.h"
 
 void EXTI0_IRQHandler(void)
 {
 
-// #if Use_Default_Pin_Config
-// 	NRF24L01_IRQ_Handler();
-// #endif //!Use_Default_Pin_Config
+  NRF24L01_IRQ_Handler(G_NRF_HardStruct_ForEXTI0);
 
-	if(EXTI_GetITStatus(EXTI_Line0) !=RESET )//判断是否进入中断，若进入中断则执行后面的中断程序
-	{
-		/**********************中断程序*********************/
-
-		/**************************************************/
-	}
-	EXTI_ClearITPendingBit(EXTI_Line0);//完成中断后清除中断标志位
 }
 
 

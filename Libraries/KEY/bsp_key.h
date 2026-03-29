@@ -38,7 +38,7 @@
 
 #define KEY_FIFO_DUMMY 0
 #define KEY_BUTTON_FIFO_MASK  ((uint32_t)0x0000ffff) //电位计和按键共用FIFO，按键FIFO只有低16位有效
-#define KEY_POT_FIFO_FLAG  ((uint32_t)0x40000000) //电位计FIFO bit30为1,除去bit30外其他位表示百分比
+#define KEY_POT_FIFO_FLAG  ((uint32_t)0x40000000) //电位计FIFO bit30为1,
 #define KEY_POT_FIFO_MASK  ((uint32_t)0x0000ffff) //电位计FIFO bit30为1,bit0-bit15为int16数据
 #define KEY_POT_FIFO_I_MASK  ((uint32_t)0x00ff0000) //电位计FIFO bit30为1,bit0-bit15为int16数据,bit16-bit23为u8索引
 #define KEY_POT_FIFO_I_BIT_S  16 //电位计索引起始bit位

@@ -2,10 +2,9 @@
 
 #ifndef _BSP_TIME_H_
 #define _BSP_TIME_H_
-#include "bsp_tim.h"
 
 #include "stm32f10x.h"
-
+#include "bsp_tim.h"
 /*******注意，如果使用TIM3的CH1或CH3等的映射引脚，GPIO需要重映射,使用GPIO_PinRemapConfig()********/
 //注意，C6T6没有TIM4
 //库函数SYSCLK为72M,AHB分频为1,APB1为36M分频为2,TIM2-TIM7为36*2=72M

@@ -4,6 +4,16 @@
         "bsp_hc_sr04.h": "c",
         "inv_mpu.h": "c",
         "main.h": "c",
-        "bsp_key.h": "c"
+        "bsp_key.h": "c",
+        "bsp_usart.h": "c",
+        "stm32f10x.h": "c",
+        "bsp_systick.h": "c",
+        "bsp_gpio.h": "c",
+        "bsp_led.h": "c",
+        "nrf_controller.h": "c",
+        "nrf24l01p.h": "c",
+        "controller_decode.h": "c",
+        "bsp_encoder.h": "c",
+        "bsp_exti.h": "c"
     }
 }

@@ -17,6 +17,8 @@
 
 
 #include "mpu6050.h"
+#include "bsp_SysTick.h"
+
 
 float  G_Euler_RPY[3];//Å·À­½Ç
 float  G_GYRO_XYZ[3];//½ÇËÙ¶È

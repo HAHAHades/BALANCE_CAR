@@ -31,14 +31,9 @@
 .\objects\controller_decode.o: ..\Libraries\FWlib\inc\misc.h
 .\objects\controller_decode.o: ..\Libraries\KEY\bsp_key.h
 .\objects\controller_decode.o: ..\Libraries\UART\bsp_usart.h
-.\objects\controller_decode.o: ..\User\main.h
 .\objects\controller_decode.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
-.\objects\controller_decode.o: ..\Libraries\SysTick\bsp_SysTick.h
-.\objects\controller_decode.o: ..\Libraries\GPIO\bsp_gpio.h
-.\objects\controller_decode.o: ..\User\main.h
-.\objects\controller_decode.o: ..\Libraries\LED\bsp_led.h
-.\objects\controller_decode.o: ..\Libraries\UART\bsp_usart.h
-.\objects\controller_decode.o: ..\Libraries\IIC\bsp_hard_i2c.h
-.\objects\controller_decode.o: ..\Libraries\KEY\bsp_key.h
 .\objects\controller_decode.o: ..\Libraries\ADC\bsp_adc.h
+.\objects\controller_decode.o: ..\Libraries\SysTick\bsp_SysTick.h
 .\objects\controller_decode.o: ..\Libraries\NRF_CONTROLLER\nrf_controller.h
+.\objects\controller_decode.o: ..\Libraries\NRF24L01P\nrf24l01p.h
+.\objects\controller_decode.o: ..\Libraries\SPI\bsp_spi.h

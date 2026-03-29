@@ -30,16 +30,7 @@
 .\objects\mpu6050.o: ..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 .\objects\mpu6050.o: ..\Libraries\FWlib\inc\misc.h
 .\objects\mpu6050.o: ..\Libraries\UART\bsp_usart.h
-.\objects\mpu6050.o: ..\User\main.h
 .\objects\mpu6050.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
-.\objects\mpu6050.o: ..\Libraries\SysTick\bsp_SysTick.h
-.\objects\mpu6050.o: ..\Libraries\GPIO\bsp_gpio.h
-.\objects\mpu6050.o: ..\User\main.h
-.\objects\mpu6050.o: ..\Libraries\LED\bsp_led.h
-.\objects\mpu6050.o: ..\Libraries\UART\bsp_usart.h
-.\objects\mpu6050.o: ..\Libraries\IIC\bsp_hard_i2c.h
-.\objects\mpu6050.o: ..\Libraries\KEY\bsp_key.h
-.\objects\mpu6050.o: ..\Libraries\ADC\bsp_adc.h
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu_dmp_motion_driver.h
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\mllite\invensense.h
@@ -75,5 +66,6 @@
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\mpl\no_gyro_fusion.h
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\mpl\quaternion_supervisor.h
 .\objects\mpu6050.o: ..\Libraries\MPU6050\Middlewares\eMPL-hal\eMPL_outputs.h
+.\objects\mpu6050.o: ..\Libraries\SysTick\bsp_SysTick.h
 .\objects\mpu6050.o: ..\Libraries\IIC\bsp_soft_i2c.h
 .\objects\mpu6050.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\inttypes.h

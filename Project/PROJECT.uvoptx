@@ -152,9 +152,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>188</LineNumber>
+          <LineNumber>240</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134229944</Address>
+          <Address>134259506</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -163,44 +163,28 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\User\main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\PROJECT\../User/main.c\188</Expression>
+          <Expression>\\PROJECT\../User/main.c\240</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>139</LineNumber>
+          <LineNumber>167</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134222198</Address>
+          <Address>134259380</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Libraries\KEY\bsp_key.c</Filename>
+          <Filename>..\User\main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\\../Libraries/KEY/bsp_key.c\139</Expression>
+          <Expression>\\PROJECT\../User/main.c\167</Expression>
         </Bp>
         <Bp>
           <Number>2</Number>
           <Type>0</Type>
-          <LineNumber>799</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134224768</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Libraries\KEY\bsp_key.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\PROJECT\../Libraries/KEY/bsp_key.c\799</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>224</LineNumber>
+          <LineNumber>389</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -209,7 +193,7 @@
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>0</BreakIfRCount>
-          <Filename>..\User\main.c</Filename>
+          <Filename>..\Libraries\NRF_CONTROLLER\nrf_controller.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression></Expression>
         </Bp>
@@ -295,52 +279,47 @@
         <Ww>
           <count>0</count>
           <WinNumber>2</WinNumber>
-          <ItemText>SG_KEY_ButtonPressFlag</ItemText>
+          <ItemText>NRF_HardStruct</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>2</WinNumber>
-          <ItemText>SG_KEY_CombPressFlag</ItemText>
+          <ItemText>NRF_HardStruct</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>2</WinNumber>
-          <ItemText>SG_KEY_Registered_Button_Count</ItemText>
+          <ItemText>G_NRF_HardStruct_ForEXTI0</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>2</WinNumber>
-          <ItemText>SG_KEY_Registered_Comb_Count</ItemText>
+          <ItemText>NRF_HardStruct</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>2</WinNumber>
-          <ItemText>SG_KEY_ButtonStruct_List</ItemText>
+          <ItemText>msg</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>2</WinNumber>
-          <ItemText>SG_KEY_CombStruct_List</ItemText>
+          <ItemText>Msg</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>2</WinNumber>
-          <ItemText>SG_KeyCBFlagFIFO</ItemText>
+          <ItemText>NRF_HardStruct</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>2</WinNumber>
-          <ItemText>SG_KEY_CombStruct_List[1]</ItemText>
+          <ItemText>NRF_HardStruct</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>2</WinNumber>
-          <ItemText>Flag</ItemText>
-        </Ww>
-        <Ww>
-          <count>9</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>SG_KeyPotStruct_List[i]</ItemText>
+          <ItemText>NRF_HardStruct</ItemText>
         </Ww>
       </WatchWindow2>
       <Tracepoint>

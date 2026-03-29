@@ -77,7 +77,6 @@ void BSP_KEY_UsageDemo(void)
 	KEY_Pot_StructInit(&PotStruct, ADC1,  ADC_Channel_3);
 	BSP_KEY_Pot_Register(3,  PotStruct);
 
-
 	BSP_KEY_GpioConfig();
 
 

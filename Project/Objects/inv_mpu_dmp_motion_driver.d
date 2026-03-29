@@ -38,15 +38,6 @@
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\FWlib\inc\stm32f10x_wwdg.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\FWlib\inc\misc.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\UART\bsp_usart.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\User\main.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\SysTick\bsp_SysTick.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\GPIO\bsp_gpio.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\User\main.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\LED\bsp_led.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\UART\bsp_usart.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\IIC\bsp_hard_i2c.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\KEY\bsp_key.h
-.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\ADC\bsp_adc.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\MPU6050\Middlewares\mllite\invensense.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\MPU6050\Middlewares\mllite\data_builder.h
@@ -77,3 +68,4 @@
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\MPU6050\Middlewares\mpl\no_gyro_fusion.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\MPU6050\Middlewares\mpl\quaternion_supervisor.h
 .\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\MPU6050\Middlewares\eMPL-hal\eMPL_outputs.h
+.\objects\inv_mpu_dmp_motion_driver.o: ..\Libraries\SysTick\bsp_SysTick.h
