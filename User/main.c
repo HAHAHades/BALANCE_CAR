@@ -175,7 +175,14 @@ int main(void)
 		SisTic_Delay_ms(500);
 	}
 	
-#if NRF_CTRL_ON
+
+	NRF_Controller_UsageDemo();
+	while (1)
+	{
+		/* code */
+	}
+	
+#if 0
 	if (NRF_Controller_Config())
 	{
 		LED_ON(1);

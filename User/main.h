@@ -15,13 +15,13 @@
 #define OLED_SHOW_Encoder_Speed 0 //OLED 显示编码器信息
 #define HC_SR04_ON 0 //是否开启声波测距
 #define Motor_DEBUG 0 //调试电机
-#define CONTROL_CAR_IN_IT  1 // 是否在中断中控制小车，在主函数里控制小车无法同时做其他事情，如刷新OLED等
-#define BANLANCE_CAR_ON 1 //平衡车测试
+#define CONTROL_CAR_IN_IT  0 // 是否在中断中控制小车，在主函数里控制小车无法同时做其他事情，如刷新OLED等
+#define BANLANCE_CAR_ON 0 //平衡车测试
 #define NRF_CTRL_ON 1 //是否使用NRF遥控器
 #define NRF_CTRL_M_ON 0 //是否使用主控器 会屏蔽其他配置
 #define TIMx_TIME_ON 0
 #define TIMx_ENCODER_ON 0
-#define MPU_ON 1
+#define MPU_ON 0
 #define MPU_GetEuler_IN_IT  0  //在中断中读取MPU数据 仅调试用
 #define USART_DEBUG_MPU 0 //USART 输出mpu数据
 #define USART_Print_IN_IT_ON 0 //USART 在中断中输出，(中断频率过高可能导致系统卡死)

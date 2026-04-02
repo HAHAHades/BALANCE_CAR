@@ -307,7 +307,7 @@ uint8_t NRF_W_nByte(uint8_t Reg, uint8_t* WDataBuf, uint8_t n, NRF24L01P_Hard_Ty
 uint8_t NRF_R_nByte(uint8_t Reg, uint8_t* RDataBuf, uint8_t n, NRF24L01P_Hard_Typedef* NRF_HardStruct);
 
 void NRF24L01_IRQ_Handler(NRF24L01P_Hard_Typedef* NRF_HardStruct);
-
+uint8_t NRF_TXRX_TEST_WithAckDataA(NRF24L01P_Hard_Typedef* NRF_HardStruct, uint32_t time_out);
 
 uint8_t NRF24L01_TxPacket(uint8_t* TxBuf, uint32_t time_out, NRF24L01P_Hard_Typedef* NRF_HardStruct);
 uint8_t NRF24L01_RxPacket(uint8_t* RxBuf, uint32_t time_out, NRF24L01P_Hard_Typedef* NRF_HardStruct);

@@ -16,7 +16,7 @@ USART6       --      --      C6       C7      C8       USART6_IO_Reamp0
 USART6       --      --      A11      A12     C8       USART6_IO_Reamp1
 
 */
-# define DEBUG_USART   USART2
+# define DEBUG_USART   USART1
 
 # define USART_DEBUG  DEBUG_USART
 # define  DEBUG_USARTx DEBUG_USART

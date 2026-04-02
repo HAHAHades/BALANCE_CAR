@@ -89,7 +89,7 @@ void NRF_Controller_UsageDemo(void)
       NRF_CTRL_DEBUG("NRF24L01P_Init Failed!");
       return;
     }
-    tmpR = NRF_TXRX_TEST( &SG_NRF_CTRL_NRF_HardStruct, 10000 );
+    tmpR = NRF_TXRX_TEST_WithAckData( &SG_NRF_CTRL_NRF_HardStruct, 10000 );
 
     if (tmpR)
     {
@@ -187,7 +187,7 @@ void NRF_Controller_UsageDemo(void)
       return;
     }
 
-    tmpR = NRF_TXRX_TEST( &SG_NRF_CTRL_NRF_HardStruct, 10000);//测试主控与被控端通信是否异常
+    tmpR = NRF_TXRX_TEST_WithAckData( &SG_NRF_CTRL_NRF_HardStruct, 10000);//测试主控与被控端通信是否异常
     if (tmpR)
     {
       NRF_CTRL_DEBUG("NRF_TXRX_TEST successful!");

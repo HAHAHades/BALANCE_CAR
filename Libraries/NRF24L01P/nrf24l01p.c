@@ -112,6 +112,7 @@ uint8_t NRF_HardStruct_Init(NRF24L01P_Hard_Typedef* NRF_HardStruct, NRF_WorkMode
 	uint8_t rVal = 0;
 
 	NRF_HardStruct->WorkMode = WorkMode;
+	NRF_HardStruct->AckPay = AckPay;
 	NRF_HardStruct->BSP_SPIX_Struct.SPIx = SPIx;
 	NRF_HardStruct->BSP_SPIX_Struct.SPI_GPIO_Remap = SPI_GPIO_Remap;
 	NRF_HardStruct->BSP_SPIX_Struct.SPI_InitStruct = BSP_SPIxStructInit( SPI_Mode_Master,  SPI_Direction_2Lines_FullDuplex);;
@@ -206,7 +207,7 @@ void NRF24L01_RX_ModeConfig(uint8_t f, NRF24L01P_Hard_Typedef* NRF_HardStruct)
 	NRF_W_nByte(NRF_WRITE_REG_CMD +RX_ADDR_P0, (uint8_t*)NRFRX_RX_ADDRESS_0, RX_ADDRESS_WIDTH, NRF_HardStruct);//设置数据接收管道P0的接收地址
 	NRF_W_Reg(NRF_WRITE_REG_CMD |EN_AA, 0x01, NRF_HardStruct);//使能通道0的自动应答
 	NRF_W_Reg(NRF_WRITE_REG_CMD |EN_RXADDR, 0x01, NRF_HardStruct);//使能通道0的接收地址
-	NRF_W_Reg(0x75,SETUP_RETR, NRF_HardStruct);//设置自动重发间隔2000us，自动重发次数5次, xy(H)高4位为延迟时间=(x+1)*250us; 低4位为重发次数y
+	NRF_W_Reg(NRF_WRITE_REG_CMD |SETUP_RETR, 0x75, NRF_HardStruct);//设置自动重发间隔2000us，自动重发次数5次, xy(H)高4位为延迟时间=(x+1)*250us; 低4位为重发次数y
 	NRF_W_Reg(NRF_WRITE_REG_CMD |RF_CH, f, NRF_HardStruct);//设置射频信道为2.4+0.001*fGHz，0x01为2.401GHz 0x02为2.402GHz...（2.4GHz-2.525GHz）
 	NRF_W_Reg(NRF_WRITE_REG_CMD |RF_SETUP, 0x0f, NRF_HardStruct);//打开低噪声放大器增益，发射功率为0dBm，数据传输率2Mbps
 	NRF_W_Reg(NRF_WRITE_REG_CMD |CONFIG, 0x0f, NRF_HardStruct);//打开所有中断（产生中断IRQ脚被拉低），使能16位CRC，芯片上电，设置为接收模式
@@ -242,7 +243,7 @@ void NRF24L01_TX_ModeConfig(uint8_t f, NRF24L01P_Hard_Typedef* NRF_HardStruct)
 	NRF_W_nByte(NRF_WRITE_REG_CMD +RX_ADDR_P0, (uint8_t*)NRFTX_RX_ADDRESS_0, RX_ADDRESS_WIDTH, NRF_HardStruct);//设置数据接收管道P0的接收地址
 	NRF_W_Reg(NRF_WRITE_REG_CMD |EN_AA, 0x01, NRF_HardStruct);//使能通道0的自动应答
 	NRF_W_Reg(NRF_WRITE_REG_CMD |EN_RXADDR, 0x01, NRF_HardStruct);//使能通道0的接收地址
-	NRF_W_Reg(0x75,SETUP_RETR, NRF_HardStruct);//设置自动重发间隔2000us，自动重发次数5次, xy(H)高4位为延迟时间=(x+1)*250us; 低4位为重发次数y
+	NRF_W_Reg(NRF_WRITE_REG_CMD |SETUP_RETR, 0x75, NRF_HardStruct);//设置自动重发间隔2000us，自动重发次数5次, xy(H)高4位为延迟时间=(x+1)*250us; 低4位为重发次数y
 	NRF_W_Reg(NRF_WRITE_REG_CMD |RF_CH, f, NRF_HardStruct);//设置射频信道为2.4+0.001*fGHz，0x01为2.401GHz 0x02为2.402GHz...（2.4GHz-2.525GHz）
 	NRF_W_Reg(NRF_WRITE_REG_CMD |RF_SETUP, 0x0f, NRF_HardStruct);//打开低噪声放大器增益，发射功率为0dBm，数据传输率2Mbps
 	NRF_W_Reg(NRF_WRITE_REG_CMD |CONFIG, 0x0e, NRF_HardStruct);//打开所有中断（产生中断IRQ脚被拉低），使能16位CRC，芯片上电，设置为发送模式
@@ -574,14 +575,14 @@ uint8_t NRF24L01_TxPacketWithAckData(uint8_t* TxBuf, uint8_t* RxBuf, uint32_t ti
 	if (NRF_HardStruct->NRF_UseEXTI)
 	{
 		//使用外部中断读取NRF状态
-		uint32_t nowTime = NRF24L01_GetTime();
+		uint32_t nowTime ;
 		uint32_t diffTime;
 		
 		NRF24L01_CE_LOW(NRF_HardStruct);//切换为待机
 		NRF_W_nByte(WR_TX_PLOAD_CMD , TxBuf, WRX_PAYLOAD_WIDTH, NRF_HardStruct);//写入数据到发送缓冲区
 		NRF24L01_CE_HIGH(NRF_HardStruct);//切换为收发，等待发送
 
-	
+		nowTime = NRF24L01_GetTime();
 		while(!(NRF_HardStruct->NRF_G_STATE&STATUS_TX_DS))//等待发送完成,产生中断
 		{
 			diffTime = NRF24L01_GetTime() - nowTime;
@@ -591,15 +592,29 @@ uint8_t NRF24L01_TxPacketWithAckData(uint8_t* TxBuf, uint8_t* RxBuf, uint32_t ti
 				break;
 			}
 		}
-		
+		// uint8_t FIFO_Status; 
+		// FIFO_Status = NRF_R_Reg(FIFO_STATUS, NRF_HardStruct);         
+		// NRF_W_Reg(NRF_WRITE_REG_CMD+FIFO_STATUS, FIFO_Status, NRF_HardStruct);     //清空FIFO状态寄存器
+		NRF_W_Reg(FLUSH_TX_CMD , NRF_DUMMY, NRF_HardStruct);//清除TX_FIFO寄存器
+
+		if (NRF_HardStruct->NRF_G_STATE&STATUS_RX_DR)
+		{
+			// NRF_GetACKData(RxBuf,  NRF_HardStruct);
+			NRF_R_nByte(RD_RX_PLOAD_CMD, RxBuf, WRX_PAYLOAD_WIDTH, NRF_HardStruct);          //读取随ACK返回的负载
+			NRF_W_Reg(FLUSH_RX_CMD, NRF_DUMMY, NRF_HardStruct);  
+		}
+		else
+		{
+			rVal |= NRF_ERRCODE_RX_Err;
+		}
+
 		if(NRF_HardStruct->NRF_G_STATE&STATUS_TX_DS)
 		{
-			NRF_W_Reg(FLUSH_TX_CMD , NRF_DUMMY, NRF_HardStruct);//清除TX_FIFO寄存器
-			rVal = 0;//发送成功
+			rVal |= 0;//发送成功
 		}
 		else if(NRF_HardStruct->NRF_G_STATE&STATUS_MAX_RT)//达到最大重发次数
 		{
-			NRF_W_Reg(FLUSH_TX_CMD , NRF_DUMMY, NRF_HardStruct);//清除TX_FIFO寄存器
+			
 			// NRF_DEBUG("NRF 达到最大重发次数!errorCode = %d",NRF_ERRCODE_TX_MAX);
 			rVal |= STATUS_MAX_RT|NRF_ERRCODE_TX_Err;
 		}
@@ -607,17 +622,9 @@ uint8_t NRF24L01_TxPacketWithAckData(uint8_t* TxBuf, uint8_t* RxBuf, uint32_t ti
 		{
 			rVal |= NRF_ERRCODE_GET_TX_STA_TIMEOUT|NRF_ERRCODE_TX_Err;
 		}
-		
-		if (NRF_HardStruct->NRF_G_STATE&STATUS_RX_DR)
-		{
-			NRF_GetACKData(RxBuf,  NRF_HardStruct);
-		}
-		else
-		{
-			rVal |= NRF_ERRCODE_RX_Err;
-		}
-		NRF_HardStruct->NRF_G_STATE&=~(NRF_HardStruct->NRF_G_STATE);//清除中断标志
+
 	}
+	NRF_HardStruct->NRF_G_STATE=0;//清除中断标志
 	return rVal;
 }
 
@@ -650,6 +657,7 @@ uint8_t NRF24L01_RxPacketWithAckData(uint8_t* TxBuf, uint8_t* RxBuf, uint32_t ti
 		
 		if(NRF_HardStruct->NRF_G_STATE&STATUS_RX_DR)
 		{
+			NRF_W_Reg(FLUSH_TX_CMD, NRF_DUMMY, NRF_HardStruct);//清除TX_FIFO寄存器
 			NRF_W_nByte(W_ACK_PAYLOAD_P0 , TxBuf, WRX_PAYLOAD_WIDTH, NRF_HardStruct);//写入数据
 			NRF_R_nByte(RD_RX_PLOAD_CMD , RxBuf, WRX_PAYLOAD_WIDTH, NRF_HardStruct);//读取数据
 			NRF_W_Reg(FLUSH_RX_CMD, NRF_DUMMY, NRF_HardStruct);//清除RX_FIFO寄存器
@@ -659,14 +667,10 @@ uint8_t NRF24L01_RxPacketWithAckData(uint8_t* TxBuf, uint8_t* RxBuf, uint32_t ti
 		{
 			rVal = NRF_ERRCODE_GET_RX_STA_TIMEOUT|NRF_ERRCODE_RX_Err;//接收失败
 		}
-		if (NRF_HardStruct->NRF_G_STATE&STATUS_TX_FULL)
-		{
-			NRF_W_Reg(FLUSH_TX_CMD, NRF_DUMMY, NRF_HardStruct);//清除TX_FIFO寄存器
-		}
 		
 	}
 
-	NRF_HardStruct->NRF_G_STATE&=~(NRF_HardStruct->NRF_G_STATE);//清除数据标志
+	NRF_HardStruct->NRF_G_STATE=0;//清除数据标志
 	return rVal;
 }
 
@@ -744,7 +748,7 @@ void NRF24L01_TX_TestConfig(uint8_t f, NRF24L01P_Hard_Typedef* NRF_HardStruct)
 	NRF_W_Reg(NRF_WRITE_REG_CMD |EN_AA, 0x3f, NRF_HardStruct);//使能通道012345的自动应答
 	NRF_W_Reg(NRF_WRITE_REG_CMD |EN_RXADDR, 0x3f, NRF_HardStruct);//使能通道012345的接收地址
 	
-	NRF_W_Reg(0x75,SETUP_RETR, NRF_HardStruct);//设置自动重发间隔2000us，自动重发次数5次, xy(H)高4位为延迟时间=(x+1)*250us; 低4位为重发次数y
+	NRF_W_Reg(NRF_WRITE_REG_CMD |SETUP_RETR, 0x75,NRF_HardStruct);//设置自动重发间隔2000us，自动重发次数5次, xy(H)高4位为延迟时间=(x+1)*250us; 低4位为重发次数y
 	NRF_W_Reg(NRF_WRITE_REG_CMD |RF_CH, f, NRF_HardStruct);//设置射频信道为2.44GHz，0x01为2.401GHz 0x02为2.402GHz...（2.4GHz-2.525GHz）
 	NRF_W_Reg(NRF_WRITE_REG_CMD |RF_SETUP, 0x0f, NRF_HardStruct);//打开低噪声放大器增益，发射功率为0dBm，数据传输率2Mbps
 	NRF_W_Reg(NRF_WRITE_REG_CMD |CONFIG, 0x0e, NRF_HardStruct);//打开所有中断（产生中断IRQ脚被拉低），使能16位CRC，芯片上电，设置为发送模式
@@ -800,7 +804,7 @@ void NRF24L01_RX_TestConfig(uint8_t f, NRF24L01P_Hard_Typedef* NRF_HardStruct)
 	NRF_W_Reg(NRF_WRITE_REG_CMD |EN_AA, 0x3f, NRF_HardStruct);//使能通道012345的自动应答
 	NRF_W_Reg(NRF_WRITE_REG_CMD |EN_RXADDR, 0x3f, NRF_HardStruct);//使能通道012345的接收地址
 	
-	NRF_W_Reg(0x75,SETUP_RETR, NRF_HardStruct);//设置自动重发间隔2000us，自动重发次数5次, xy(H)高4位为延迟时间=(x+1)*250us; 低4位为重发次数y
+	NRF_W_Reg(NRF_WRITE_REG_CMD |SETUP_RETR, 0x75, NRF_HardStruct);//设置自动重发间隔2000us，自动重发次数5次, xy(H)高4位为延迟时间=(x+1)*250us; 低4位为重发次数y
 	NRF_W_Reg(NRF_WRITE_REG_CMD |RF_CH, f, NRF_HardStruct);//设置射频信道为2.44GHz，0x01为2.401GHz 0x02为2.402GHz...（2.4GHz-2.525GHz）
 	NRF_W_Reg(NRF_WRITE_REG_CMD |RF_SETUP, 0x0f, NRF_HardStruct);//打开低噪声放大器增益，发射功率为0dBm，数据传输率2Mbps
 	NRF_W_Reg(NRF_WRITE_REG_CMD |CONFIG, 0x0f, NRF_HardStruct);//打开所有中断（产生中断IRQ脚被拉低），使能16位CRC，芯片上电，设置为接收模式
@@ -946,33 +950,11 @@ uint8_t NRF_TXRX_TEST(NRF24L01P_Hard_Typedef* NRF_HardStruct, uint32_t time_out)
 }
 
 
-/** 
-* @brief   接收ACK携带的数据包
-* @param   RxBuf ：接收的数据 最大32Byte
-* @param   NRF_HardStruct[IN/OUT] ：待接收的NRF
-* @retval  读取数据的长度
-*/
-uint8_t NRF_GetACKData(uint8_t* RxBuf, NRF24L01P_Hard_Typedef* NRF_HardStruct)
-{
-	uint8_t dataCount = NRF_R_Reg(R_RX_PL_WID, NRF_HardStruct);
-	if (dataCount&&(dataCount<=WRX_PAYLOAD_MAX_WIDTH))
-	{
-		NRF_R_nByte(RD_RX_PLOAD_CMD , RxBuf, dataCount, NRF_HardStruct);//读取数据
-		NRF_W_Reg(FLUSH_RX_CMD, NRF_DUMMY, NRF_HardStruct);//清除RX_FIFO寄存器
-	}
-	else
-	{
-		dataCount=0;
-	}
-	return dataCount;
-}
-
-
 /**
 * @brief   NRF收发测试
 * @param    NRF_HardStruct：测试对象
 * @param    time_out：测试读写超时时间ms
-* @retval  1 : 测试成功  0：测试失败  
+* @retval  
 **/
 uint8_t NRF_TXRX_TEST_WithAckData(NRF24L01P_Hard_Typedef* NRF_HardStruct, uint32_t time_out)
 {
@@ -989,6 +971,10 @@ uint8_t NRF_TXRX_TEST_WithAckData(NRF24L01P_Hard_Typedef* NRF_HardStruct, uint32
 		uint8_t tmp_rpt = rpt;
 		while (tmp_rpt--)
 		{
+			for(uint8_t i=0;i<test_Byte;i++)
+			{
+				Rcheckbuf[i]=0;
+			}
 			uint8_t tmp = NRF24L01_TxPacketWithAckData(sendbuf, Rcheckbuf, NRF_PackTimeOut, NRF_HardStruct);//发送测试数据
 			if (tmp&NRF_ERRCODE_TX_Err)
 			{
@@ -1032,16 +1018,12 @@ uint8_t NRF_TXRX_TEST_WithAckData(NRF24L01P_Hard_Typedef* NRF_HardStruct, uint32
 	else
 	{
 		NRF24L01_RX_ModeConfig(NRF_DefaultFrequency, NRF_HardStruct);
-		if (NRF_HardStruct->AckPay)
-		{
-			NRF_W_nByte(W_ACK_PAYLOAD_P0, Ackbuf, test_Byte, NRF_HardStruct);//写入ACK回复数据到P0
-		}
 		while (1)
 		{
 			uint8_t tmp=0xff ;
 			while(tmp)
 			{
-				tmp=NRF24L01_RxPacketWithAckData(Ackbuf ,Rcheckbuf, NRF_PackTimeOut, NRF_HardStruct);//接收测试数据
+				tmp=NRF24L01_RxPacketWithAckData(Ackbuf ,Rcheckbuf, 1, NRF_HardStruct);//接收测试数据
 			}
 			if (tmp&(NRF_ERRCODE_RX_Err|NRF_ERRCODE_GET_RX_STA_TIMEOUT))
 			{
