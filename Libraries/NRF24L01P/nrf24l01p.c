@@ -1,5 +1,4 @@
-#include "nrf24l01p.h"//板级支持包board support package\
-                      仅支持某一个或一批同样的开发板
+#include "nrf24l01p.h"
 					  
 #include "bsp_gpio.h"			  
 #include "bsp_exti.h"
@@ -654,11 +653,18 @@ uint8_t NRF24L01_RxPacketWithAckData(uint8_t* TxBuf, uint8_t* RxBuf, uint32_t ti
 				break;
 			}
 		}
-		
-		if(NRF_HardStruct->NRF_G_STATE&STATUS_RX_DR)
+		if (TxBuf!=NULL)
 		{
 			NRF_W_Reg(FLUSH_TX_CMD, NRF_DUMMY, NRF_HardStruct);//清除TX_FIFO寄存器
 			NRF_W_nByte(W_ACK_PAYLOAD_P0 , TxBuf, WRX_PAYLOAD_WIDTH, NRF_HardStruct);//写入数据
+		}
+		if(NRF_HardStruct->NRF_G_STATE&STATUS_RX_DR)
+		{
+			// if (TxBuf!=NULL)
+			// {
+			// 	NRF_W_Reg(FLUSH_TX_CMD, NRF_DUMMY, NRF_HardStruct);//清除TX_FIFO寄存器
+			// 	NRF_W_nByte(W_ACK_PAYLOAD_P0 , TxBuf, WRX_PAYLOAD_WIDTH, NRF_HardStruct);//写入数据
+			// }
 			NRF_R_nByte(RD_RX_PLOAD_CMD , RxBuf, WRX_PAYLOAD_WIDTH, NRF_HardStruct);//读取数据
 			NRF_W_Reg(FLUSH_RX_CMD, NRF_DUMMY, NRF_HardStruct);//清除RX_FIFO寄存器
 			rVal = 0;//接收成功
@@ -954,7 +960,7 @@ uint8_t NRF_TXRX_TEST(NRF24L01P_Hard_Typedef* NRF_HardStruct, uint32_t time_out)
 * @brief   NRF收发测试
 * @param    NRF_HardStruct：测试对象
 * @param    time_out：测试读写超时时间ms
-* @retval  
+* @retval  1 : 测试成功  0：测试失败  
 **/
 uint8_t NRF_TXRX_TEST_WithAckData(NRF24L01P_Hard_Typedef* NRF_HardStruct, uint32_t time_out)
 {
@@ -1004,6 +1010,7 @@ uint8_t NRF_TXRX_TEST_WithAckData(NRF24L01P_Hard_Typedef* NRF_HardStruct, uint32
 				if(Compare_Array( Ackbuf, Rcheckbuf,  test_Byte))//接收数据正确
 				{
 					NRF_DEBUG( "NRF TXMode TEST OK！\n");
+					return 1;
 				}
 				else
 				{
@@ -1041,6 +1048,12 @@ uint8_t NRF_TXRX_TEST_WithAckData(NRF24L01P_Hard_Typedef* NRF_HardStruct, uint32
 				if(Compare_Array( sendbuf, Rcheckbuf,  test_Byte))//接收数据正确
 				{
 					NRF_DEBUG( "NRF RXMode TEST OK！\n");
+					//再次执行确保ACK数据发出
+					while(tmp)
+					{
+						tmp=NRF24L01_RxPacketWithAckData(Ackbuf ,Rcheckbuf, 1, NRF_HardStruct);//接收测试数据
+					}
+					return 1;
 				}
 				else
 				{

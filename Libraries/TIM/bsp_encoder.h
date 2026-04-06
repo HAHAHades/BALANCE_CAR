@@ -10,8 +10,6 @@
 
 /*********************定义编码器使用的定时器及通道************************/
 
-#define ENCODER_GET_COUNT_IN_IT 0 //是否在中断中读取编码器脉冲数
-
 
 #define EncoderA_TIMx TIM2
 #define EncoderA_TIMx_ACH_x TIM_Channel_1

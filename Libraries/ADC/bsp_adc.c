@@ -35,14 +35,14 @@ void ADC_Test()
 			for(uint8_t i =0; i<ADC_NumOfChannel; i++)
 			{
 				tmpV = (float)(ADCx_RegSimult_DMA_MemoryBaseAddr[i]&0x0000ffff)/4096.0*3.3;//µÍ16Î» ADC1
-				UsartPrintf(DEBUG_USART,"The voltage of ADC1_CH%d is %.6f\n",ADC_Channel_xList[i],tmpV);
+				UsartPrint("The voltage of ADC1_CH%d is %.6f\n",ADC_Channel_xList[i],tmpV);
 				
 				
 				tmpV = (float)(ADCx_RegSimult_DMA_MemoryBaseAddr[i]>>16)/4096.0*3.3;//¸ß16Î» ADC2
-				UsartPrintf(DEBUG_USART,"The voltage of ADC2_CH%d is %.6f\n",ADC_Channel_9 - ADC_Channel_xList[i],tmpV);
+				UsartPrint("The voltage of ADC2_CH%d is %.6f\n",ADC_Channel_9 - ADC_Channel_xList[i],tmpV);
 				
 			}
-			UsartPrintf(DEBUG_USART,"\n\n");
+			UsartPrint("\n\n");
 			SisTic_Delay_ms(500);
 			
 		}
@@ -56,10 +56,10 @@ void ADC_Test()
 			{
 				tmpV = (float)ADCx_Independent_DMA_MemoryBaseAddr[i]/4096.0*3.3;
 			
-				UsartPrintf(DEBUG_USART,"The voltage of ADC_CH%d is %.6f\n",ADC_Channel_xList[i],tmpV);
+				UsartPrint("The voltage of ADC_CH%d is %.6f\n",ADC_Channel_xList[i],tmpV);
 				
 			}
-			UsartPrintf(DEBUG_USART,"\n\n");
+			UsartPrint("\n\n");
 			SisTic_Delay_ms(500);
 			
 		}

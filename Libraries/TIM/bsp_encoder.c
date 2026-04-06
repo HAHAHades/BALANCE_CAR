@@ -280,12 +280,6 @@ void TIMx_CHx_ENCODER_Init(TIM_TypeDef * ENCODER_TIMx, uint16_t TIM_Channel_x1,
 
 
 
-
-
-#if ENCODER_GET_COUNT_IN_IT
-int volatile G_ENCODERA_COUNT;
-int volatile G_ENCODERB_COUNT;
-#endif //ENCODER_GET_COUNT_IN_IT
 /**
   * @brief   获取编码器位置并清零计数器
   * @param   TIMx ：编码器所使用的定时器

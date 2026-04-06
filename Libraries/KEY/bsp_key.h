@@ -60,7 +60,7 @@ typedef enum
     keySta_doublepress,//双击/双击释放
 }KEY_STA_enumt;
 
-/* 定义写入按键FIFO储存中的按键回调标识，独立按键在前，电位计在中间，组合键在后  */
+/* 定义写入按键FIFO储存中的按键回调标识，独立按键在前，组合键在后  */
 typedef enum
 {
  
@@ -196,7 +196,7 @@ typedef struct
 #define KEY_ERROR(fmt,arg...)          printf("<<-KEY-ERROR->> "fmt"\n",##arg)
 #define KEY_DEBUG(fmt,arg...)          do{\
                                           if(KEY_DEBUG_ON)\
-                                          UsartPrintf(USART_DEBUG,"<<-KEY-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
+                                          UsartPrint("<<-KEY-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
                                           }while(0)
 
 #define KEY_GET_IO_STA(A,B)  (A->IDR & B)

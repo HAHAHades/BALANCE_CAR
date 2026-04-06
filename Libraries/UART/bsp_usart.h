@@ -16,10 +16,7 @@ USART6       --      --      C6       C7      C8       USART6_IO_Reamp0
 USART6       --      --      A11      A12     C8       USART6_IO_Reamp1
 
 */
-# define DEBUG_USART   USART1
 
-# define USART_DEBUG  DEBUG_USART
-# define  DEBUG_USARTx DEBUG_USART
 #define USART_PRINTF_LEN 296 //串口单次发送最大字节
 
 #define USE_USART1 1 //使用USART1
@@ -55,6 +52,14 @@ extern u8 USART_RX_BUF2[USART_REC_LEN2];//保存接收的数据
 extern u16 USART_RX_STA6;//串口接受状态 
 extern u8 USART_RX_BUF6[USART_REC_LEN6];//保存接收的数据
 #endif //USE_USART6
+
+
+typedef struct 
+{
+  USART_TypeDef *USARTx;
+}USART_Print_Typdef;
+
+
 
 
 
@@ -95,7 +100,7 @@ extern u8 USART_RX_BUF6[USART_REC_LEN6];//保存接收的数据
 
 USART_InitTypeDef BSP_USARTxStructInit(uint32_t BaudRate);
 void BSP_USARTx_Init(USART_TypeDef *USARTx, USART_InitTypeDef USART_InitStruct, uint32_t IO_Reamp);
-
+void BSP_USART_Print_Init(USART_TypeDef *USARTx, USART_InitTypeDef USART_InitStruct, uint32_t IO_Reamp);
 #endif //BSP_USE_F103
 
 #if 0
@@ -113,7 +118,7 @@ void vUSART2_IRQHandler(void);
 #if USE_USART6
 void vUSART6_IRQHandler(void);
 #endif //#if USE_USART6
-
+void UsartPrint( char *fmt,...);
 void UsartPrintf(USART_TypeDef *USARTx, char *fmt,...);
 uint16_t UsartRecv(USART_TypeDef *USARTx, uint8_t* Rdata);
 void UsartSend(USART_TypeDef *USARTx, uint8_t* Sdata, uint16_t Slen);

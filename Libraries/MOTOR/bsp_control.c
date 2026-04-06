@@ -1,26 +1,49 @@
-#include "bsp_control.h"//板级支持包board support package\
-                      仅支持某一个或一批同样的开发板
+#include "bsp_control.h"
 #include "bsp_SysTick.h"  		  
 #include "bsp_520Motor.h"
 #include "bsp_encoder.h"
+#include "bsp_flash.h"
 
+//小车参数储存位置，放在Flash最后
+#define CTRL_SBV_ParamBuff_SP ((uint32_t)(FLASH_END_ADDR-(4*CTRL_SBV_PARAM_NUM)))
+//小车参数依次为 直立环KP/KD、速度环KP/KI、转向环KP/KD、中值、转向偏置
+static float SG_CTRL_SBV_ParamBuff[CTRL_SBV_PARAM_NUM] __attribute__ ((at(CTRL_SBV_ParamBuff_SP)));
 
-static float KP_ver 	= 420; //700; //直立环比例
-static float KD_ver 	= 36; //60直立环微分
-static float KP_vel 	= -0.57; //速度环比例
-static float KI_vel 	= -0.57/200.0; //速度环积分
+BSP_TWSBV_Typedef G_CTRL_TWSBV_Struct;//小车对象
+
+// static float KP_vert 	= 420; //700; //直立环比例
+// static float KD_vert 	= 36; //60直立环微分
+// static float KP_velo 	= -0.57; //速度环比例
+// static float KI_velo 	= -0.57/200.0; //速度环积分
 #define S_LIMIT 1000 //积分限幅
 
-static float KP_turn 	= 20; //转向环比例
-static float KD_turn 	= 0.8; //转向环微分
-static float Med = -3.0; //机械中值 
+// static float KP_turn 	= 20; //转向环比例
+// static float KD_turn 	= 0.8; //转向环微分
+// static float Med = -3.0; //机械中值 
 
 #define PWM_LIMIT 100000 //PWM限幅，占空比*100
 
-int32_t G_BSPCTRL_TargetSpeed = 0;//前后速度
-int32_t G_BSPCTRL_TurnSpeed = 0;//转向速度，正为左转，负为右转
-static int SG_BSPCTRL_TrunErr = 80; //转向偏置，中和硬件缺陷
+// static float Tilt_Angle_Limit = 30;//倾斜限制,超出倾角小车停止
 
+// int32_t G_BSPCTRL_TargetSpeed = 0;//前后速度
+// int32_t G_BSPCTRL_TurnSpeed = 0;//转向速度，正为左转，负为右转
+// static int SG_BSPCTRL_TurnErr = 80; //转向偏置，中和硬件缺陷
+// static uint8_t SG_BSP_CTRL_CAR_ON = 0;//小车启动开关
+// static uint8_t SG_BSP_CTRL_Ctroller_ON = 0;//遥控启动开关
+// static uint8_t SG_BSP_CTRL_CAR_Tilt = 0;//小车倾倒检测结果
+
+
+/**
+  * @brief   小车参数初始化
+  * @param   
+  * @retval  
+  */
+void TWSBV_Init(void)
+{
+	BSP_TWSBV_Typedef tmpStruct = BSP_TWSBV_Typedef_DefaultVal;
+	G_CTRL_TWSBV_Struct = tmpStruct;
+
+}
 
 
 /**
@@ -28,7 +51,7 @@ static int SG_BSPCTRL_TrunErr = 80; //转向偏置，中和硬件缺陷
 	偏差微分 = (本次偏差 - 上次偏差)/单位时间
 	E_angle = tatget_angle - real_angle
 	E_angle_last = tatget_angle_last - real_angle_last
-	out = KP_ver*E_angle + KD_ver*(E_angle - E_angle_last);
+	out = KP_vert*E_angle + KD_vert*(E_angle - E_angle_last);
 	gyro_X = (real_angle - real_angle_last)/10ms
 
   * @brief   直立环PD控制
@@ -43,7 +66,7 @@ int Vertical_Loop(float tatget_angle, float real_angle, float gyro_X)
 	int out;
 	static float tatget_angle_last = 0;
 	
-	out = KP_ver*(tatget_angle - real_angle) + KD_ver*(tatget_angle-tatget_angle_last - gyro_X);
+	out = G_CTRL_TWSBV_Struct.KP_vert*(tatget_angle - real_angle) + G_CTRL_TWSBV_Struct.KD_vert*(tatget_angle-tatget_angle_last - gyro_X);
 	tatget_angle_last = tatget_angle;
 	
 	return out;
@@ -76,7 +99,7 @@ float Velocity_Loop(int tatget_speed, int real_speed)
 		S_Espeed = -S_LIMIT;
 	}
 	
-	out = KP_vel*Espeed +  KI_vel*S_Espeed;
+	out = G_CTRL_TWSBV_Struct.KP_velo*Espeed +  G_CTRL_TWSBV_Struct.KI_velo*S_Espeed;
 	
 	return out;
 
@@ -91,7 +114,7 @@ float Velocity_Loop(int tatget_speed, int real_speed)
 int Turn_Loop(int32_t turn_speed ,float gyro_Z)
 {
 	
-	return KP_turn*turn_speed + KD_turn*gyro_Z;
+	return G_CTRL_TWSBV_Struct.KP_turn*turn_speed + G_CTRL_TWSBV_Struct.KD_turn*gyro_Z;
 }
 
 
@@ -114,23 +137,53 @@ void Control_PWM(float tatget_angle, float real_angle, float gyro_X, int32_t tat
 	
 	float Velocity_out;
 	
-	
 	Velocity_out = Velocity_Loop(2*tatget_speed, (encoder_L+encoder_R));//encoder_L+encoder_R)/2 表示两轮子中心的速度（每10ms正交计数值）
-	Vertical_out = Vertical_Loop( Velocity_out+Med,  real_angle,  gyro_X);
+	Vertical_out = Vertical_Loop( Velocity_out+G_CTRL_TWSBV_Struct.Med,  real_angle,  gyro_X);
 	Turn_out = Turn_Loop(target_turn , gyro_Z);
 	
 	PWM_A = Vertical_out - Turn_out;
-	PWM_B = Vertical_out + Turn_out + SG_BSPCTRL_TrunErr;
-	
+	PWM_B = Vertical_out + Turn_out + G_CTRL_TWSBV_Struct.TurnErr;
 	
 	//控制电机
 	uint8_t Dir_A = pwm_limit_abs(&PWM_A);
 	uint8_t Dir_B = pwm_limit_abs(&PWM_B);
-	BSP_520Motor_Rotation( Motor_520_A,  Dir_A,  PWM_A/100.0);
-	BSP_520Motor_Rotation( Motor_520_B,  Dir_B,  PWM_B/100.0);
+
+	Control_Tilt_Detect(real_angle);//倾斜检测
+
+	if (G_CTRL_TWSBV_Struct.CAR_ON&&(!G_CTRL_TWSBV_Struct.CAR_Tilt))
+	{
+		BSP_520Motor_Rotation( Motor_520_A,  Dir_A,  PWM_A/100.0);
+		BSP_520Motor_Rotation( Motor_520_B,  Dir_B,  PWM_B/100.0);
+	}
+	else
+	{
+		BSP_520Motor_Stop(Motor_520_A|Motor_520_B);
+	}
 	
 }
 
+
+/**
+ * @brief   倾斜检测
+ * @param	real_angle:当前角度
+ * @retval  
+ */
+void Control_Tilt_Detect(float real_angle)
+{
+	float tmp = real_angle - G_CTRL_TWSBV_Struct.Med;
+	if (tmp<0)
+	{
+		tmp = -tmp;
+	}
+	if (tmp>G_CTRL_TWSBV_Struct.Tilt_Angle_Limit)
+	{
+		G_CTRL_TWSBV_Struct.CAR_Tilt = 1;//小车倾斜
+	}
+	else
+	{
+		G_CTRL_TWSBV_Struct.CAR_Tilt = 0;
+	}
+}
 
 
 /**
@@ -154,8 +207,6 @@ uint8_t pwm_limit_abs(int* data)
 }
 
 
-
-
 /**
   * @brief   小车控制的中断服务程序
   * @param
@@ -163,125 +214,61 @@ uint8_t pwm_limit_abs(int* data)
   */
 void Control_Car_IRQHandler(void)
 {
+
+	MPU_GetEuler(G_Euler_RPY, G_ACCEL_XYZ, G_GYRO_XYZ);
+	int16_t Encoder_CountA = Get_Encoder_Count(EncoderA_TIMx);//读取编码器
+	int16_t Encoder_CountB = -Get_Encoder_Count(EncoderB_TIMx);
 	
-	/* 接收到中断信息后继续往下 */
-	if (!hal.new_gyro)
-	{
-		return;
-	}
-	
-    unsigned char new_temp = 0;
-    unsigned long timestamp;
+	Control_PWM( 0.0,  G_Euler_RPY[0],  G_GYRO_XYZ[0],  G_CTRL_TWSBV_Struct.TargetSpeed,  Encoder_CountA,  Encoder_CountB, G_CTRL_TWSBV_Struct.TurnSpeed , G_GYRO_XYZ[2]);//控制小车
 
-	unsigned long sensor_timestamp;
-	int new_data = 0;
-		
-	/* 每过500ms读取一次温度 */
-	get_tick_count(&timestamp);
-	if (timestamp > hal.next_temp_ms)
-	{
-		hal.next_temp_ms = timestamp + TEMP_READ_MS;
-		new_temp = 1;
-	}
-
-	/* 接收到新数据 并且 开启DMP */
-	if (hal.new_gyro && hal.dmp_on)
-	{
-		short gyro[3], accel_short[3], sensors;
-		unsigned char more;
-		long accel[3], quat[4], temperature;
-		/* 当DMP正在使用时，该函数从FIFO获取新数据 */
-		dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors, &more);
-		/* 如果more=0，则数据被获取完毕 */
-		if (!more)
-			hal.new_gyro = 0;
-
-		/* 读取相对应的新数据，推入MPL */
-		//四元数数据
-		if (sensors & INV_WXYZ_QUAT)
-		{
-			inv_build_quat(quat, 0, sensor_timestamp);
-			new_data = 1;
-		}
-
-		//陀螺仪数据
-		if (sensors & INV_XYZ_GYRO)
-		{
-			inv_build_gyro(gyro, sensor_timestamp);
-			new_data = 1;
-			if (new_temp)
-			{
-				new_temp = 0;
-				/* 获取温度，仅用于陀螺温度比较 */
-				mpu_get_temperature(&temperature, &sensor_timestamp);
-				inv_build_temp(temperature, sensor_timestamp);
-			}
-		}
-		
-		//加速度计数据
-		if (sensors & INV_XYZ_ACCEL)
-		{
-			accel[0] = (long)accel_short[0];
-			accel[1] = (long)accel_short[1];
-			accel[2] = (long)accel_short[2];
-			inv_build_accel(accel, 0, sensor_timestamp);
-			new_data = 1;
-		}
-	}//end if (hal.new_gyro && hal.dmp_on)
-
-	if (new_data)
-	{
-		long data[9];
-		int8_t accuracy;
-		/* 处理接收到的数据 */
-		if (inv_execute_on_data())
-		{
-			//数据错误
-			new_data = 0;
-			return;
-//			#if UART_Printtf
-//			printf("数据错误\n");
-//			#endif //UART_Printtf
-		}
-		
-		//欧拉角
-		if (inv_get_sensor_type_euler(data, &accuracy, (inv_time_t *)&timestamp))
-		{
-			G_Euler_RPY[0] = data[0] * 1.0 / (1 << 16);
-			G_Euler_RPY[1] = data[1] * 1.0 / (1 << 16);
-			G_Euler_RPY[2] = data[2] * 1.0 / (1 << 16);
-		}
-		
-		//加速度
-		if (inv_get_sensor_type_accel(data, &accuracy, (inv_time_t *)&timestamp))
-		{
-			G_ACCEL_XYZ[0] = data[0] * 1.0 / (1 << 16);
-			G_ACCEL_XYZ[1] = data[1] * 1.0 / (1 << 16);
-			G_ACCEL_XYZ[2] = data[2] * 1.0 / (1 << 16);
-		}
-		
-		//角速度
-		if (inv_get_sensor_type_gyro(data, &accuracy, (inv_time_t *)&timestamp))
-		{
-			G_GYRO_XYZ[0] = data[0] * 1.0 / (1 << 16);
-			G_GYRO_XYZ[1] = data[1] * 1.0 / (1 << 16);
-			G_GYRO_XYZ[2] = data[2] * 1.0 / (1 << 16);
-		}		
-
-	}//end if (new_data)
-
-
-		int16_t Encoder_CountA = Get_Encoder_Count(EncoderA_TIMx);//读取编码器
-		int16_t Encoder_CountB = -Get_Encoder_Count(EncoderB_TIMx);
-		
-		Control_PWM( 0.0,  G_Euler_RPY[0],  G_GYRO_XYZ[0],  G_BSPCTRL_TargetSpeed,  Encoder_CountA,  Encoder_CountB, G_BSPCTRL_TurnSpeed , G_GYRO_XYZ[2]);//控制小车
-	
-		
 }
 
 
+#if CTRL_SBV_PARAMADJ_ON
+
+/**
+  * @brief   将小车参数保存在Flash
+  * @param
+  * @retval  
+  */
+void CTRL_SaveSBVParam(void)
+{
+
+	float tmpp[CTRL_SBV_PARAM_NUM];
+
+	CTRL_PrintSBVParam();
+
+	tmpp[0] = G_CTRL_TWSBV_Struct.KP_vert;
+	tmpp[1] = G_CTRL_TWSBV_Struct.KD_vert;
+	tmpp[2] = G_CTRL_TWSBV_Struct.KP_velo;
+	tmpp[3] = G_CTRL_TWSBV_Struct.KI_velo;
+	tmpp[4] = G_CTRL_TWSBV_Struct.KP_turn;
+	tmpp[5] = G_CTRL_TWSBV_Struct.KD_turn;
+	tmpp[6] = G_CTRL_TWSBV_Struct.Med;
+	tmpp[7] = G_CTRL_TWSBV_Struct.TurnErr;
+
+
+	FlashEraseSegment((uint32_t)SG_CTRL_SBV_ParamBuff, (uint32_t)(SG_CTRL_SBV_ParamBuff+CTRL_SBV_PARAM_NUM));
 
 
 
+	FlashWriteWords( (uint32_t)SG_CTRL_SBV_ParamBuff,  (uint32_t*)tmpp,  CTRL_SBV_PARAM_NUM);
 
+}
+
+#endif //CTRL_SBV_PARAMADJ_ON
+
+
+
+void CTRL_PrintSBVParam(void)
+{
+	BSP_CTRL_DEBUG("KP_vert:%.5f", SG_CTRL_SBV_ParamBuff[0]);
+	BSP_CTRL_DEBUG("KD_vert:%.5f", SG_CTRL_SBV_ParamBuff[1]);
+	BSP_CTRL_DEBUG("KP_velo:%.5f", SG_CTRL_SBV_ParamBuff[2]);
+	BSP_CTRL_DEBUG("KI_velo:%.5f", SG_CTRL_SBV_ParamBuff[3]);
+	BSP_CTRL_DEBUG("KP_turn:%.5f", SG_CTRL_SBV_ParamBuff[4]);
+	BSP_CTRL_DEBUG("KD_turn:%.5f", SG_CTRL_SBV_ParamBuff[5]);
+	BSP_CTRL_DEBUG("Med:%.5f", SG_CTRL_SBV_ParamBuff[6]);
+	BSP_CTRL_DEBUG("TurnErr:%.5f", SG_CTRL_SBV_ParamBuff[7]);
+}
 

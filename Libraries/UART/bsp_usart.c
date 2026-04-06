@@ -2,8 +2,11 @@
                       仅支持某一个或一批同样的开发板
 #include "bsp_gpio.h"
 
-#if 1
 
+static USART_Print_Typdef SG_USART_PrintStruct;//全局变量，仅用于串口打印
+
+
+#if 1
 
 /**
   * @brief   测试串口
@@ -160,6 +163,23 @@ void BSP_USARTx_Init(USART_TypeDef *USARTx, USART_InitTypeDef USART_InitStruct, 
 	USART_Cmd(USARTx, ENABLE);//打开串口
 
 }
+
+
+/**
+  * @brief   初始化串口
+  * @param   USARTx ：需要配置的USART：USART1/2/3
+  * @param   USART_InitStruct ：串口的配置 
+  * @param   IO_Reamp ：IO重映射 @ref USART_IO_Reamp
+  * @retval 
+**/
+void BSP_USART_Print_Init(USART_TypeDef *USARTx, USART_InitTypeDef USART_InitStruct, uint32_t IO_Reamp)
+{
+	SG_USART_PrintStruct.USARTx = USARTx;
+	BSP_USARTx_Init( USARTx,  USART_InitStruct,  IO_Reamp);
+
+}
+
+
 
 
 #endif //BSP_USE_F103
@@ -339,6 +359,31 @@ void UsartPrintf(USART_TypeDef *USARTx, char *fmt,...)
 	}
 }
 
+
+/**
+  * @brief   串口发送字符串
+  * @param   fmt ：格式化字符串
+  * @retval 
+**/
+void UsartPrint( char *fmt,...)
+{
+	unsigned char UsartPrintfBuf[USART_PRINTF_LEN];
+	va_list ap;
+	unsigned char *pStr = UsartPrintfBuf;
+
+	va_start(ap, fmt);
+	vsnprintf((char *)UsartPrintfBuf, sizeof(UsartPrintfBuf), fmt, ap);							//格式化
+	va_end(ap);
+
+	while(*pStr != 0)
+	{
+		USART_SendData(SG_USART_PrintStruct.USARTx, *pStr++);
+		while(USART_GetFlagStatus(SG_USART_PrintStruct.USARTx, USART_FLAG_TXE) == RESET);
+	}
+}
+
+
+
 /**
   * @brief   串口接收数据
   * @param   USARTx ：需要使用的USART：USART1/2/6
@@ -407,6 +452,7 @@ void UsartSend(USART_TypeDef *USARTx, uint8_t* Sdata, uint16_t Slen)
 
 }
 
+
 /*
 	中断服务函数
 */
@@ -431,10 +477,10 @@ void vUSART1_IRQHandler(void)
 			{
 				USART_RX_STA1 |= 0x8000; //'\r'后是'\n'，表示接收完成
 				uint8_t Rdata[20];
-				uint16_t recvN=UsartRecv(DEBUG_USART, Rdata);
+				uint16_t recvN=UsartRecv(USART1, Rdata);
 				if (recvN)
 				{
-					UsartSend(DEBUG_USART, Rdata,  recvN);
+					UsartSend(USART1, Rdata,  recvN);
 					USART_RX_STA1 = 0;
 				}
 			}

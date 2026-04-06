@@ -43,7 +43,7 @@ void BSP_520Motor_Config(TIM_TypeDef * PWM_TIMx, uint16_t PWM_TIM_Channel_x,
   */
 void BSP_520Motor_Rotation(uint8_t Motor_Num, _Bool Dir, float Speed)
 {
-	if(Motor_Num == Motor_520_A)
+	if(Motor_Num & Motor_520_A)
 	{
 		if(Dir)
 		{
@@ -60,7 +60,7 @@ void BSP_520Motor_Rotation(uint8_t Motor_Num, _Bool Dir, float Speed)
 		PWM_SetCompare(Motor_520_APWM_TIMx, Motor_520_APWM_TIM_Channel_x, (uint16_t)((Speed/100)*Motor_520_PWM_10KHz_Period));
 		
 	}
-	else if(Motor_Num == Motor_520_B)
+	if(Motor_Num & Motor_520_B)
 	{
 		if(Dir)
 		{
@@ -77,24 +77,22 @@ void BSP_520Motor_Rotation(uint8_t Motor_Num, _Bool Dir, float Speed)
 		PWM_SetCompare(Motor_520_BPWM_TIMx, Motor_520_BPWM_TIM_Channel_x, (uint16_t)((Speed/100)*Motor_520_PWM_10KHz_Period));
 	}
 
-
 }
 
 /**
   * @brief   520电机停止
-  * @param   
-	*	@arg Motor_Num ：电机号，0:A电机 1:B电机
+  * @param   Motor_Num ：电机号
   * @retval  
   */
 void BSP_520Motor_Stop(uint8_t Motor_Num)
 {
-	if(Motor_Num == Motor_520_A)
+	if(Motor_Num & Motor_520_A)
 	{
 		GPIO_ResetBits(Motor_520_AIN1_PORTx,  Motor_520_AIN1_Pinx);
 		GPIO_ResetBits(Motor_520_AIN2_PORTx,  Motor_520_AIN2_Pinx);
 		PWM_SetSta(Motor_520_APWM_TIMx, Motor_520_APWM_TIM_Channel_x, 0);
 	}
-	else if(Motor_Num == Motor_520_B)
+	if(Motor_Num & Motor_520_B)
 	{
 		GPIO_ResetBits(Motor_520_BIN1_PORTx,  Motor_520_BIN1_Pinx);
 		GPIO_ResetBits(Motor_520_BIN2_PORTx,  Motor_520_BIN2_Pinx);

@@ -47,8 +47,8 @@ Motor	停止	正转	反转
 
 					
 /*********************电机*************************/				
-#define Motor_520_A 0
-#define Motor_520_B 1	
+#define Motor_520_A 0x01
+#define Motor_520_B 0x02	
 
 #define Motor_520_ForwardRotation 0
 #define Motor_520_ReverseRotation 1

@@ -166,6 +166,7 @@ typedef struct
 	uint32_t NRF_IRQ_EXTI_Line;//÷–∂œœﬂ
 	uint8_t NRF_UseEXTI;// «∑Ò π”√Õ‚≤ø÷–∂œ
 	uint8_t NRF_G_STATE;//NRF÷–∂œ◊¥Ã¨
+	uint8_t NRF_S_ACKMsg;//NRFΩ” ’∂À «∑Ò”– ˝æ›∑µªÿ
 }NRF24L01P_Hard_Typedef;
 
 
@@ -184,7 +185,7 @@ extern NRF24L01P_Hard_Typedef* G_NRF_HardStruct_ForEXTI0;//»´æ÷÷∏’Î£¨ΩˆŒ™÷–∂œ∫Ø 
 /*–≈œ¢ ‰≥ˆ*/
 #define NRF_DEBUG(fmt,arg...)          do{\
                                           if(NRF_DEBUG_ON)\
-                                          UsartPrintf(USART_DEBUG , "<<-NRF-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
+                                          UsartPrint("<<-NRF-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
                                           }while(0)
 
 /** @defgroup NRF24L01P_ReturnCode
@@ -307,7 +308,6 @@ uint8_t NRF_W_nByte(uint8_t Reg, uint8_t* WDataBuf, uint8_t n, NRF24L01P_Hard_Ty
 uint8_t NRF_R_nByte(uint8_t Reg, uint8_t* RDataBuf, uint8_t n, NRF24L01P_Hard_Typedef* NRF_HardStruct);
 
 void NRF24L01_IRQ_Handler(NRF24L01P_Hard_Typedef* NRF_HardStruct);
-uint8_t NRF_TXRX_TEST_WithAckDataA(NRF24L01P_Hard_Typedef* NRF_HardStruct, uint32_t time_out);
 
 uint8_t NRF24L01_TxPacket(uint8_t* TxBuf, uint32_t time_out, NRF24L01P_Hard_Typedef* NRF_HardStruct);
 uint8_t NRF24L01_RxPacket(uint8_t* RxBuf, uint32_t time_out, NRF24L01P_Hard_Typedef* NRF_HardStruct);

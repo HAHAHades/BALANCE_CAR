@@ -71,3 +71,4 @@
 .\objects\bsp_control.o: ..\Libraries\MOTOR\bsp_520Motor.h
 .\objects\bsp_control.o: ..\Libraries\TIM\bsp_encoder.h
 .\objects\bsp_control.o: ..\Libraries\TIM\bsp_tim.h
+.\objects\bsp_control.o: ..\Libraries\FLASH\bsp_flash.h

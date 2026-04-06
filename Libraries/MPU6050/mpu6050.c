@@ -230,15 +230,15 @@ uint8_t MPU6050ReadID(void)
 	if((Re != MPU_6500ID)&&(Re != MPU_6050ID))
 	{
         #if USART_Print_ON
-		UsartPrintf(USART_DEBUG,"MPU6050 dectected error!\r\n检测不到MPU6050模块，请检查模块与开发板的接线");
-        UsartPrintf(USART_DEBUG,"MPU6050 ID = %d\r\n",Re);
+		UsartPrint("MPU6050 dectected error!\r\n检测不到MPU6050模块，请检查模块与开发板的接线");
+        UsartPrint("MPU6050 ID = %d\r\n",Re);
         #endif //USART_Print_ON
 		return 0;
 	}
 	else
 	{
         #if USART_Print_ON
-		UsartPrintf(USART_DEBUG,"MPU6050 ID = %d\r\n",Re);
+		UsartPrint("MPU6050 ID = %d\r\n",Re);
         #endif //USART_Print_ON
 		return 1;
 	}
@@ -383,7 +383,7 @@ void MPU_GetEuler(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ)
         if (inv_execute_on_data())
         {
             #if USART_Print_IN_IT_ON
-            UsartPrintf(USART_DEBUG,"数据错误\n");
+            UsartPrint("数据错误\n");
             #endif //USART_Print_IN_IT_ON
         }
 
@@ -394,7 +394,7 @@ void MPU_GetEuler(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ)
             Euler_RPY[2] = data[2] * 1.0 / (1 << 16);
             
             #if USART_Print_IN_IT_ON
-            UsartPrintf(USART_DEBUG,"\r\n欧拉角(rad)\t\t: %7.5f\t %7.5f\t %7.5f\t", Euler_RPY[0], Euler_RPY[1], Euler_RPY[2]);
+            UsartPrint("\r\n欧拉角(rad)\t\t: %7.5f\t %7.5f\t %7.5f\t", Euler_RPY[0], Euler_RPY[1], Euler_RPY[2]);
             #endif //USART_Print_IN_IT_ON
             
             #if OLED_SHOW_MPU
@@ -409,7 +409,7 @@ void MPU_GetEuler(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ)
                ACCEL[1] = data[1] * 1.0 / (1 << 16);
                ACCEL[2] = data[2] * 1.0 / (1 << 16);
 				#if USART_Print_IN_IT_ON
-               UsartPrintf(USART_DEBUG,"\r加速度(g/s)\t\t: %7.5f\t %7.5f\t %7.5f\t\r", ACCEL[0], ACCEL[1], ACCEL[2]);
+               UsartPrint("\r加速度(g/s)\t\t: %7.5f\t %7.5f\t %7.5f\t\r", ACCEL[0], ACCEL[1], ACCEL[2]);
 				#endif //USART_Print_IN_IT_ON
 			}
 
@@ -419,7 +419,7 @@ void MPU_GetEuler(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ)
                 GYRO_XYZ[1] = data[1] * 1.0 / (1 << 16);
                 GYRO_XYZ[2] = data[2] * 1.0 / (1 << 16);
 				#if USART_Print_IN_IT_ON
-                UsartPrintf(USART_DEBUG,"角速度(rad/s)\t\t: %7.5f\t %7.5f\t %7.5f\t\r\n", GYRO_XYZ[0], GYRO_XYZ[1], GYRO_XYZ[2]);
+                UsartPrint("角速度(rad/s)\t\t: %7.5f\t %7.5f\t %7.5f\t\r\n", GYRO_XYZ[0], GYRO_XYZ[1], GYRO_XYZ[2]);
 				#endif //USART_Print_IN_IT_ON+
             }		
 

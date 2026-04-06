@@ -631,7 +631,7 @@ static void KeyUpdataButtonSta(KEY_STA_TypeDef* Sta_Struct, uint8_t isPressed, u
 			if (Sta_Struct->keyEnableFlag & KEY_Flag_P)
 			{
 				//对应回调使能，将回调标识写入FIFO 
-				KeyWriteFIFO((KEY_FIFO_t)(Key1_P+(keyIndexBias*4)));
+				KeyWriteFIFO((KEY_FIFO_t)(Key1_P+(keyIndexBias*KEY_FLAG_NUM)));
 			}
 		}
 	}break;
@@ -649,7 +649,7 @@ static void KeyUpdataButtonSta(KEY_STA_TypeDef* Sta_Struct, uint8_t isPressed, u
 				if (Sta_Struct->keyEnableFlag & KEY_Flag_LP)
 				{
 					//对应回调使能，将回调标识写入FIFO 
-					KeyWriteFIFO( (KEY_FIFO_t)(Key1_LP+(keyIndexBias*4)));
+					KeyWriteFIFO( (KEY_FIFO_t)(Key1_LP+(keyIndexBias*KEY_FLAG_NUM)));
 				}
 			}
 		}
@@ -662,7 +662,7 @@ static void KeyUpdataButtonSta(KEY_STA_TypeDef* Sta_Struct, uint8_t isPressed, u
 			// if (Sta_Struct->keyEnableFlag & KEY_Flag_R)
 			// {
 			// 	//对应回调使能，将回调标识写入FIFO 
-			// 	KeyWriteFIFO( (KEY_FIFO_t)(Key1_R+(keyIndexBias*4)));
+			// 	KeyWriteFIFO( (KEY_FIFO_t)(Key1_R+(keyIndexBias*KEY_FLAG_NUM)));
 			// }
 		}
 	}break;
@@ -688,7 +688,7 @@ static void KeyUpdataButtonSta(KEY_STA_TypeDef* Sta_Struct, uint8_t isPressed, u
 			if (Sta_Struct->keyEnableFlag & KEY_Flag_R)
 			{
 				//对应回调使能，将回调标识写入FIFO 
-				KeyWriteFIFO( (KEY_FIFO_t)(Key1_R+(keyIndexBias*4)));
+				KeyWriteFIFO( (KEY_FIFO_t)(Key1_R+(keyIndexBias*KEY_FLAG_NUM)));
 			}
 
 			// 空闲回调 
@@ -705,7 +705,7 @@ static void KeyUpdataButtonSta(KEY_STA_TypeDef* Sta_Struct, uint8_t isPressed, u
 				if (Sta_Struct->keyEnableFlag & KEY_Flag_LP)
 				{
 					//对应回调使能，将回调标识写入FIFO 
-					KeyWriteFIFO( (KEY_FIFO_t)(Key1_LP+(keyIndexBias*4)));
+					KeyWriteFIFO( (KEY_FIFO_t)(Key1_LP+(keyIndexBias*KEY_FLAG_NUM)));
 				}
 			}
 		}
@@ -734,7 +734,7 @@ static void KeyUpdataButtonSta(KEY_STA_TypeDef* Sta_Struct, uint8_t isPressed, u
 				if (Sta_Struct->keyEnableFlag & KEY_Flag_LP)
 				{
 					//对应回调使能，将回调标识写入FIFO 
-					KeyWriteFIFO( (KEY_FIFO_t)(Key1_LP+(keyIndexBias*4)));
+					KeyWriteFIFO( (KEY_FIFO_t)(Key1_LP+(keyIndexBias*KEY_FLAG_NUM)));
 				}
 			}
 		}
@@ -748,7 +748,7 @@ static void KeyUpdataButtonSta(KEY_STA_TypeDef* Sta_Struct, uint8_t isPressed, u
 			if (Sta_Struct->keyEnableFlag & KEY_Flag_DPR)
 			{
 				//对应回调使能，将回调标识写入FIFO 
-				KeyWriteFIFO( (KEY_FIFO_t)(Key1_DPR+(keyIndexBias*4)));
+				KeyWriteFIFO( (KEY_FIFO_t)(Key1_DPR+(keyIndexBias*KEY_FLAG_NUM)));
 			}
 		}
 	}break;
