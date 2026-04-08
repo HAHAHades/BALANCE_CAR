@@ -2,7 +2,7 @@
 
 //Ó²¼þÇý¶¯
 #include "bsp_iic.h"
-
+#include "bsp_gpio.h"
 
 
 uint32_t I2C_TIMEOUT_UserCallback(uint8_t errorCode)

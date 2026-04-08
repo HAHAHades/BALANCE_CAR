@@ -29,33 +29,7 @@
 #define KEY_UP_K3		KEY_3_UP
 #define KEY_LONG_K3		KEY_3_LONG
 
-#define JOY_DOWN_U		KEY_4_DOWN		/* 上 */
-#define JOY_UP_U		KEY_4_UP
-#define JOY_LONG_U		KEY_4_LONG
 
-#define JOY_DOWN_D		KEY_5_DOWN		/* 下 */
-#define JOY_UP_D		KEY_5_UP
-#define JOY_LONG_D		KEY_5_LONG
-
-#define JOY_DOWN_L		KEY_6_DOWN		/* 左 */
-#define JOY_UP_L		KEY_6_UP
-#define JOY_LONG_L		KEY_6_LONG
-
-#define JOY_DOWN_R		KEY_7_DOWN		/* 右 */
-#define JOY_UP_R		KEY_7_UP
-#define JOY_LONG_R		KEY_7_LONG
-
-#define JOY_DOWN_OK		KEY_8_DOWN		/* ok */
-#define JOY_UP_OK		KEY_8_UP
-#define JOY_LONG_OK		KEY_8_LONG
-
-#define SYS_DOWN_K1K2	KEY_9_DOWN		/* K1 K2 组合键 */
-#define SYS_UP_K1K2	    KEY_9_UP
-#define SYS_LONG_K1K2	KEY_9_LONG
-
-#define SYS_DOWN_K2K3	KEY_10_DOWN		/* K2 K3 组合键 */
-#define SYS_UP_K2K3  	KEY_10_UP
-#define SYS_LONG_K2K3	KEY_10_LONG
 
 /* 按键ID, 主要用于bsp_KeyState()函数的入口参数 */
 typedef enum

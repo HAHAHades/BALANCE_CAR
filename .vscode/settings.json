@@ -14,6 +14,11 @@
         "nrf24l01p.h": "c",
         "controller_decode.h": "c",
         "bsp_encoder.h": "c",
-        "bsp_exti.h": "c"
+        "bsp_exti.h": "c",
+        "bsp_soft_i2c.h": "c",
+        "bsp_sbv.h": "c",
+        "mpu6050.h": "c",
+        "bsp_iic.h": "c",
+        "oled.h": "c"
     }
 }

@@ -1,36 +1,100 @@
-#include "bsp_control.h"
-#include "bsp_SysTick.h"  		  
+#include "bsp_sbv.h"
+#include "bsp_SysTick.h"
+#include "mpu6050.h"
+
+#ifdef   soft_IIC //MPU
+#include "bsp_soft_i2c.h"
+#else
+#include "bsp_hard_i2c.h"
+#endif
+
 #include "bsp_520Motor.h"
 #include "bsp_encoder.h"
 #include "bsp_flash.h"
+#include "bsp_led.h"
+#include "nrf_controller.h"
 
-//小车参数储存位置，放在Flash最后
-#define CTRL_SBV_ParamBuff_SP ((uint32_t)(FLASH_END_ADDR-(4*CTRL_SBV_PARAM_NUM)))
+
+
+extern float  G_Euler_RPY[3];//欧拉角
+extern float  G_GYRO_XYZ[3];//角速度
+extern float  G_ACCEL_XYZ[3];//加速度
+
+
+//小车参数储存起始位置，放在Flash最后
+#define BSP_SBV_ParamBuff_SP ((uint32_t)(FLASH_END_ADDR-(4*BSP_SBV_PARAM_NUM)))
 //小车参数依次为 直立环KP/KD、速度环KP/KI、转向环KP/KD、中值、转向偏置
-static float SG_CTRL_SBV_ParamBuff[CTRL_SBV_PARAM_NUM] __attribute__ ((at(CTRL_SBV_ParamBuff_SP)));
+static float SG_SBV_ParamBuff[BSP_SBV_PARAM_NUM] __attribute__ ((at(BSP_SBV_ParamBuff_SP)));
 
 BSP_TWSBV_Typedef G_CTRL_TWSBV_Struct;//小车对象
 
-// static float KP_vert 	= 420; //700; //直立环比例
-// static float KD_vert 	= 36; //60直立环微分
-// static float KP_velo 	= -0.57; //速度环比例
-// static float KI_velo 	= -0.57/200.0; //速度环积分
-#define S_LIMIT 1000 //积分限幅
+static NRF_Controller_Run_Typedef SG_SBV_RunStruct = NRF_Controller_Run_TypedefDefaultVal;
 
-// static float KP_turn 	= 20; //转向环比例
-// static float KD_turn 	= 0.8; //转向环微分
-// static float Med = -3.0; //机械中值 
-
+#define S_LIMIT 60 //积分限幅
 #define PWM_LIMIT 100000 //PWM限幅，占空比*100
 
-// static float Tilt_Angle_Limit = 30;//倾斜限制,超出倾角小车停止
 
-// int32_t G_BSPCTRL_TargetSpeed = 0;//前后速度
-// int32_t G_BSPCTRL_TurnSpeed = 0;//转向速度，正为左转，负为右转
-// static int SG_BSPCTRL_TurnErr = 80; //转向偏置，中和硬件缺陷
-// static uint8_t SG_BSP_CTRL_CAR_ON = 0;//小车启动开关
-// static uint8_t SG_BSP_CTRL_Ctroller_ON = 0;//遥控启动开关
-// static uint8_t SG_BSP_CTRL_CAR_Tilt = 0;//小车倾倒检测结果
+void BSP_SBVInit(void)
+{
+
+    // MPU6050 IIC 初始化
+	
+    #ifdef soft_IIC //mpu使用软/硬件IIC
+		// 使用了B3 B4等引脚
+		// RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+		// GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
+        i2c_GPIO_Config();
+    #else
+        MPU_I2C_Config();
+    #endif
+    
+    //初始化MPUINT引脚
+    MPU_INT_Init();
+    
+    //初始化MPU6050
+    MPU6050_mpu_init();
+    MPU6050_mpl_init();
+    MPU6050_config();
+
+    //检测MPU6050
+    if(MPU6050ReadID() == 0)
+    {
+        BSP_SBV_DEBUG("\r\n没有检测到MPU6050传感器！\r\n");
+        LED_ON(1); 
+        while(1);	
+    }
+
+	//NRF遥控器配置
+	if (NRF_Controller_Config(NRF_CTRL_SLAVER))
+	{
+		LED_ON(1);
+		BSP_SBV_DEBUG( "NRF_Controller_Config err\n");
+		while(1);
+	}
+
+
+	BSP_SBV_ParamInit();//小车初始化参数
+	#if BSP_SBV_DEBUG_ON
+	CTRL_PrintSBVParam();//输出小车参数
+	#endif //BSP_SBV_DEBUG_ON
+	//电机初始化
+	TIM_DeInit(Motor_520_APWM_TIMx);
+	BSP_520Motor_Config( Motor_520_APWM_TIMx,  Motor_520_APWM_TIM_Channel_x, 
+						Motor_520_AIN1_PORTx,  Motor_520_AIN1_Pinx, 
+						 Motor_520_AIN2_PORTx,  Motor_520_AIN2_Pinx);
+	
+	BSP_520Motor_Config( Motor_520_BPWM_TIMx,  Motor_520_BPWM_TIM_Channel_x, 
+						Motor_520_BIN1_PORTx,  Motor_520_BIN1_Pinx, 
+						 Motor_520_BIN2_PORTx,  Motor_520_BIN2_Pinx);
+	
+	//编码器初始化
+	TIMx_CHx_ENCODER_Init( EncoderA_TIMx,  EncoderA_TIMx_ACH_x, EncoderA_TIMx_IO_Reamp ,  BSP_Encoder_DirF); //
+	Get_Encoder_Count(EncoderA_TIMx);//计数器清零
+	
+	TIMx_CHx_ENCODER_Init( EncoderB_TIMx,  EncoderB_TIMx_ACH_x, EncoderB_TIMx_IO_Reamp ,  BSP_Encoder_DirF); //
+	Get_Encoder_Count(EncoderB_TIMx);//计数器清零
+
+}
 
 
 /**
@@ -38,12 +102,31 @@ BSP_TWSBV_Typedef G_CTRL_TWSBV_Struct;//小车对象
   * @param   
   * @retval  
   */
-void TWSBV_Init(void)
+void BSP_SBV_ParamInit(void)
 {
 	BSP_TWSBV_Typedef tmpStruct = BSP_TWSBV_Typedef_DefaultVal;
 	G_CTRL_TWSBV_Struct = tmpStruct;
 
+	G_CTRL_TWSBV_Struct.KP_vert = SG_SBV_ParamBuff[0];
+	G_CTRL_TWSBV_Struct.KD_vert = SG_SBV_ParamBuff[1];
+	G_CTRL_TWSBV_Struct.KP_velo = SG_SBV_ParamBuff[2];
+	G_CTRL_TWSBV_Struct.KI_velo = SG_SBV_ParamBuff[3];
+	G_CTRL_TWSBV_Struct.KP_turn = SG_SBV_ParamBuff[4];
+	G_CTRL_TWSBV_Struct.KD_turn = SG_SBV_ParamBuff[5];
+	G_CTRL_TWSBV_Struct.Med = SG_SBV_ParamBuff[6];
+	G_CTRL_TWSBV_Struct.TurnErr = SG_SBV_ParamBuff[7];
 }
+
+
+
+void BSP_SBV_RunOnece(void)
+{
+	NRF_Controller_Run(&SG_SBV_RunStruct);
+}
+
+
+
+
 
 
 /**
@@ -60,7 +143,6 @@ void TWSBV_Init(void)
   * @param   gyro_X ：当前角速度
   * @retval  电机PWM占空比*100；符号表示旋转方向
   */
-
 int Vertical_Loop(float tatget_angle, float real_angle, float gyro_X)
 {
 	int out;
@@ -83,12 +165,19 @@ float Velocity_Loop(int tatget_speed, int real_speed)
 	static int S_Espeed = 0;//速度偏差的积分
 	static int Espeed = 0;//速度偏差
 	int out;
-	
+	// uint8_t sErr = 0;
 	//速度偏差，低通滤波限制速度变化
 	Espeed = 0.7*Espeed + 0.3*(tatget_speed - real_speed);//Espeed为上次偏差，(tatget_speed - real_speed)为本次偏差
-	
+	//速度偏差超过10倍,停止积分累加
+	// if (abs(real_speed)/(abs(tatget_speed)+1)>10)
+	// {
+	// 	sErr = 1;
+	// }
+	// else
+	// {
+	// 	S_Espeed += Espeed;
+	// }
 	S_Espeed += Espeed;
-	
 	//积分限幅
 	if(S_Espeed>S_LIMIT)
 	{
@@ -98,8 +187,9 @@ float Velocity_Loop(int tatget_speed, int real_speed)
 	{
 		S_Espeed = -S_LIMIT;
 	}
-	
+
 	out = G_CTRL_TWSBV_Struct.KP_velo*Espeed +  G_CTRL_TWSBV_Struct.KI_velo*S_Espeed;
+
 	
 	return out;
 
@@ -124,7 +214,7 @@ int Turn_Loop(int32_t turn_speed ,float gyro_Z)
   * @param   tatget_angle ：目标倾角角度
   * @param   real_angle(Roll) ：当前倾角角度
   * @param   gyro_X ：当前倾角速度
-  * @param   tatget_speed ：目标速度 单位：正交编码器每10ms的计数值（单脉冲的4倍）； rps轮子转每秒 = 100*tatget_speed/(4 * 11编码器每转单脉冲数*30减速比) tatget_speed=25时约1rps
+  * @param   tatget_speed ：目标速度 单位：正交编码器每10ms的计数值（单脉冲的4倍）； rps轮子转每秒 = 100*tatget_speed/(4 * 11编码器每转单脉冲数*30减速比) tatget_speed=13.2时约1rps
   * @param   encoder_L ：A电机编码器每10ms的正交计数值
   * @param   encoder_R ：B电机编码器每10ms的正交计数值
   * @param   target_turn ：目标转向速度 正左转 负右转 车轮速度与tatget_speed相同
@@ -136,9 +226,9 @@ void Control_PWM(float tatget_angle, float real_angle, float gyro_X, int32_t tat
 	int Vertical_out, Turn_out, PWM_A, PWM_B;
 	
 	float Velocity_out;
-	
+	tatget_angle = tatget_speed/BSP_SBV_SpeedDivAngle;
 	Velocity_out = Velocity_Loop(2*tatget_speed, (encoder_L+encoder_R));//encoder_L+encoder_R)/2 表示两轮子中心的速度（每10ms正交计数值）
-	Vertical_out = Vertical_Loop( Velocity_out+G_CTRL_TWSBV_Struct.Med,  real_angle,  gyro_X);
+	Vertical_out = Vertical_Loop( Velocity_out+G_CTRL_TWSBV_Struct.Med+tatget_angle,  real_angle,  gyro_X);
 	Turn_out = Turn_Loop(target_turn , gyro_Z);
 	
 	PWM_A = Vertical_out - Turn_out;
@@ -159,8 +249,8 @@ void Control_PWM(float tatget_angle, float real_angle, float gyro_X, int32_t tat
 	{
 		BSP_520Motor_Stop(Motor_520_A|Motor_520_B);
 	}
-	
 }
+
 
 
 /**
@@ -214,17 +304,15 @@ uint8_t pwm_limit_abs(int* data)
   */
 void Control_Car_IRQHandler(void)
 {
-
 	MPU_GetEuler(G_Euler_RPY, G_ACCEL_XYZ, G_GYRO_XYZ);
 	int16_t Encoder_CountA = Get_Encoder_Count(EncoderA_TIMx);//读取编码器
 	int16_t Encoder_CountB = -Get_Encoder_Count(EncoderB_TIMx);
-	
 	Control_PWM( 0.0,  G_Euler_RPY[0],  G_GYRO_XYZ[0],  G_CTRL_TWSBV_Struct.TargetSpeed,  Encoder_CountA,  Encoder_CountB, G_CTRL_TWSBV_Struct.TurnSpeed , G_GYRO_XYZ[2]);//控制小车
-
 }
 
 
-#if CTRL_SBV_PARAMADJ_ON
+
+#if BSP_SBV_PARAMADJ_ON
 
 /**
   * @brief   将小车参数保存在Flash
@@ -233,11 +321,8 @@ void Control_Car_IRQHandler(void)
   */
 void CTRL_SaveSBVParam(void)
 {
-
-	float tmpp[CTRL_SBV_PARAM_NUM];
-
+	float tmpp[BSP_SBV_PARAM_NUM];
 	CTRL_PrintSBVParam();
-
 	tmpp[0] = G_CTRL_TWSBV_Struct.KP_vert;
 	tmpp[1] = G_CTRL_TWSBV_Struct.KD_vert;
 	tmpp[2] = G_CTRL_TWSBV_Struct.KP_velo;
@@ -247,28 +332,24 @@ void CTRL_SaveSBVParam(void)
 	tmpp[6] = G_CTRL_TWSBV_Struct.Med;
 	tmpp[7] = G_CTRL_TWSBV_Struct.TurnErr;
 
-
-	FlashEraseSegment((uint32_t)SG_CTRL_SBV_ParamBuff, (uint32_t)(SG_CTRL_SBV_ParamBuff+CTRL_SBV_PARAM_NUM));
-
-
-
-	FlashWriteWords( (uint32_t)SG_CTRL_SBV_ParamBuff,  (uint32_t*)tmpp,  CTRL_SBV_PARAM_NUM);
-
+	FlashEraseSegment((uint32_t)SG_SBV_ParamBuff, (uint32_t)(SG_SBV_ParamBuff+BSP_SBV_PARAM_NUM));
+	FlashWriteWords( (uint32_t)SG_SBV_ParamBuff,  (uint32_t*)tmpp,  BSP_SBV_PARAM_NUM);
 }
 
-#endif //CTRL_SBV_PARAMADJ_ON
-
+#endif //BSP_SBV_PARAMADJ_ON
 
 
 void CTRL_PrintSBVParam(void)
 {
-	BSP_CTRL_DEBUG("KP_vert:%.5f", SG_CTRL_SBV_ParamBuff[0]);
-	BSP_CTRL_DEBUG("KD_vert:%.5f", SG_CTRL_SBV_ParamBuff[1]);
-	BSP_CTRL_DEBUG("KP_velo:%.5f", SG_CTRL_SBV_ParamBuff[2]);
-	BSP_CTRL_DEBUG("KI_velo:%.5f", SG_CTRL_SBV_ParamBuff[3]);
-	BSP_CTRL_DEBUG("KP_turn:%.5f", SG_CTRL_SBV_ParamBuff[4]);
-	BSP_CTRL_DEBUG("KD_turn:%.5f", SG_CTRL_SBV_ParamBuff[5]);
-	BSP_CTRL_DEBUG("Med:%.5f", SG_CTRL_SBV_ParamBuff[6]);
-	BSP_CTRL_DEBUG("TurnErr:%.5f", SG_CTRL_SBV_ParamBuff[7]);
+	BSP_SBV_DEBUG("KP_vert:%.5f", SG_SBV_ParamBuff[0]);
+	BSP_SBV_DEBUG("KD_vert:%.5f", SG_SBV_ParamBuff[1]);
+	BSP_SBV_DEBUG("KP_velo:%.5f", SG_SBV_ParamBuff[2]);
+	BSP_SBV_DEBUG("KI_velo:%.5f", SG_SBV_ParamBuff[3]);
+	BSP_SBV_DEBUG("KP_turn:%.5f", SG_SBV_ParamBuff[4]);
+	BSP_SBV_DEBUG("KD_turn:%.5f", SG_SBV_ParamBuff[5]);
+	BSP_SBV_DEBUG("Med:%.5f", SG_SBV_ParamBuff[6]);
+	BSP_SBV_DEBUG("TurnErr:%.5f", SG_SBV_ParamBuff[7]);
 }
+
+
 

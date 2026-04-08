@@ -19,7 +19,7 @@ void BSP_TIMx_TIME_UsageDemo(void)
 	BSP_TIMx_TypeDef BSP_TIM3_Struct;//建议使用全局对象
 	BSP_TIM3_Struct.TIMx = TIM3;
 
-	BSP_TIMx_TIME_Init(TIM3, 36-1, 1000-1);//1ms
+	BSP_TIMx_TIME_Init(TIM3, 72-1, 1000-1);//1ms
 	/* 中断函数示例
 	void TIM3_IRQHandler(void)
 	{

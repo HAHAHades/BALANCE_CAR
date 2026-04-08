@@ -193,7 +193,7 @@ void BSP_KEY_UsageDemo(void)
 **/
 uint32_t Key_GetTime(void) 
 {
-	unsigned long count;
+	uint32_t count;
 	get_tick_count(&count);
 	return count;
 }

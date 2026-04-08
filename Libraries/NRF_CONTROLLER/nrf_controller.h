@@ -82,13 +82,13 @@ typedef struct
   */
 
 /*信息输出*/
-#define NRF_CTRL_INFO(fmt,arg...)           UsartPrint("<<-NRF_CTRL-INFO->> "fmt"\n",##arg)
-#define NRF_CTRL_ERROR(fmt,arg...)          UsartPrint("<<-NRF_CTRL-ERROR->> "fmt"\n",##arg)
+#define NRF_CTRL_INFO(fmt,arg...)           printf("<<-NRF_CTRL-INFO->> "fmt"\n",##arg)
+#define NRF_CTRL_ERROR(fmt,arg...)          printf("<<-NRF_CTRL-ERROR->> "fmt"\n",##arg)
 
 
 #define NRF_CTRL_DEBUG(fmt,arg...)          do{\
                                           if(NRF_CTRL_DEBUG_ON)\
-                                          UsartPrint("<<-NRF_CTRL-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
+                                          printf("<<-NRF_CTRL-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
                                           }while(0)                                       
 
 /************************函数声明********************/

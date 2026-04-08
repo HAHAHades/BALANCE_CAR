@@ -134,7 +134,10 @@ void PendSV_Handler(void)
 
 #include "main.h"
 #include "bsp_SysTick.h"
-
+#include "mpu6050.h"
+#include "nrf24l01p.h"
+#include "bsp_time.h"
+#include "bsp_hc_sr04.h"
 /**
   * @brief  This function handles SysTick Handler.
   * @param  None
@@ -155,14 +158,14 @@ void SysTick_Handler(void)
 /*  file (startup_stm32f10x_xx.s).                                            */
 /******************************************************************************/
 
-
-
-
+#if HC_SR04_ON
+extern HC_SR04_Typedef G_HC_SR04_Struct;
+#endif //HC_SR04_ON
 void TIM3_IRQHandler(void)
 {
-  #if BSP_TIM3_TIME_ON
-  TIMx_DelayT_IRQHandler(&BSP_TIM3_Struct);
-  #endif //#if BSP_TIM3_TIME_ON
+  #if HC_SR04_ON
+  TIMx_DelayT_IRQHandler(&(G_HC_SR04_Struct.Time_TIM_Struct));
+	#endif //HC_SR04_ON
 }
 
 
@@ -183,7 +186,7 @@ void USART2_IRQHandler(void)
 
 #endif //USART_Print_ON
 
-#include "nrf24l01p.h"
+
 
 void EXTI0_IRQHandler(void)
 {
@@ -199,9 +202,9 @@ void EXTI0_IRQHandler(void)
 
 void EXTI2_IRQHandler(void)
 {
-	
-	// HC_SR04_IRQHandler();
-	
+	#if HC_SR04_ON
+  HC_SR04_IRQHandler( &G_HC_SR04_Struct);
+	#endif //HC_SR04_ON
 }
 
 

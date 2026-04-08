@@ -32,3 +32,8 @@
 .\objects\bsp_iic.o: ..\Libraries\SysTick\bsp_SysTick.h
 .\objects\bsp_iic.o: ..\Libraries\UART\bsp_usart.h
 .\objects\bsp_iic.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\bsp_iic.o: ..\Libraries\GPIO\bsp_gpio.h
+.\objects\bsp_iic.o: ..\User\main.h
+.\objects\bsp_iic.o: ..\Libraries\GPIO\bsp_gpio.h
+.\objects\bsp_iic.o: ..\Libraries\LED\bsp_led.h
+.\objects\bsp_iic.o: ..\Libraries\MOTOR\bsp_sbv.h

@@ -16,7 +16,7 @@ USART6       --      --      C6       C7      C8       USART6_IO_Reamp0
 USART6       --      --      A11      A12     C8       USART6_IO_Reamp1
 
 */
-
+#define USART_Print_ON  1 //是否使用串口输出调试信息
 #define USART_PRINTF_LEN 296 //串口单次发送最大字节
 
 #define USE_USART1 1 //使用USART1
@@ -95,6 +95,15 @@ typedef struct
 
 
 /***************函数申明***************/
+
+
+
+#define UsartPrint_DEBUG(fmt,arg...)          do{\
+                                          if(USART_Print_ON)\
+                                          printf("<<USART-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
+                                          }while(0)    
+
+
 
 #if 1
 

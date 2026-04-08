@@ -6,25 +6,22 @@
 #define BSP_USE_F103  //使用F103系列
 //#define BSP_USE_F401  //使用F401系列
 
+#define NRF_CTRL_M_ON 0 //是否编译为遥控器 会屏蔽其他配置
 
-#define USART_Print_ON  1
 #define OLED_Display_ON  0
 #define OLED_SHOW_MPU 0 //OLED 显示mpu的信息
-
 #define OLED_SHOW_HC_SR04 0 //OLED 显示声波传感器的信息
-#define HC_SR04_ON 0 //是否开启声波测距
-#define Motor_DEBUG 0 //调试电机
-#define CONTROL_CAR_IN_IT  1 // 是否在中断中控制小车，在主函数里控制小车可能导致控制周期不稳定
-#define BANLANCE_CAR_ON 1 //平衡车测试
-#define NRF_CTRL_ON 1 //是否使用NRF遥控器控制小车
-#define NRF_CTRL_M_ON 0 //是否作为遥控器 会屏蔽其他配置
+#define HC_SR04_ON 0 //是否开启声波测距,注意被占用的串口
+
+
+//调试参数定义
 #define TIMx_TIME_ON 0
 #define TIMx_ENCODER_ON 0
-#define MPU_ON 1
+#define Motor_DEBUG 0 //调试电机
 #define MPU_GetEuler_IN_IT  0  //在中断中读取MPU数据 仅调试用
 #define USART_DEBUG_MPU 0 //USART 输出mpu数据
 #define USART_Print_IN_IT_ON 0 //USART 在中断中输出，(中断频率过高可能导致系统卡死)
-#define BSP_KEYButton_TESTOnly 0  //仅测试按钮
+
 
 /* Includes ------------------------------------------------------------------*/
 #include "stdio.h"
@@ -40,11 +37,10 @@
 #include "bsp_SysTick.h"
 #include "bsp_gpio.h"
 #include "bsp_led.h"
-
-/********************* */
-#if USART_Print_ON
 #include "bsp_usart.h"
-#endif //USART_Print_ON
+
+#include "bsp_sbv.h"
+
 
 /******************** */
 #if OLED_Display_ON
@@ -53,9 +49,6 @@
 #endif //OLED_Display_ON
 
 /********************* */
-#if HC_SR04_ON
-#include "bsp_hc_sr04.h"
-#endif //HC_SR04_ON
 
 /******************** */
 #if TIMx_TIME_ON
@@ -75,35 +68,40 @@ extern BSP_TIMx_TypeDef BSP_TIM3_Struct;
 
 /****************** */
 #if BANLANCE_CAR_ON
-#include "bsp_520Motor.h"
-#include "bsp_control.h"
-#include "bsp_encoder.h"
+#include "bsp_sbv.h"
 #endif //BANLANCE_CAR_ON
 
 /******************* */
-#if NRF_CTRL_ON
+#if (NRF_CTRL_ON||NRF_CTRL_M_ON)
 #include "nrf_controller.h"
 #endif //NRF_CTRL_ON
 
 /********************* */
-#if MPU_ON
+#if (OLED_SHOW_MPU||MPU_GetEuler_IN_IT)
 #include "mpu6050.h"
+
 extern float  G_Euler_RPY[3];//欧拉角
 extern float  G_GYRO_XYZ[3];//角速度
 extern float  G_ACCEL_XYZ[3];//加速度
 #endif //MPU_ON
 
 /****************** */
-#ifdef   soft_IIC //MPU
-#include "bsp_soft_i2c.h"
-#else
-#include "bsp_hard_i2c.h"
-#endif
 
-#if BSP_KEYButton_TESTOnly
-#include "bsp_key.h"
- 
-#endif //BSP_KEYButton_TESTOnly
+
+#if HC_SR04_ON
+#include "bsp_hc_sr04.h"
+#endif //HC_SR04_ON
+
+
+
+
+
+
+
+
+
+
+
 
 
 

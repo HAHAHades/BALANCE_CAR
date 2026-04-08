@@ -1,17 +1,18 @@
-#ifndef _BSP_CONTROL_H
-#define _BSP_CONTROL_H
+#ifndef _BSP_SBV_H
+#define _BSP_SBV_H
 
 #include "stm32f10x.h"
+#include "bsp_usart.h"
 
-#include "mpu6050.h"
+#define BSP_SBV_DEBUG_ON 1 //是否输出调试信息
 
 
-extern int32_t G_BSPCTRL_TargetSpeed ;//前后速度
-extern int32_t G_BSPCTRL_TurnSpeed ;//转向速度，正为左转，负为右转
+#define BSP_SBV_PARAMADJ_ON 1 //是否开启调参功能
+#define BSP_SBV_PARAM_NUM 8 //需要调整的参数个数
 
-#define BSP_CTRL_DEBUG_ON 1 //是否调试输出
-#define CTRL_SBV_PARAMADJ_ON 1 //是否开启调参功能
-#define CTRL_SBV_PARAM_NUM 8 //需要调整的参数个数
+#define CONTROL_CAR_IN_IT  1 // 是否在中断中控制小车，在主函数里控制小车可能导致控制周期不稳定
+
+#define BSP_SBV_SpeedDivAngle 4 
 
 //小车结构体
 typedef struct 
@@ -32,6 +33,7 @@ typedef struct
     uint8_t CAR_Tilt        ; //小车倾倒检测结果
 }BSP_TWSBV_Typedef;
 
+
 //小车默认参数
 #define BSP_TWSBV_Typedef_DefaultVal {.KP_vert=420,\
                                       .KD_vert=36,\
@@ -40,7 +42,7 @@ typedef struct
                                       .KP_turn=20,\
                                       .KD_turn=0.8,\
                                       .Med=-3.0,\
-                                      .Tilt_Angle_Limit=30,\
+                                      .Tilt_Angle_Limit=45,\
                                       .TargetSpeed=0,\
                                       .TurnSpeed=0,\
                                       .TurnErr=80,\
@@ -51,34 +53,36 @@ typedef struct
                                    
 
 
-#define BSP_CTRL_DEBUG(fmt,arg...)          do{\
-                                          if(BSP_CTRL_DEBUG_ON)\
-                                          UsartPrint("<<-CTRL-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
+
+
+
+#define BSP_SBV_DEBUG(fmt,arg...)          do{\
+                                          if(BSP_SBV_DEBUG_ON)\
+                                          printf("<<-CTRL-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
                                           }while(0)
 
 
                                       
 
 /***************函数申明***************/
+void BSP_SBVInit(void);
+void BSP_SBV_ParamInit(void);
+void BSP_SBV_RunOnece(void);
 
-void TWSBV_Init(void);
-int Vertical_Loop(float tatget_angle, float real_angle, float gyro_Y);
+int Vertical_Loop(float tatget_angle, float real_angle, float gyro_X);
 float Velocity_Loop(int tatget_speed, int real_speed);
 int Turn_Loop(int32_t turn_speed ,float gyro_Z);
-uint8_t pwm_limit_abs(int* data);
-void Control_PWM(float tatget_angle, float real_angle, float gyro_Y, int32_t tatget_speed, int encoder_L, int encoder_R, int32_t target_turn, float gyro_Z);
-void Control_Car_IRQHandler(void);
-void Control_SetCarSta(uint8_t newSta);
-uint8_t Control_GetCarSta(void);
-void Control_SetCtrollerSta(uint8_t newSta);
-uint8_t Control_GetCtrollerSta(void);
+void Control_PWM(float tatget_angle, float real_angle, float gyro_X, int32_t tatget_speed, int encoder_L, int encoder_R, int32_t target_turn, float gyro_Z);
+
 void Control_Tilt_Detect(float real_angle);
+uint8_t pwm_limit_abs(int* data);
+void Control_Car_IRQHandler(void);
 void CTRL_SaveSBVParam(void);
 void CTRL_PrintSBVParam(void);
 /*************************************/
 
 
-#endif //_BSP_CONTROL_H
+#endif //_BSP_SBV_H
 
 
 

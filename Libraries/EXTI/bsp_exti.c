@@ -33,8 +33,7 @@ void KEY_EXTI_Register(GPIO_TypeDef* KEY_GPIO_POTRx, uint16_t KEY_GPIO_PINx,
 	GPIO_InitStruct.GPIO_Speed=GPIO_Speed_50MHz;
 	GPIO_InitStruct.GPIO_Pin =KEY_GPIO_PINx;
 	
-	GPIO_Init(KEY_GPIO_POTRx, &GPIO_InitStruct);//初始化LED灯对应的端口，将配置\
-                                              的模式、速度等写入寄存器中
+	GPIO_Init(KEY_GPIO_POTRx, &GPIO_InitStruct);//
 	uint8_t GPIO_PortSourceGPIOx = tmpGPIOx_count;
 	uint8_t GPIO_PinSourcex = 0;
 	uint16_t tmp_GPIO_Pinx = KEY_GPIO_PINx;
@@ -75,7 +74,7 @@ void KEY_EXTI_Register(GPIO_TypeDef* KEY_GPIO_POTRx, uint16_t KEY_GPIO_PINx,
 	{
 		NVIC_IRQChannel = EXTI0_IRQn + GPIO_PinSourcex;
 	}
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//选择中断优先级分组
+	//NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//选择中断优先级分组
 	
 	NVIC_InitStruct.NVIC_IRQChannel = NVIC_IRQChannel;
 	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;

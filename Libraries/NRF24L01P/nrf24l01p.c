@@ -61,14 +61,14 @@ void NRF24L01P_UseageDemo(void)
 		rVal = NRF24L01_TxPacket(TxBuf, time_out, &NRF_HardStruct);
 		if (rVal)
 		{
-			NRF_DEBUG("err code:", rVal);
+			NRF_DEBUG("err code:%d", rVal);
 		}
 		 
 		//Ω” ’∑Ω
 		rVal = NRF24L01_RxPacket( RxBuf, time_out, &NRF_HardStruct);
 		if (rVal)
 		{
-			NRF_DEBUG("err code:", rVal);
+			NRF_DEBUG("err code:%d", rVal);
 		}
 		else
 		{
@@ -86,7 +86,7 @@ void NRF24L01P_UseageDemo(void)
 **/
 uint32_t NRF24L01_GetTime(void) 
 {
-	unsigned long count;
+	uint32_t count;
 	get_tick_count(&count);
 	return count;
 }

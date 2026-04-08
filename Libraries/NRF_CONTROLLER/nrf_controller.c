@@ -1,7 +1,7 @@
 #include "nrf_controller.h"
 #include "bsp_exti.h"
 #include "string.h"
-#include "bsp_control.h"
+#include "bsp_sbv.h"
 
 static uint32_t SG_NRF_CTRL_CD_Tick; //长连接心跳
 NRF24L01P_Hard_Typedef G_NRF_CTRL_NRF_HardStruct;//遥控器使用的硬件对象
@@ -421,9 +421,9 @@ void NRF_Controller_Run(NRF_Controller_Run_Typedef* RunStruct)
             }
             else if (msg[0]==NRF_CTRL_CMD_ADJP)//调参
             {
-              #if CTRL_SBV_PARAMADJ_ON
+              #if BSP_SBV_PARAMADJ_ON
               CTRL_S_DECODE_ADJParam(msg);
-              #endif //#if CTRL_SBV_PARAMADJ_ON
+              #endif //#if BSP_SBV_PARAMADJ_ON
             }
         }
     }
@@ -438,7 +438,7 @@ void NRF_Controller_Run(NRF_Controller_Run_Typedef* RunStruct)
 **/
 uint32_t NRFCTR_GetTime(void) 
 {
-	unsigned long count;
+	uint32_t count;
 	get_tick_count(&count);
 	return count;
 }

@@ -608,11 +608,6 @@
               <FilePath>..\Libraries\TIM\bsp_encoder.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_control.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Libraries\MOTOR\bsp_control.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_hard_i2c.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Libraries\IIC\bsp_hard_i2c.c</FilePath>
@@ -651,6 +646,11 @@
               <FileName>bsp_flash.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Libraries\FLASH\bsp_flash.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_sbv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\MOTOR\bsp_sbv.c</FilePath>
             </File>
           </Files>
         </Group>

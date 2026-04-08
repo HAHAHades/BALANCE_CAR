@@ -24,11 +24,11 @@ IIC3       A8      C9          IIC3_IO_Reamp0
 
 */
 
-
+#define BSP_USE_F103
 
 /****************************/
 #define BSP_IICx 						I2C1
-#define IICx_DEBUG_ON         1
+#define IICx_DEBUG_ON         0
 
 #define I2C_Speed              400000  //
 #define BSP_I2Cx_OWN_ADDRESS7       0x10   //本机地址，这个地址只要与STM32外挂的I2C器件地址不一样即可
@@ -59,24 +59,24 @@ IIC3       A8      C9          IIC3_IO_Reamp0
 
 
 /*信息输出*/
-#if IICx_DEBUG_ON
+
 #include "bsp_usart.h"
 
 
 #define IICx_INFO(fmt,arg...)           do{\
                                           if(IICx_DEBUG_ON)\
-											printf("<<-EEPROM-INFO->> "fmt"\n",##arg);\
+											printf("<<-IIC-INFO->> "fmt"\n",##arg);\
 											}while(0)
 #define IICx_ERROR(fmt,arg...)          do{\
                                           if(IICx_DEBUG_ON)\
-											printf("<<-EEPROM-ERROR->> "fmt"\n",##arg);\
+											printf("<<-IIC-ERROR->> "fmt"\n",##arg);\
 											}while(0)
 #define IICx_DEBUG(fmt,arg...)          do{\
                                           if(IICx_DEBUG_ON)\
-                                          printf("<<-EEPROM-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
+                                          printf("<<-IIC-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
                                           }while(0)
 
-#endif //IICx_DEBUG_ON
+
 
 										  
 							  

@@ -38,13 +38,13 @@
 
 /*ÐÅÏ¢Êä³ö*/
 #define BSP_FLASH_INFO(fmt,arg...)          do{\
-										if(EEPROM_DEBUG_ON)\
-										UsartPrint("<<-EEPROM-INFO->> "fmt"\n",##arg);\
+										if(BSP_FLASH_DEBUG_ON)\
+										printf("<<-FLASH-INFO->> "fmt"\n",##arg);\
 										}while(0)
-#define BSP_FLASH_ERROR(fmt,arg...)          UsartPrint("<<-EEPROM-ERROR->> "fmt"\n",##arg)
+#define BSP_FLASH_ERROR(fmt,arg...)          printf("<<-FLASH-ERROR->> "fmt"\n",##arg)
 #define BSP_FLASH_DEBUG(fmt,arg...)          do{\
                                           if(BSP_FLASH_DEBUG_ON)\
-                                          UsartPrint("<<-EEPROM-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
+                                          printf("<<-FLASH-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
                                           }while(0)
 
 /****************copy from stm32f10x_flash.c******************/

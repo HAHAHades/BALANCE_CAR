@@ -1,12 +1,9 @@
 #ifndef _BSP_HC_SR04_H
 #define _BSP_HC_SR04_H
-#include "main.h"
+
 #include "stm32f10x.h"
+#include "bsp_tim.h"
 
-#include "bsp_exti.h"
-
-#include "bsp_SysTick.h"
-#include "bsp_time.h"
 
 
 #define HC_SR04_TIME_BSPTIMxStruct  BSP_TIM3_Struct  //传感器使用的计时定时器(需设置好全局变量)
@@ -32,11 +29,33 @@
 #define HC_SR04_Echo_H_T_Div1ms ((float)100.0) //1ms	   /170mm
 
 
+typedef struct 
+{
+	GPIO_TypeDef* Trig_PORT;
+	uint16_t Trig_PIN;
+	GPIO_TypeDef* Echo_PORT;
+	uint16_t Echo_PIN;
+	uint32_t Echo_EXTI_Line;
+	BSP_TIMx_TypeDef Time_TIM_Struct;//使用的定时器对象
+	uint8_t Echo_EXTI_Falg;
+	uint32_t usResult;//转换的结果/us
+}HC_SR04_Typedef;
 
-void HC_SR04_Init(GPIO_TypeDef* HC_Trig_GPIO_POTRx, uint16_t HC_Trig_GPIO_PINx,
-						 GPIO_TypeDef* HC_Echo_GPIO_POTRx, uint16_t HC_Echo_GPIO_PINx);
-void HC_SR04_StartMeasure(void);
-_Bool HC_SR04_get_distance(float *dis);
-void HC_SR04_IRQHandler(void);
+
+#define HC_SR04_Typedef_DefaultVal {\
+									.Trig_PORT = GPIOA,\
+									.Trig_PIN = GPIO_Pin_3,\
+									.Echo_PORT = GPIOA,\
+									.Echo_PIN = GPIO_Pin_2,\
+									.Echo_EXTI_Line = GPIO_Pin_2,\
+									.Time_TIM_Struct.TIMx = TIM3}
+
+
+
+
+void HC_SR04_Init(HC_SR04_Typedef* HC_SR04_Struct);
+void HC_SR04_StartMeasure(HC_SR04_Typedef* HC_SR04_Struct);
+uint8_t HC_SR04_get_distance(HC_SR04_Typedef* HC_SR04_Struct, float *dis);
+void HC_SR04_IRQHandler(HC_SR04_Typedef* HC_SR04_Struct);
 
 #endif /* _BSP_HC_SR04_H */

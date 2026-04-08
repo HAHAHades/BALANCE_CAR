@@ -1,6 +1,6 @@
 #include "controller_decode.h"
 #include "nrf_controller.h"
-#include "bsp_control.h"
+#include "bsp_sbv.h"
 
 
 extern BSP_TWSBV_Typedef G_CTRL_TWSBV_Struct;//小车对象
@@ -33,7 +33,7 @@ uint8_t CTRL_M_DECODE_CopeKeyFIFO(KEY_FIFO_t* Keys, uint8_t keys_num, uint8_t* M
             //电位计按键
             ret_num++;
             potIndex = (tmpFlag&KEY_POT_FIFO_I_MASK)>>KEY_POT_FIFO_I_BIT_S;
-            potData = (int16_t)(tmpFlag & KEY_POT_FIFO_MASK)/CTRL_DECODE_POTDataRatio;
+            potData = (int16_t)(tmpFlag & KEY_POT_FIFO_MASK);
             tmpMsg[0] = potIndex;
             tmpMsg[1] = (tmpFlag&0xff000000)>>24;
             tmpMsg[2] = (tmpFlag&0xff0000)>>16;
@@ -96,13 +96,16 @@ uint8_t CTRL_S_DECODE_CopeKeyFIFO(uint8_t* Msg)
             NRF_CTRL_DEBUG("pot:%d potData32:%ld", potIndex, potData32);
 
             #if NRF_CTRL_ON
-            if (potIndex==0)
-            {
-                G_CTRL_TWSBV_Struct.TurnSpeed = potData32*10;
-            }
-            else if (potIndex==3)
-            {
-                G_CTRL_TWSBV_Struct.TargetSpeed = potData32;
+            if (G_CTRL_TWSBV_Struct.Ctroller_ON)
+            {         
+                if (potIndex==0)
+                {
+                    G_CTRL_TWSBV_Struct.TurnSpeed = potData32/CTRL_DECODE_POT_TurnDataRatio;
+                }
+                else if (potIndex==3)
+                {
+                    G_CTRL_TWSBV_Struct.TargetSpeed = potData32/CTRL_DECODE_POT_TargetDataRatio;
+                }
             }
             #endif //NRF_CTRL_ON
 
@@ -122,11 +125,17 @@ uint8_t CTRL_S_DECODE_CopeKeyFIFO(uint8_t* Msg)
                     {
                         G_CTRL_TWSBV_Struct.CAR_ON = 0;
                         //NRF_CTRL_DEBUG("stop ctrl car...");
+                        G_NRF_CTRL_S_ACKMsg[0] = NRF_CTRL_CMD_CAHR;
+                        G_NRF_CTRL_S_ACKMsg[1] = snprintf((char*)(&G_NRF_CTRL_S_ACKMsg[2]), WRX_PAYLOAD_WIDTH-2, "Car_Off");
+                        G_NRF_CTRL_NRF_HardStruct.NRF_S_ACKMsg = 1;
                     }
                     else
                     {
                         G_CTRL_TWSBV_Struct.CAR_ON = 1;
                         //NRF_CTRL_DEBUG("start ctrl car...");
+                        G_NRF_CTRL_S_ACKMsg[0] = NRF_CTRL_CMD_CAHR;
+                        G_NRF_CTRL_S_ACKMsg[1] = snprintf((char*)(&G_NRF_CTRL_S_ACKMsg[2]), WRX_PAYLOAD_WIDTH-2, "Car_On");
+                        G_NRF_CTRL_NRF_HardStruct.NRF_S_ACKMsg = 1;
                     }
                     #endif //NRF_CTRL_ON
                 }
@@ -135,12 +144,16 @@ uint8_t CTRL_S_DECODE_CopeKeyFIFO(uint8_t* Msg)
                     if (G_CTRL_TWSBV_Struct.Ctroller_ON)
                     {
                         G_CTRL_TWSBV_Struct.Ctroller_ON = 0;
-                    
+                        G_NRF_CTRL_S_ACKMsg[0] = NRF_CTRL_CMD_CAHR;
+                        G_NRF_CTRL_S_ACKMsg[1] = snprintf((char*)(&G_NRF_CTRL_S_ACKMsg[2]), WRX_PAYLOAD_WIDTH-2, "Ctroller_OFF");
+                        G_NRF_CTRL_NRF_HardStruct.NRF_S_ACKMsg = 1;
                     }
                     else
                     {
                         G_CTRL_TWSBV_Struct.Ctroller_ON = 1;
-                
+                        G_NRF_CTRL_S_ACKMsg[0] = NRF_CTRL_CMD_CAHR;
+                        G_NRF_CTRL_S_ACKMsg[1] = snprintf((char*)(&G_NRF_CTRL_S_ACKMsg[2]), WRX_PAYLOAD_WIDTH-2, "Ctroller_ON");
+                        G_NRF_CTRL_NRF_HardStruct.NRF_S_ACKMsg = 1;
                     }
                 }
                 
@@ -154,7 +167,7 @@ uint8_t CTRL_S_DECODE_CopeKeyFIFO(uint8_t* Msg)
 
 
 
-#if CTRL_SBV_PARAMADJ_ON
+#if BSP_SBV_PARAMADJ_ON
 /**
   * @brief   配控端参数调节，持续读取按键信息，直至再次读取到参数调节指令退出
   * @param   Msg[IN] : 输入的数据, 固定32个uint8_t
@@ -385,7 +398,7 @@ void CTRL_S_DECODE_ADJParam(uint8_t *Msg)
     }
 }
 
-#endif //#if CTRL_SBV_PARAMADJ_ON
+#endif //#if BSP_SBV_PARAMADJ_ON
 
 
 /**

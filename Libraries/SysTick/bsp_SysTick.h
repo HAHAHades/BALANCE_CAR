@@ -9,10 +9,11 @@
 
 
 
-int get_tick_count(unsigned long *count);
+uint32_t get_tick_count(uint32_t* count);
 void SysTick_delay(unsigned long nTime);
 void SysTick_Init(void);
 void TimingDelay_Decrement(void);
 void TimeStamp_Increment(void);
+void delay_us(uint32_t us);
 void delay_5_nop(void);
 #endif /* __SYSTICK_H */

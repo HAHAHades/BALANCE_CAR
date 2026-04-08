@@ -230,15 +230,15 @@ uint8_t MPU6050ReadID(void)
 	if((Re != MPU_6500ID)&&(Re != MPU_6050ID))
 	{
         #if USART_Print_ON
-		UsartPrint("MPU6050 dectected error!\r\n检测不到MPU6050模块，请检查模块与开发板的接线");
-        UsartPrint("MPU6050 ID = %d\r\n",Re);
+		UsartPrint_DEBUG("MPU6050 dectected error!\r\n检测不到MPU6050模块，请检查模块与开发板的接线");
+        UsartPrint_DEBUG("MPU6050 ID = %d\r\n",Re);
         #endif //USART_Print_ON
 		return 0;
 	}
 	else
 	{
         #if USART_Print_ON
-		UsartPrint("MPU6050 ID = %d\r\n",Re);
+		UsartPrint_DEBUG("MPU6050 ID = %d\r\n",Re);
         #endif //USART_Print_ON
 		return 1;
 	}
@@ -312,7 +312,7 @@ void MPU6050_ReturnTemp(float *Temperature)
 void MPU_GetEuler(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ)
 {
     unsigned char new_temp = 0;
-    unsigned long timestamp;
+    uint32_t timestamp;
     unsigned long sensor_timestamp;
     int new_data = 0;
 
@@ -383,7 +383,7 @@ void MPU_GetEuler(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ)
         if (inv_execute_on_data())
         {
             #if USART_Print_IN_IT_ON
-            UsartPrint("数据错误\n");
+            printf("数据错误\n");
             #endif //USART_Print_IN_IT_ON
         }
 
@@ -394,14 +394,9 @@ void MPU_GetEuler(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ)
             Euler_RPY[2] = data[2] * 1.0 / (1 << 16);
             
             #if USART_Print_IN_IT_ON
-            UsartPrint("\r\n欧拉角(rad)\t\t: %7.5f\t %7.5f\t %7.5f\t", Euler_RPY[0], Euler_RPY[1], Euler_RPY[2]);
+            printf("\r\n欧拉角(rad)\t\t: %7.5f\t %7.5f\t %7.5f\t", Euler_RPY[0], Euler_RPY[1], Euler_RPY[2]);
             #endif //USART_Print_IN_IT_ON
             
-            #if OLED_SHOW_MPU
-            OLED_Display_XxX_ASCII( 0, 0,  8, 16, 1, "euler:R,P,Y\n", Euler_RPY[0], Euler_RPY[1], Euler_RPY[2]);
-            OLED_Display_XxX_ASCII( 0, 16,  8, 16, 1, "%5.2f %5.2f %5.2f\n", Euler_RPY[0], Euler_RPY[1], Euler_RPY[2]);
-            OLED_Refresh();
-            #endif //OLED_SHOW_MPU
         }
            if (inv_get_sensor_type_accel(data, &accuracy, (inv_time_t *)&timestamp))
            {
@@ -409,7 +404,7 @@ void MPU_GetEuler(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ)
                ACCEL[1] = data[1] * 1.0 / (1 << 16);
                ACCEL[2] = data[2] * 1.0 / (1 << 16);
 				#if USART_Print_IN_IT_ON
-               UsartPrint("\r加速度(g/s)\t\t: %7.5f\t %7.5f\t %7.5f\t\r", ACCEL[0], ACCEL[1], ACCEL[2]);
+               printf("\r加速度(g/s)\t\t: %7.5f\t %7.5f\t %7.5f\t\r", ACCEL[0], ACCEL[1], ACCEL[2]);
 				#endif //USART_Print_IN_IT_ON
 			}
 
@@ -419,7 +414,7 @@ void MPU_GetEuler(float *Euler_RPY, float *ACCEL, float *GYRO_XYZ)
                 GYRO_XYZ[1] = data[1] * 1.0 / (1 << 16);
                 GYRO_XYZ[2] = data[2] * 1.0 / (1 << 16);
 				#if USART_Print_IN_IT_ON
-                UsartPrint("角速度(rad/s)\t\t: %7.5f\t %7.5f\t %7.5f\t\r\n", GYRO_XYZ[0], GYRO_XYZ[1], GYRO_XYZ[2]);
+                printf("角速度(rad/s)\t\t: %7.5f\t %7.5f\t %7.5f\t\r\n", GYRO_XYZ[0], GYRO_XYZ[1], GYRO_XYZ[2]);
 				#endif //USART_Print_IN_IT_ON+
             }		
 

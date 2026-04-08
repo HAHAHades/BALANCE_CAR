@@ -10,7 +10,7 @@
 
 *************************************************************/
 
-#define KEY_DEBUG_ON 1 //通过串口输出调试信息
+#define KEY_DEBUG_ON 0 //通过串口输出调试信息
 
 #define KEY_POT_ON 1 //是否使用电位计按键
 
@@ -196,7 +196,7 @@ typedef struct
 #define KEY_ERROR(fmt,arg...)          printf("<<-KEY-ERROR->> "fmt"\n",##arg)
 #define KEY_DEBUG(fmt,arg...)          do{\
                                           if(KEY_DEBUG_ON)\
-                                          UsartPrint("<<-KEY-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
+                                          printf("<<-KEY-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
                                           }while(0)
 
 #define KEY_GET_IO_STA(A,B)  (A->IDR & B)

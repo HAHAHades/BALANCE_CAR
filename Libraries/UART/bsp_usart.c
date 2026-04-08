@@ -2,8 +2,20 @@
                       仅支持某一个或一批同样的开发板
 #include "bsp_gpio.h"
 
-
 static USART_Print_Typdef SG_USART_PrintStruct;//全局变量，仅用于串口打印
+
+
+
+
+int fputc(int ch, FILE *p)
+{
+	#if USART_Print_ON
+	USART_SendData(SG_USART_PrintStruct.USARTx, ch);
+	while(USART_GetFlagStatus(SG_USART_PrintStruct.USARTx, USART_FLAG_TXE)==RESET);//等待发送完成
+	#endif //USART_Print_ON
+	return ch;
+}
+
 
 
 #if 1

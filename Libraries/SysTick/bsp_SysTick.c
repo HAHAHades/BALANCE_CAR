@@ -53,10 +53,10 @@ void SysTick_delay(unsigned long nTime)
 	while(TimingDelay != 0);
 }
 
-int get_tick_count(unsigned long *count)
+uint32_t get_tick_count(uint32_t* count)
 {
-        count[0] = g_ul_ms_ticks;
-	return 0;
+  count[0] = g_ul_ms_ticks;
+	return g_ul_ms_ticks;
 }
 
 void TimingDelay_Decrement(void)
@@ -69,6 +69,15 @@ void TimeStamp_Increment(void)
 {
 	g_ul_ms_ticks++;
 }
+
+
+void delay_us(uint32_t us)
+{
+  uint32_t i;
+  for ( i = 0; i < us*8; i++);
+}
+
+
 
 void delay_5_nop(void)
 {

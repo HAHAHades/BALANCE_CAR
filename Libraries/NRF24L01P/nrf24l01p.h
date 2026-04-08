@@ -22,7 +22,7 @@
 
 
 #define NRF_DefaultFrequency  10//Ä¬ÈÏÊ¹ÓÃÆµÂÊ (2.4+0.001*NRF_DefaultFrequency)/GHz  NRF_DefaultFrequency<125
-#define NRF_DEBUG_ON         1  //Êä³öµ÷ÊÔÐÅÏ¢
+#define NRF_DEBUG_ON         0  //Êä³öµ÷ÊÔÐÅÏ¢
 #define TEST_NRF24L01  1  //ÊÇ·ñ½ö²âÊÔNRF24L01Ä£¿é
 
 #define NRF24L01_IRQ_EXTI 1 //ÊÇ·ñÊ¹ÓÃÍâ²¿ÖÐ¶Ï´¦ÀíNRF×´Ì¬
@@ -185,7 +185,7 @@ extern NRF24L01P_Hard_Typedef* G_NRF_HardStruct_ForEXTI0;//È«¾ÖÖ¸Õë£¬½öÎªÖÐ¶Ïº¯Ê
 /*ÐÅÏ¢Êä³ö*/
 #define NRF_DEBUG(fmt,arg...)          do{\
                                           if(NRF_DEBUG_ON)\
-                                          UsartPrint("<<-NRF-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
+                                          printf("<<-NRF-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
                                           }while(0)
 
 /** @defgroup NRF24L01P_ReturnCode
