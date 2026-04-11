@@ -535,7 +535,6 @@ u32 OLED_Pow(u8 m,u8 n)
 void OLED_Init(void)
 {
 
-	
 	OLED_WR_Byte(0xAE,OLED_CMD); /*display off*/
 	OLED_WR_Byte(0x00,OLED_CMD); /*set lower column address*/ 
 	OLED_WR_Byte(0x10,OLED_CMD); /*set higher column address*/

@@ -38,4 +38,8 @@
 .\objects\nrf24l01p.o: ..\Libraries\GPIO\bsp_gpio.h
 .\objects\nrf24l01p.o: ..\Libraries\LED\bsp_led.h
 .\objects\nrf24l01p.o: ..\Libraries\MOTOR\bsp_sbv.h
+.\objects\nrf24l01p.o: ..\Libraries\NRF_CONTROLLER\nrf_controller.h
+.\objects\nrf24l01p.o: ..\Libraries\KEY\bsp_key.h
+.\objects\nrf24l01p.o: ..\Libraries\ADC\bsp_adc.h
+.\objects\nrf24l01p.o: ..\Libraries\NRF_CONTROLLER\controller_decode.h
 .\objects\nrf24l01p.o: ..\Libraries\EXTI\bsp_exti.h

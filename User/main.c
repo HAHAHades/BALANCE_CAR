@@ -116,6 +116,7 @@ int main(void)
     uint32_t HC_SR04_DetcPeriod = 500;
 	#endif //	#if HC_SR04_ON //
 
+
 	BSP_SBVInit();
 	while (1)
 	{
@@ -129,7 +130,11 @@ int main(void)
 		else if (timeDiff > LED_RunPeriod)
 		{
 			LED_ON(1);
+			 //printf("\nº”ÀŸ∂»(g/s)\t\t: %7.5f; %7.5f; %7.5f;\n", G_ACCEL_XYZ[0], G_ACCEL_XYZ[1], G_ACCEL_XYZ[2]);
+
 		}
+
+
 
 		#if OLED_SHOW_MPU
 		timeDiff = nowTime - OLED_MPULastDipTime;

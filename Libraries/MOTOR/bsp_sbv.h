@@ -8,7 +8,7 @@
 
 
 #define BSP_SBV_PARAMADJ_ON 1 //是否开启调参功能
-#define BSP_SBV_PARAM_NUM 8 //需要调整的参数个数
+#define BSP_SBV_PARAM_NUM 10 //需要调整的参数个数
 
 #define CONTROL_CAR_IN_IT  1 // 是否在中断中控制小车，在主函数里控制小车可能导致控制周期不稳定
 
@@ -23,6 +23,8 @@ typedef struct
     float KI_velo 	        ; //速度环积分
     float KP_turn 	        ; //转向环比例
     float KD_turn 	        ; //转向环微分
+    float KD_pos 	        ; //位置环微分
+    float KI_pos            ; //位置环积分
     float Med               ; //机械中值 
     float Tilt_Angle_Limit  ; //倾斜限制,超出倾角小车停止
     int32_t TargetSpeed     ; //前后速度
@@ -41,11 +43,13 @@ typedef struct
                                       .KI_velo=-0.57/200.0,\
                                       .KP_turn=20,\
                                       .KD_turn=0.8,\
-                                      .Med=-3.0,\
+                                      .KD_pos=0.5,\
+                                      .KI_pos=0.0065,\
+                                      .Med=-1.0,\
                                       .Tilt_Angle_Limit=45,\
                                       .TargetSpeed=0,\
                                       .TurnSpeed=0,\
-                                      .TurnErr=80,\
+                                      .TurnErr=-50,\
                                       .CAR_ON=1,\
                                       .Ctroller_ON=0,\
                                       .CAR_Tilt=0}
@@ -72,7 +76,8 @@ void BSP_SBV_RunOnece(void);
 int Vertical_Loop(float tatget_angle, float real_angle, float gyro_X);
 float Velocity_Loop(int tatget_speed, int real_speed);
 int Turn_Loop(int32_t turn_speed ,float gyro_Z);
-void Control_PWM(float tatget_angle, float real_angle, float gyro_X, int32_t tatget_speed, int encoder_L, int encoder_R, int32_t target_turn, float gyro_Z);
+float Position_Loop(int pos);
+void Control_PWM(float tatget_angle, float real_angle, float gyro_X, float acc_X, int32_t tatget_speed, int encoder_L, int encoder_R, int32_t target_turn, float gyro_Z);
 
 void Control_Tilt_Detect(float real_angle);
 uint8_t pwm_limit_abs(int* data);

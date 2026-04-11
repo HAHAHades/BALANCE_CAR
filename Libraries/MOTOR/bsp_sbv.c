@@ -23,15 +23,20 @@ extern float  G_ACCEL_XYZ[3];//加速度
 
 //小车参数储存起始位置，放在Flash最后
 #define BSP_SBV_ParamBuff_SP ((uint32_t)(FLASH_END_ADDR-(4*BSP_SBV_PARAM_NUM)))
-//小车参数依次为 直立环KP/KD、速度环KP/KI、转向环KP/KD、中值、转向偏置
+//小车参数依次为 直立环KP/KD、速度环KP/KI、转向环KP/KD、位置环KD/KI、中值、转向偏置
 static float SG_SBV_ParamBuff[BSP_SBV_PARAM_NUM] __attribute__ ((at(BSP_SBV_ParamBuff_SP)));
 
 BSP_TWSBV_Typedef G_CTRL_TWSBV_Struct;//小车对象
 
 static NRF_Controller_Run_Typedef SG_SBV_RunStruct = NRF_Controller_Run_TypedefDefaultVal;
+static int S_Espeed = 0;//速度偏差的积分
+static int Spos = 0;//位置积分
+static int last_pos = 0;
 
 #define S_LIMIT 60 //积分限幅
 #define PWM_LIMIT 100000 //PWM限幅，占空比*100
+
+
 
 
 void BSP_SBVInit(void)
@@ -74,6 +79,7 @@ void BSP_SBVInit(void)
 
 
 	BSP_SBV_ParamInit();//小车初始化参数
+
 	#if BSP_SBV_DEBUG_ON
 	CTRL_PrintSBVParam();//输出小车参数
 	#endif //BSP_SBV_DEBUG_ON
@@ -107,14 +113,16 @@ void BSP_SBV_ParamInit(void)
 	BSP_TWSBV_Typedef tmpStruct = BSP_TWSBV_Typedef_DefaultVal;
 	G_CTRL_TWSBV_Struct = tmpStruct;
 
-	G_CTRL_TWSBV_Struct.KP_vert = SG_SBV_ParamBuff[0];
-	G_CTRL_TWSBV_Struct.KD_vert = SG_SBV_ParamBuff[1];
-	G_CTRL_TWSBV_Struct.KP_velo = SG_SBV_ParamBuff[2];
-	G_CTRL_TWSBV_Struct.KI_velo = SG_SBV_ParamBuff[3];
-	G_CTRL_TWSBV_Struct.KP_turn = SG_SBV_ParamBuff[4];
-	G_CTRL_TWSBV_Struct.KD_turn = SG_SBV_ParamBuff[5];
-	G_CTRL_TWSBV_Struct.Med = SG_SBV_ParamBuff[6];
-	G_CTRL_TWSBV_Struct.TurnErr = SG_SBV_ParamBuff[7];
+	// G_CTRL_TWSBV_Struct.KP_vert = SG_SBV_ParamBuff[0];
+	// G_CTRL_TWSBV_Struct.KD_vert = SG_SBV_ParamBuff[1];
+	// G_CTRL_TWSBV_Struct.KP_velo = SG_SBV_ParamBuff[2];
+	// G_CTRL_TWSBV_Struct.KI_velo = SG_SBV_ParamBuff[3];
+	// G_CTRL_TWSBV_Struct.KP_turn = SG_SBV_ParamBuff[4];
+	// G_CTRL_TWSBV_Struct.KD_turn = SG_SBV_ParamBuff[5];
+	// G_CTRL_TWSBV_Struct.KD_pos = SG_SBV_ParamBuff[6];
+	// G_CTRL_TWSBV_Struct.KI_pos = SG_SBV_ParamBuff[7];
+	// G_CTRL_TWSBV_Struct.Med = SG_SBV_ParamBuff[8];
+	// G_CTRL_TWSBV_Struct.TurnErr = SG_SBV_ParamBuff[9];
 }
 
 
@@ -162,7 +170,7 @@ int Vertical_Loop(float tatget_angle, float real_angle, float gyro_X)
   */
 float Velocity_Loop(int tatget_speed, int real_speed)
 {
-	static int S_Espeed = 0;//速度偏差的积分
+	
 	static int Espeed = 0;//速度偏差
 	int out;
 	// uint8_t sErr = 0;
@@ -196,7 +204,7 @@ float Velocity_Loop(int tatget_speed, int real_speed)
 }
 
 /**
-  * @brief   转向环P控制
+  * @brief   转向环控制
   * @param   turn_speed ：期望转向速度
   * @param   gyro_Z ：当前偏航角速度
   * @retval  电机PWM占空比*100；符号表示旋转方向
@@ -208,47 +216,79 @@ int Turn_Loop(int32_t turn_speed ,float gyro_Z)
 }
 
 
+/**
+  * @brief   位置环控制
+  * @param   posA ：电机编码器数值
+  * @retval  电机速度(速度环输入)
+  */
+float Position_Loop(int pos)
+{
+	int VPos;
+	int outP;
+	VPos = pos - last_pos;
+	Spos+= pos;
+	outP = G_CTRL_TWSBV_Struct.KD_pos*VPos + G_CTRL_TWSBV_Struct.KI_pos*Spos;
+	last_pos = pos;
+	return outP;
+}
+
 
 /**
   * @brief   计算PWM，控制电机
   * @param   tatget_angle ：目标倾角角度
   * @param   real_angle(Roll) ：当前倾角角度
   * @param   gyro_X ：当前倾角速度
+  * @param   acc_X ：小车正向加速度
   * @param   tatget_speed ：目标速度 单位：正交编码器每10ms的计数值（单脉冲的4倍）； rps轮子转每秒 = 100*tatget_speed/(4 * 11编码器每转单脉冲数*30减速比) tatget_speed=13.2时约1rps
-  * @param   encoder_L ：A电机编码器每10ms的正交计数值
-  * @param   encoder_R ：B电机编码器每10ms的正交计数值
+  * @param   encoder_L ：A电机编码器每10ms的正交计数值,前+后-，由于每次读取后清零，所以读取的是相对位置
+  * @param   encoder_R ：B电机编码器每10ms的正交计数值,前+后-
   * @param   target_turn ：目标转向速度 正左转 负右转 车轮速度与tatget_speed相同
   * @param   gyro_Z ：当前偏航速度
   * @retval  
   */
-void Control_PWM(float tatget_angle, float real_angle, float gyro_X, int32_t tatget_speed, int encoder_L, int encoder_R, int32_t target_turn, float gyro_Z)
+void Control_PWM(float tatget_angle, float real_angle, float gyro_X, float acc_X, int32_t tatget_speed, int encoder_L, int encoder_R, int32_t target_turn, float gyro_Z)
 {
-	int Vertical_out, Turn_out, PWM_A, PWM_B;
-	
+	int Vertical_out=0, Turn_out=0, PWM_A=0, PWM_B=0;
+	float posOut = 0;
 	float Velocity_out;
 	tatget_angle = tatget_speed/BSP_SBV_SpeedDivAngle;
+	
+	Control_Tilt_Detect(real_angle);//倾斜检测
+	if ((!G_CTRL_TWSBV_Struct.CAR_ON)||G_CTRL_TWSBV_Struct.CAR_Tilt)
+	{
+		BSP_520Motor_Stop(Motor_520_A|Motor_520_B);
+		S_Espeed = 0;//积分累计清零
+		G_CTRL_TWSBV_Struct.TargetSpeed = 0;
+		G_CTRL_TWSBV_Struct.TurnSpeed = 0;
+		Spos= 0;
+		last_pos = 0;
+		return;
+	}
+	else if ((abs(tatget_speed)<1)&&(abs(target_turn)<1))
+	{
+		
+		posOut = Position_Loop(encoder_L+encoder_R);
+	}
+	else
+	{
+		Spos= 0;
+		last_pos = 0;
+	}
+
 	Velocity_out = Velocity_Loop(2*tatget_speed, (encoder_L+encoder_R));//encoder_L+encoder_R)/2 表示两轮子中心的速度（每10ms正交计数值）
-	Vertical_out = Vertical_Loop( Velocity_out+G_CTRL_TWSBV_Struct.Med+tatget_angle,  real_angle,  gyro_X);
+	Vertical_out = Vertical_Loop( posOut + Velocity_out+G_CTRL_TWSBV_Struct.Med+tatget_angle,  real_angle,  gyro_X);
 	Turn_out = Turn_Loop(target_turn , gyro_Z);
 	
-	PWM_A = Vertical_out - Turn_out;
+	PWM_A = Vertical_out - Turn_out ;
 	PWM_B = Vertical_out + Turn_out + G_CTRL_TWSBV_Struct.TurnErr;
 	
 	//控制电机
 	uint8_t Dir_A = pwm_limit_abs(&PWM_A);
 	uint8_t Dir_B = pwm_limit_abs(&PWM_B);
 
-	Control_Tilt_Detect(real_angle);//倾斜检测
+	BSP_520Motor_Rotation( Motor_520_A,  Dir_A,  PWM_A/100.0);
+	BSP_520Motor_Rotation( Motor_520_B,  Dir_B,  PWM_B/100.0);
 
-	if (G_CTRL_TWSBV_Struct.CAR_ON&&(!G_CTRL_TWSBV_Struct.CAR_Tilt))
-	{
-		BSP_520Motor_Rotation( Motor_520_A,  Dir_A,  PWM_A/100.0);
-		BSP_520Motor_Rotation( Motor_520_B,  Dir_B,  PWM_B/100.0);
-	}
-	else
-	{
-		BSP_520Motor_Stop(Motor_520_A|Motor_520_B);
-	}
 }
 
 
@@ -307,7 +347,7 @@ void Control_Car_IRQHandler(void)
 	MPU_GetEuler(G_Euler_RPY, G_ACCEL_XYZ, G_GYRO_XYZ);
 	int16_t Encoder_CountA = Get_Encoder_Count(EncoderA_TIMx);//读取编码器
 	int16_t Encoder_CountB = -Get_Encoder_Count(EncoderB_TIMx);
-	Control_PWM( 0.0,  G_Euler_RPY[0],  G_GYRO_XYZ[0],  G_CTRL_TWSBV_Struct.TargetSpeed,  Encoder_CountA,  Encoder_CountB, G_CTRL_TWSBV_Struct.TurnSpeed , G_GYRO_XYZ[2]);//控制小车
+	Control_PWM( 0.0,  G_Euler_RPY[0],  G_GYRO_XYZ[0], G_ACCEL_XYZ[0], G_CTRL_TWSBV_Struct.TargetSpeed,  Encoder_CountA,  Encoder_CountB, G_CTRL_TWSBV_Struct.TurnSpeed , G_GYRO_XYZ[2]);//控制小车
 }
 
 
@@ -329,8 +369,10 @@ void CTRL_SaveSBVParam(void)
 	tmpp[3] = G_CTRL_TWSBV_Struct.KI_velo;
 	tmpp[4] = G_CTRL_TWSBV_Struct.KP_turn;
 	tmpp[5] = G_CTRL_TWSBV_Struct.KD_turn;
-	tmpp[6] = G_CTRL_TWSBV_Struct.Med;
-	tmpp[7] = G_CTRL_TWSBV_Struct.TurnErr;
+	tmpp[6] = G_CTRL_TWSBV_Struct.KD_pos;
+	tmpp[7] = G_CTRL_TWSBV_Struct.KI_pos;
+	tmpp[8] = G_CTRL_TWSBV_Struct.Med;
+	tmpp[9] = G_CTRL_TWSBV_Struct.TurnErr;
 
 	FlashEraseSegment((uint32_t)SG_SBV_ParamBuff, (uint32_t)(SG_SBV_ParamBuff+BSP_SBV_PARAM_NUM));
 	FlashWriteWords( (uint32_t)SG_SBV_ParamBuff,  (uint32_t*)tmpp,  BSP_SBV_PARAM_NUM);
@@ -347,8 +389,10 @@ void CTRL_PrintSBVParam(void)
 	BSP_SBV_DEBUG("KI_velo:%.5f", SG_SBV_ParamBuff[3]);
 	BSP_SBV_DEBUG("KP_turn:%.5f", SG_SBV_ParamBuff[4]);
 	BSP_SBV_DEBUG("KD_turn:%.5f", SG_SBV_ParamBuff[5]);
-	BSP_SBV_DEBUG("Med:%.5f", SG_SBV_ParamBuff[6]);
-	BSP_SBV_DEBUG("TurnErr:%.5f", SG_SBV_ParamBuff[7]);
+	BSP_SBV_DEBUG("KD_pos:%.5f", SG_SBV_ParamBuff[6]);
+	BSP_SBV_DEBUG("KI_pos:%.5f", SG_SBV_ParamBuff[7]);
+	BSP_SBV_DEBUG("Med:%.5f", SG_SBV_ParamBuff[8]);
+	BSP_SBV_DEBUG("TurnErr:%.5f", SG_SBV_ParamBuff[9]);
 }
 
 

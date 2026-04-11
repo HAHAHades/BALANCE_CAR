@@ -195,8 +195,7 @@ void CTRL_S_DECODE_ADJParam(uint8_t *Msg)
     G_NRF_CTRL_NRF_HardStruct.NRF_S_ACKMsg = 1;
     G_NRF_CTRL_S_ACKMsg[0] = NRF_CTRL_CMD_CAHR;
     G_NRF_CTRL_S_ACKMsg[1] = snprintf((char*)(&G_NRF_CTRL_S_ACKMsg[2]), WRX_PAYLOAD_WIDTH-2, "adjp...%.5f",G_CTRL_TWSBV_Struct.KP_vert);
-    float fStep[6] = {0.001, 0.01, 0.1, 1, 10, 100};
-    int stepIndex = 0;//指示当前步距
+    float step = 1.0;//指示当前步距
     uint8_t ParamFlag = 0;//指示当前所调参数,0-7分别为 直立环KP/KD、速度环KP/KI、转向环KP/KD、中值、转向偏置
     uint8_t ParamFlagMAX = 7;//
     float tmp_Param = 0;//参数
@@ -258,19 +257,11 @@ void CTRL_S_DECODE_ADJParam(uint8_t *Msg)
                         {
                             if (potData32>0)
                             {
-                                stepIndex+=1;
+                                step*=10.0;
                             }
                             else if (potData32<0)
                             {
-                                stepIndex-=1;
-                            }
-                            if (stepIndex>5)
-                            {
-                                stepIndex=5;
-                            }
-                            else if (stepIndex<0)
-                            {
-                                stepIndex=0;
+                                step/=10.0;
                             }
                             lastAdjTime = NRFCTR_GetTime();
                         }
@@ -278,11 +269,11 @@ void CTRL_S_DECODE_ADJParam(uint8_t *Msg)
                         {
                             if (potData32>0)
                             {
-                                tmp_Param=fStep[stepIndex];
+                                tmp_Param=step;
                             }
                             else if (potData32<0)
                             {
-                                tmp_Param=-fStep[stepIndex];
+                                tmp_Param=-step;
                             }
                             lastAdjTime = NRFCTR_GetTime();
                         }
@@ -311,14 +302,14 @@ void CTRL_S_DECODE_ADJParam(uint8_t *Msg)
                         {
                             if (KeyData==Key1_R)//按钮1单击，正向调参
                             {
-                                tmp_Param=fStep[stepIndex];
+                                tmp_Param=step;
                             }                  
                         }
                         else if (KeyIndex==2)//
                         {
                             if (KeyData==Key1_R)//按钮2单击，反向调参
                             {
-                                tmp_Param=-fStep[stepIndex];
+                                tmp_Param=-step;
                             }                  
                         }
                         lastAdjTime = NRFCTR_GetTime();
@@ -334,42 +325,52 @@ void CTRL_S_DECODE_ADJParam(uint8_t *Msg)
                 case 0://直立环KP
                 {
                     G_CTRL_TWSBV_Struct.KP_vert += tmp_Param;
-                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KP_vert:%.5f", G_CTRL_TWSBV_Struct.KP_vert);
+                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KP_vert:%.5f,step:%.5f", G_CTRL_TWSBV_Struct.KP_vert,step);
                 }break;
                 case 1://直立环KD
                 {
                     G_CTRL_TWSBV_Struct.KD_vert += tmp_Param;
-                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KD_vert:%.5f", G_CTRL_TWSBV_Struct.KD_vert);
+                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KD_vert:%.5f,step:%.5f", G_CTRL_TWSBV_Struct.KD_vert,step);
                 }break;
                 case 2://速度环KP
                 {
                     G_CTRL_TWSBV_Struct.KP_velo += tmp_Param;
-                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KP_velo:%.5f", G_CTRL_TWSBV_Struct.KP_velo);
+                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KP_velo:%.5f,step:%.5f", G_CTRL_TWSBV_Struct.KP_velo,step);
                 }break;
                 case 3://速度环KI
                 {
                     G_CTRL_TWSBV_Struct.KI_velo += tmp_Param;
-                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KI_velo:%.5f", G_CTRL_TWSBV_Struct.KI_velo);
+                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KI_velo:%.5f,step:%.5f", G_CTRL_TWSBV_Struct.KI_velo,step);
                 }break;
                 case 4://转向环KP
                 {
                     G_CTRL_TWSBV_Struct.KP_turn += tmp_Param;
-                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KP_turn:%.5f", G_CTRL_TWSBV_Struct.KP_turn);
+                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KP_turn:%.5f,step:%.5f", G_CTRL_TWSBV_Struct.KP_turn,step);
                 }break;
                 case 5://转向环KD
                 {
                     G_CTRL_TWSBV_Struct.KD_turn += tmp_Param;
-                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KD_turn:%.5f", G_CTRL_TWSBV_Struct.KD_turn);
+                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KD_turn:%.5f,step:%.5f", G_CTRL_TWSBV_Struct.KD_turn,step);
                 }break;
-                case 6://中值
+                case 6://位置环KD
+                {
+                    G_CTRL_TWSBV_Struct.KD_pos += tmp_Param;
+                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KD_pos:%.5f,step:%.5f", G_CTRL_TWSBV_Struct.KD_pos,step);
+                }break;
+                case 7://位置环KI
+                {
+                    G_CTRL_TWSBV_Struct.KI_pos += tmp_Param;
+                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "KI_pos:%.5f,step:%.5f", G_CTRL_TWSBV_Struct.KI_pos,step);
+                }break;
+                case 8://中值
                 {
                     G_CTRL_TWSBV_Struct.Med += tmp_Param;
-                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "Med:%.5f", G_CTRL_TWSBV_Struct.Med);
+                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "Med:%.5f,step:%.5f", G_CTRL_TWSBV_Struct.Med,step);
                 }break;
-                case 7://转向偏置
+                case 9://转向偏置
                 {
                     G_CTRL_TWSBV_Struct.TurnErr += tmp_Param;
-                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "TurnErr:%d", G_CTRL_TWSBV_Struct.TurnErr);
+                    ackLen = snprintf((char*)tmpMSG, WRX_PAYLOAD_WIDTH-2, "TurnErr:%d,step:%.5f", G_CTRL_TWSBV_Struct.TurnErr,step);
                 }break;
             
                 default:
@@ -377,6 +378,7 @@ void CTRL_S_DECODE_ADJParam(uint8_t *Msg)
                         G_NRF_CTRL_NRF_HardStruct.NRF_S_ACKMsg = 0;
                     }break;
                 }
+                G_NRF_CTRL_S_ACKMsg[WRX_PAYLOAD_WIDTH-1] = '\0';
                 G_NRF_CTRL_S_ACKMsg[1] = ackLen;
                 NRF_CTRL_DEBUG("ackLen:%d",ackLen);
                 NRF_CTRL_DEBUG("G_NRF_CTRL_S_ACKMsg[0]:%d",G_NRF_CTRL_S_ACKMsg[0]);

@@ -534,13 +534,14 @@ void NRF_CTRL_M_CopeRecv(uint8_t* recvM)
     uint8_t cmd = recvM[0];
     uint8_t msgLen = recvM[1];
     char* tmpstr = (char*)(&recvM[2]);
-    if ((msgLen>0) && (msgLen<WRX_PAYLOAD_WIDTH-2))
+    NRF_CTRL_DEBUG("msgLen:%d\n",msgLen);
+    if ((msgLen>0) && (cmd==NRF_CTRL_CMD_CAHR))
     {
-        if (cmd==NRF_CTRL_CMD_CAHR)//收到字符串
-        {
-            recvM[WRX_PAYLOAD_WIDTH-1] = '\0';
-            NRF_CTRL_DEBUG("%s\n",tmpstr);
-        }
+        //收到字符串
+        
+        recvM[WRX_PAYLOAD_WIDTH-1] = '\0';
+        NRF_CTRL_DEBUG("%s\n",tmpstr);
+      
         
     }
     

@@ -698,8 +698,8 @@ I (..\Libraries\FWlib\inc\stm32f10x_spi.h)(0x559784D6)
 I (..\Libraries\FWlib\inc\stm32f10x_tim.h)(0x559784D6)
 I (..\Libraries\FWlib\inc\stm32f10x_usart.h)(0x559784D6)
 I (..\Libraries\FWlib\inc\misc.h)(0x559784D6)
-F (..\User\main.c)(0x69D5D4D4)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
-I (..\User\main.h)(0x69D62251)
+F (..\User\main.c)(0x69D9E248)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
+I (..\User\main.h)(0x69DA1739)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x54C245B8)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x62CE6A2F)
 I (..\Libraries\CMSIS\core_cm3.h)(0x559784D6)
@@ -733,7 +733,13 @@ I (..\Libraries\SysTick\bsp_SysTick.h)(0x69D4B919)
 I (..\Libraries\GPIO\bsp_gpio.h)(0x68736702)
 I (..\Libraries\LED\bsp_led.h)(0x66DD0ACA)
 I (..\Libraries\UART\bsp_usart.h)(0x69D6224B)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
+I (..\Libraries\KEY\bsp_key.h)(0x69D5C170)
+I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
+I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
+I (..\Libraries\SPI\bsp_spi.h)(0x69C37E72)
+I (..\Libraries\NRF_CONTROLLER\controller_decode.h)(0x69D60846)
 F (..\User\stm32f10x_it.c)(0x69D5BF5D)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\stm32f10x_it.o --omf_browse .\objects\stm32f10x_it.crf --depend .\objects\stm32f10x_it.d)
 I (..\User\stm32f10x_it.h)(0x559784D4)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x62CE6A2F)
@@ -764,13 +770,19 @@ I (..\Libraries\FWlib\inc\stm32f10x_tim.h)(0x559784D6)
 I (..\Libraries\FWlib\inc\stm32f10x_usart.h)(0x559784D6)
 I (..\Libraries\FWlib\inc\stm32f10x_wwdg.h)(0x559784D6)
 I (..\Libraries\FWlib\inc\misc.h)(0x559784D6)
-I (..\User\main.h)(0x69D62251)
+I (..\User\main.h)(0x69DA1739)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x54C245B8)
 I (..\Libraries\SysTick\bsp_SysTick.h)(0x69D4B919)
 I (..\Libraries\GPIO\bsp_gpio.h)(0x68736702)
 I (..\Libraries\LED\bsp_led.h)(0x66DD0ACA)
 I (..\Libraries\UART\bsp_usart.h)(0x69D6224B)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
+I (..\Libraries\KEY\bsp_key.h)(0x69D5C170)
+I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
+I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
+I (..\Libraries\SPI\bsp_spi.h)(0x69C37E72)
+I (..\Libraries\NRF_CONTROLLER\controller_decode.h)(0x69D60846)
 I (..\Libraries\MPU6050\mpu6050.h)(0x69B115D4)
 I (..\Libraries\MPU6050\Middlewares\porting\mpu6050_SL.h)(0x69AE6F6E)
 I (..\Libraries\MPU6050\Middlewares\driver\eMPL\inv_mpu_dmp_motion_driver.h)(0x66A74B23)
@@ -807,8 +819,6 @@ I (..\Libraries\MPU6050\Middlewares\mpl\motion_no_motion.h)(0x66A74B23)
 I (..\Libraries\MPU6050\Middlewares\mpl\no_gyro_fusion.h)(0x66A74B23)
 I (..\Libraries\MPU6050\Middlewares\mpl\quaternion_supervisor.h)(0x66A74B23)
 I (..\Libraries\MPU6050\Middlewares\eMPL-hal\eMPL_outputs.h)(0x66A74B23)
-I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
-I (..\Libraries\SPI\bsp_spi.h)(0x69C37E72)
 I (..\Libraries\TIM\bsp_time.h)(0x69C381C6)
 I (..\Libraries\TIM\bsp_tim.h)(0x69C381D0)
 I (..\Libraries\HC_SR04\bsp_hc_sr04.h)(0x69D4BF37)
@@ -877,9 +887,13 @@ I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x54C245B8)
 I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
 I (..\Libraries\SysTick\bsp_SysTick.h)(0x69D4B919)
 I (..\Libraries\GPIO\bsp_gpio.h)(0x68736702)
-I (..\User\main.h)(0x69D62251)
+I (..\User\main.h)(0x69DA1739)
 I (..\Libraries\LED\bsp_led.h)(0x66DD0ACA)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
+I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
+I (..\Libraries\SPI\bsp_spi.h)(0x69C37E72)
+I (..\Libraries\NRF_CONTROLLER\controller_decode.h)(0x69D60846)
 I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x54C245B8)
 F (..\Libraries\UART\bsp_usart.c)(0x69D5C3CF)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\bsp_usart.o --omf_browse .\objects\bsp_usart.crf --depend .\objects\bsp_usart.d)
 I (..\Libraries\UART\bsp_usart.h)(0x69D6224B)
@@ -913,10 +927,16 @@ I (..\Libraries\FWlib\inc\stm32f10x_wwdg.h)(0x559784D6)
 I (..\Libraries\FWlib\inc\misc.h)(0x559784D6)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x54C245B8)
 I (..\Libraries\GPIO\bsp_gpio.h)(0x68736702)
-I (..\User\main.h)(0x69D62251)
+I (..\User\main.h)(0x69DA1739)
 I (..\Libraries\SysTick\bsp_SysTick.h)(0x69D4B919)
 I (..\Libraries\LED\bsp_led.h)(0x66DD0ACA)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
+I (..\Libraries\KEY\bsp_key.h)(0x69D5C170)
+I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
+I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
+I (..\Libraries\SPI\bsp_spi.h)(0x69C37E72)
+I (..\Libraries\NRF_CONTROLLER\controller_decode.h)(0x69D60846)
 I (C:\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x54C245B8)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x54C245B8)
 F (..\Libraries\SPI\bsp_spi.c)(0x69C3D037)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\bsp_spi.o --omf_browse .\objects\bsp_spi.crf --depend .\objects\bsp_spi.d)
@@ -952,10 +972,15 @@ I (..\Libraries\FWlib\inc\misc.h)(0x559784D6)
 I (..\Libraries\UART\bsp_usart.h)(0x69D6224B)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x54C245B8)
 I (..\Libraries\GPIO\bsp_gpio.h)(0x68736702)
-I (..\User\main.h)(0x69D62251)
+I (..\User\main.h)(0x69DA1739)
 I (..\Libraries\SysTick\bsp_SysTick.h)(0x69D4B919)
 I (..\Libraries\LED\bsp_led.h)(0x66DD0ACA)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
+I (..\Libraries\KEY\bsp_key.h)(0x69D5C170)
+I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
+I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
+I (..\Libraries\NRF_CONTROLLER\controller_decode.h)(0x69D60846)
 F (..\Libraries\EXTI\bsp_exti.c)(0x69D4B16B)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\bsp_exti.o --omf_browse .\objects\bsp_exti.crf --depend .\objects\bsp_exti.d)
 I (..\Libraries\EXTI\bsp_exti.h)(0x66FFAD3B)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x62CE6A2F)
@@ -1047,7 +1072,7 @@ I (..\Libraries\FWlib\inc\stm32f10x_tim.h)(0x559784D6)
 I (..\Libraries\FWlib\inc\stm32f10x_usart.h)(0x559784D6)
 I (..\Libraries\FWlib\inc\stm32f10x_wwdg.h)(0x559784D6)
 I (..\Libraries\FWlib\inc\misc.h)(0x559784D6)
-F (..\Libraries\OLED\oled.c)(0x69673133)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\oled.o --omf_browse .\objects\oled.crf --depend .\objects\oled.d)
+F (..\Libraries\OLED\oled.c)(0x69D748C7)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\oled.o --omf_browse .\objects\oled.crf --depend .\objects\oled.d)
 I (..\Libraries\OLED\oled.h)(0x69AD2724)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x62CE6A2F)
 I (..\Libraries\CMSIS\core_cm3.h)(0x559784D6)
@@ -1118,9 +1143,15 @@ I (..\Libraries\SysTick\bsp_SysTick.h)(0x69D4B919)
 I (..\Libraries\UART\bsp_usart.h)(0x69D6224B)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x54C245B8)
 I (..\Libraries\GPIO\bsp_gpio.h)(0x68736702)
-I (..\User\main.h)(0x69D62251)
+I (..\User\main.h)(0x69DA1739)
 I (..\Libraries\LED\bsp_led.h)(0x66DD0ACA)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
+I (..\Libraries\KEY\bsp_key.h)(0x69D5C170)
+I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
+I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
+I (..\Libraries\SPI\bsp_spi.h)(0x69C37E72)
+I (..\Libraries\NRF_CONTROLLER\controller_decode.h)(0x69D60846)
 F (..\Libraries\TIM\bsp_pwm.c)(0x69A9421E)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\bsp_pwm.o --omf_browse .\objects\bsp_pwm.crf --depend .\objects\bsp_pwm.d)
 I (..\Libraries\TIM\bsp_pwm.h)(0x69A93E91)
 I (..\Libraries\TIM\bsp_tim.h)(0x69C381D0)
@@ -1187,11 +1218,17 @@ I (..\Libraries\EXTI\bsp_exti.h)(0x66FFAD3B)
 I (..\Libraries\SysTick\bsp_SysTick.h)(0x69D4B919)
 I (..\Libraries\TIM\bsp_time.h)(0x69C381C6)
 I (..\Libraries\GPIO\bsp_gpio.h)(0x68736702)
-I (..\User\main.h)(0x69D62251)
+I (..\User\main.h)(0x69DA1739)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x54C245B8)
 I (..\Libraries\LED\bsp_led.h)(0x66DD0ACA)
 I (..\Libraries\UART\bsp_usart.h)(0x69D6224B)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
+I (..\Libraries\KEY\bsp_key.h)(0x69D5C170)
+I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
+I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
+I (..\Libraries\SPI\bsp_spi.h)(0x69C37E72)
+I (..\Libraries\NRF_CONTROLLER\controller_decode.h)(0x69D60846)
 F (..\Libraries\TIM\bsp_tim.c)(0x69C381D8)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\bsp_tim.o --omf_browse .\objects\bsp_tim.crf --depend .\objects\bsp_tim.d)
 I (..\Libraries\TIM\bsp_tim.h)(0x69C381D0)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x62CE6A2F)
@@ -1257,15 +1294,21 @@ I (..\Libraries\FWlib\inc\misc.h)(0x559784D6)
 I (..\Libraries\TIM\bsp_pwm.h)(0x69A93E91)
 I (..\Libraries\TIM\bsp_tim.h)(0x69C381D0)
 I (..\Libraries\GPIO\bsp_gpio.h)(0x68736702)
-I (..\User\main.h)(0x69D62251)
+I (..\User\main.h)(0x69DA1739)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x54C245B8)
 I (..\Libraries\SysTick\bsp_SysTick.h)(0x69D4B919)
 I (..\Libraries\LED\bsp_led.h)(0x66DD0ACA)
 I (..\Libraries\UART\bsp_usart.h)(0x69D6224B)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
+I (..\Libraries\KEY\bsp_key.h)(0x69D5C170)
+I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
+I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
+I (..\Libraries\SPI\bsp_spi.h)(0x69C37E72)
+I (..\Libraries\NRF_CONTROLLER\controller_decode.h)(0x69D60846)
 F (..\Libraries\GPIO\bsp_gpio.c)(0x69BE4156)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\bsp_gpio.o --omf_browse .\objects\bsp_gpio.crf --depend .\objects\bsp_gpio.d)
 I (..\Libraries\GPIO\bsp_gpio.h)(0x68736702)
-I (..\User\main.h)(0x69D62251)
+I (..\User\main.h)(0x69DA1739)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x54C245B8)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x62CE6A2F)
 I (..\Libraries\CMSIS\core_cm3.h)(0x559784D6)
@@ -1298,7 +1341,13 @@ I (..\Libraries\FWlib\inc\misc.h)(0x559784D6)
 I (..\Libraries\SysTick\bsp_SysTick.h)(0x69D4B919)
 I (..\Libraries\LED\bsp_led.h)(0x66DD0ACA)
 I (..\Libraries\UART\bsp_usart.h)(0x69D6224B)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
+I (..\Libraries\KEY\bsp_key.h)(0x69D5C170)
+I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
+I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
+I (..\Libraries\SPI\bsp_spi.h)(0x69C37E72)
+I (..\Libraries\NRF_CONTROLLER\controller_decode.h)(0x69D60846)
 F (..\Libraries\TIM\bsp_encoder.c)(0x69CDF718)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\bsp_encoder.o --omf_browse .\objects\bsp_encoder.crf --depend .\objects\bsp_encoder.d)
 I (..\Libraries\TIM\bsp_encoder.h)(0x69CDF720)
 I (..\Libraries\TIM\bsp_tim.h)(0x69C381D0)
@@ -1399,7 +1448,7 @@ I (..\Libraries\MPU6050\Middlewares\mpl\no_gyro_fusion.h)(0x66A74B23)
 I (..\Libraries\MPU6050\Middlewares\mpl\quaternion_supervisor.h)(0x66A74B23)
 I (..\Libraries\MPU6050\Middlewares\eMPL-hal\eMPL_outputs.h)(0x66A74B23)
 I (..\Libraries\LED\bsp_led.h)(0x66DD0ACA)
-F (..\Libraries\NRF_CONTROLLER\controller_decode.c)(0x69D6244D)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\controller_decode.o --omf_browse .\objects\controller_decode.crf --depend .\objects\controller_decode.d)
+F (..\Libraries\NRF_CONTROLLER\controller_decode.c)(0x69DA1448)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\controller_decode.o --omf_browse .\objects\controller_decode.crf --depend .\objects\controller_decode.d)
 I (..\Libraries\NRF_CONTROLLER\controller_decode.h)(0x69D60846)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x62CE6A2F)
 I (..\Libraries\CMSIS\core_cm3.h)(0x559784D6)
@@ -1434,12 +1483,12 @@ I (..\Libraries\UART\bsp_usart.h)(0x69D6224B)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x54C245B8)
 I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
 I (..\Libraries\SysTick\bsp_SysTick.h)(0x69D4B919)
-I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69D5EE12)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
 I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
 I (..\Libraries\SPI\bsp_spi.h)(0x69C37E72)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
-F (..\Libraries\NRF_CONTROLLER\nrf_controller.c)(0x69D62443)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\nrf_controller.o --omf_browse .\objects\nrf_controller.crf --depend .\objects\nrf_controller.d)
-I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69D5EE12)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
+F (..\Libraries\NRF_CONTROLLER\nrf_controller.c)(0x69DA1894)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\nrf_controller.o --omf_browse .\objects\nrf_controller.crf --depend .\objects\nrf_controller.d)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x62CE6A2F)
 I (..\Libraries\CMSIS\core_cm3.h)(0x559784D6)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x54C245B8)
@@ -1478,7 +1527,7 @@ I (..\Libraries\SPI\bsp_spi.h)(0x69C37E72)
 I (..\Libraries\NRF_CONTROLLER\controller_decode.h)(0x69D60846)
 I (..\Libraries\EXTI\bsp_exti.h)(0x66FFAD3B)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x54C245B8)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
 F (..\Libraries\NRF24L01P\nrf24l01p.c)(0x69D5C212)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\nrf24l01p.o --omf_browse .\objects\nrf24l01p.crf --depend .\objects\nrf24l01p.d)
 I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x54C245B8)
@@ -1513,10 +1562,14 @@ I (..\Libraries\FWlib\inc\misc.h)(0x559784D6)
 I (..\Libraries\UART\bsp_usart.h)(0x69D6224B)
 I (..\Libraries\SPI\bsp_spi.h)(0x69C37E72)
 I (..\Libraries\GPIO\bsp_gpio.h)(0x68736702)
-I (..\User\main.h)(0x69D62251)
+I (..\User\main.h)(0x69DA1739)
 I (..\Libraries\SysTick\bsp_SysTick.h)(0x69D4B919)
 I (..\Libraries\LED\bsp_led.h)(0x66DD0ACA)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
+I (..\Libraries\KEY\bsp_key.h)(0x69D5C170)
+I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
+I (..\Libraries\NRF_CONTROLLER\controller_decode.h)(0x69D60846)
 I (..\Libraries\EXTI\bsp_exti.h)(0x66FFAD3B)
 F (..\Libraries\ADC\bsp_adc.c)(0x69CDECBC)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\bsp_adc.o --omf_browse .\objects\bsp_adc.crf --depend .\objects\bsp_adc.d)
 I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
@@ -1644,8 +1697,8 @@ I (..\Libraries\FWlib\inc\stm32f10x_wwdg.h)(0x559784D6)
 I (..\Libraries\FWlib\inc\misc.h)(0x559784D6)
 I (..\Libraries\UART\bsp_usart.h)(0x69D6224B)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x54C245B8)
-F (..\Libraries\MOTOR\bsp_sbv.c)(0x69D621D3)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\bsp_sbv.o --omf_browse .\objects\bsp_sbv.crf --depend .\objects\bsp_sbv.d)
-I (..\Libraries\MOTOR\bsp_sbv.h)(0x69D62258)
+F (..\Libraries\MOTOR\bsp_sbv.c)(0x69DA1055)(--c99 --gnu -c --cpu Cortex-M3 -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\User -I ..\Libraries\AHT30 -I ..\Libraries\BEEP -I ..\Libraries\cJSON -I ..\Libraries\CMSIS -I ..\Libraries\FWlib\inc -I ..\Libraries\IIC -I ..\Libraries\KEY -I ..\Libraries\LED -I ..\Libraries\SPI -I ..\Libraries\SysTick -I ..\Libraries\TIM -I ..\Libraries\UART -I ..\Libraries\NET\device\inc -I ..\Libraries\NET\MQTT -I ..\Libraries\NET\onenet\inc -I ..\Libraries\OLED -I ..\Libraries\TFT_LCD -I ..\Libraries\DMA -I ..\Libraries\EXTI -I ..\Libraries\CAN -I ..\Libraries\MPU6050 -I ..\Libraries\MPU6050\Middlewares\driver -I ..\Libraries\MPU6050\Middlewares\eMPL-hal -I ..\Libraries\MPU6050\Middlewares\mllite -I ..\Libraries\MPU6050\Middlewares\mpl -I ..\Libraries\MPU6050\Middlewares\porting -I ..\Libraries\MPU6050\Middlewares\driver\eMPL -I ..\Libraries\MPU6050\Middlewares\driver\include -I ..\Libraries\MPU6050\Middlewares\driver\stm32L -I ..\Libraries\HC_SR04 -I ..\Libraries\MOTOR -I ..\Libraries\GPIO -I ..\Libraries\NRF_CONTROLLER -I ..\Libraries\NRF24L01P -I ..\Libraries\ADC -I ..\Libraries\FLASH-I.\RTE\_Target_1-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include-IC:\Keil_v5\ARM\CMSIS\Include-D__UVISION_VERSION="529" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD -DUSE_DMP -DMPL_LOG_NDEBUG="1" -DEMPL -DMPU6050 -DEMPL_TARGET_STM32F1-o .\objects\bsp_sbv.o --omf_browse .\objects\bsp_sbv.crf --depend .\objects\bsp_sbv.d)
+I (..\Libraries\MOTOR\bsp_sbv.h)(0x69DA0B07)
 I (..\Libraries\CMSIS\stm32f10x.h)(0x62CE6A2F)
 I (..\Libraries\CMSIS\core_cm3.h)(0x559784D6)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x54C245B8)
@@ -1720,7 +1773,7 @@ I (..\Libraries\TIM\bsp_encoder.h)(0x69CDF720)
 I (..\Libraries\TIM\bsp_tim.h)(0x69C381D0)
 I (..\Libraries\FLASH\bsp_flash.h)(0x69D5C126)
 I (..\Libraries\LED\bsp_led.h)(0x66DD0ACA)
-I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69D5EE12)
+I (..\Libraries\NRF_CONTROLLER\nrf_controller.h)(0x69DA17D1)
 I (..\Libraries\KEY\bsp_key.h)(0x69D5C170)
 I (..\Libraries\ADC\bsp_adc.h)(0x69BF9E8E)
 I (..\Libraries\NRF24L01P\nrf24l01p.h)(0x69D5C0DA)
