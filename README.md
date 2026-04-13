@@ -2,5 +2,5 @@
 
 ### 两轮直流平衡小车
 
-![]{picSource/电机.png}
+![](picSource/电机.png)
 
