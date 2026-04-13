@@ -140,44 +140,44 @@ void BSP_SBV_RunOnece(void)
 /**
 	输出 = KP*偏差 + KD*偏差微分
 	偏差微分 = (本次偏差 - 上次偏差)/单位时间
-	E_angle = tatget_angle - real_angle
+	E_angle = target_angle - real_angle
 	E_angle_last = tatget_angle_last - real_angle_last
 	out = KP_vert*E_angle + KD_vert*(E_angle - E_angle_last);
 	gyro_X = (real_angle - real_angle_last)/10ms
 
   * @brief   直立环PD控制
-  * @param   tatget_angle ：目标角度（速度环输出+机械中值）
+  * @param   target_angle ：目标角度（速度环输出+机械中值）
   * @param   real_angle ：当前角度（小车倾角）
   * @param   gyro_X ：当前角速度
   * @retval  电机PWM占空比*100；符号表示旋转方向
   */
-int Vertical_Loop(float tatget_angle, float real_angle, float gyro_X)
+int Vertical_Loop(float target_angle, float real_angle, float gyro_X)
 {
 	int out;
 	static float tatget_angle_last = 0;
 	
-	out = G_CTRL_TWSBV_Struct.KP_vert*(tatget_angle - real_angle) + G_CTRL_TWSBV_Struct.KD_vert*(tatget_angle-tatget_angle_last - gyro_X);
-	tatget_angle_last = tatget_angle;
+	out = G_CTRL_TWSBV_Struct.KP_vert*(target_angle - real_angle) + G_CTRL_TWSBV_Struct.KD_vert*(target_angle-tatget_angle_last - gyro_X);
+	tatget_angle_last = target_angle;
 	
 	return out;
 }
 
 /**
   * @brief   速度环PI控制
-  * @param   tatget_speed ：目标速度
+  * @param   target_speed ：目标速度
   * @param   real_speed ：当前速度
   * @retval  由tatget_speed引起的小车倾角
   */
-float Velocity_Loop(int tatget_speed, int real_speed)
+float Velocity_Loop(int target_speed, int real_speed)
 {
 	
 	static int Espeed = 0;//速度偏差
 	int out;
 	// uint8_t sErr = 0;
 	//速度偏差，低通滤波限制速度变化
-	Espeed = 0.7*Espeed + 0.3*(tatget_speed - real_speed);//Espeed为上次偏差，(tatget_speed - real_speed)为本次偏差
+	Espeed = 0.7*Espeed + 0.3*(target_speed - real_speed);//Espeed为上次偏差，(target_speed - real_speed)为本次偏差
 	//速度偏差超过10倍,停止积分累加
-	// if (abs(real_speed)/(abs(tatget_speed)+1)>10)
+	// if (abs(real_speed)/(abs(target_speed)+1)>10)
 	// {
 	// 	sErr = 1;
 	// }
@@ -235,23 +235,29 @@ float Position_Loop(int pos)
 
 /**
   * @brief   计算PWM，控制电机
-  * @param   tatget_angle ：目标倾角角度
+  * @param   target_angle ：目标倾角角度
   * @param   real_angle(Roll) ：当前倾角角度
   * @param   gyro_X ：当前倾角速度
   * @param   acc_X ：小车正向加速度
-  * @param   tatget_speed ：目标速度 单位：正交编码器每10ms的计数值（单脉冲的4倍）； rps轮子转每秒 = 100*tatget_speed/(4 * 11编码器每转单脉冲数*30减速比) tatget_speed=13.2时约1rps
+  * @param   target_speed ：目标速度 单位：正交编码器每10ms的计数值（单脉冲的4倍）； rps轮子转每秒 = 100*target_speed/(4 * 11编码器每转单脉冲数*30减速比) target_speed=13.2时约1rps
   * @param   encoder_L ：A电机编码器每10ms的正交计数值,前+后-，由于每次读取后清零，所以读取的是相对位置
   * @param   encoder_R ：B电机编码器每10ms的正交计数值,前+后-
   * @param   target_turn ：目标转向速度 正左转 负右转 车轮速度与tatget_speed相同
   * @param   gyro_Z ：当前偏航速度
   * @retval  
   */
-void Control_PWM(float tatget_angle, float real_angle, float gyro_X, float acc_X, int32_t tatget_speed, int encoder_L, int encoder_R, int32_t target_turn, float gyro_Z)
+void Control_PWM(float target_angle, float real_angle, float gyro_X, float acc_X, int32_t target_speed, int encoder_L, int encoder_R, int32_t target_turn, float gyro_Z)
 {
 	int Vertical_out=0, Turn_out=0, PWM_A=0, PWM_B=0;
 	float posOut = 0;
 	float Velocity_out;
-	tatget_angle = tatget_speed/BSP_SBV_SpeedDivAngle;
+	static int last_target_speed = 0;
+	if (abs(target_speed-last_target_speed)>=10/CTRL_DECODE_POT_TargetDataRatio)
+	{
+		target_speed = 0.9*last_target_speed + 0.1*target_speed;
+	}
+	last_target_speed = target_speed;
+	target_angle = target_speed/BSP_SBV_SpeedDivAngle;
 	
 	Control_Tilt_Detect(real_angle);//倾斜检测
 	if ((!G_CTRL_TWSBV_Struct.CAR_ON)||G_CTRL_TWSBV_Struct.CAR_Tilt)
@@ -264,7 +270,7 @@ void Control_PWM(float tatget_angle, float real_angle, float gyro_X, float acc_X
 		last_pos = 0;
 		return;
 	}
-	else if ((abs(tatget_speed)<1)&&(abs(target_turn)<1))
+	else if ((abs(target_speed)<1)&&(abs(target_turn)<1))
 	{
 		
 		posOut = Position_Loop(encoder_L+encoder_R);
@@ -275,8 +281,8 @@ void Control_PWM(float tatget_angle, float real_angle, float gyro_X, float acc_X
 		last_pos = 0;
 	}
 
-	Velocity_out = Velocity_Loop(2*tatget_speed, (encoder_L+encoder_R));//encoder_L+encoder_R)/2 表示两轮子中心的速度（每10ms正交计数值）
-	Vertical_out = Vertical_Loop( posOut + Velocity_out+G_CTRL_TWSBV_Struct.Med+tatget_angle,  real_angle,  gyro_X);
+	Velocity_out = Velocity_Loop(2*target_speed, (encoder_L+encoder_R));//encoder_L+encoder_R)/2 表示两轮子中心的速度（每10ms正交计数值）
+	Vertical_out = Vertical_Loop( posOut + Velocity_out+G_CTRL_TWSBV_Struct.Med+target_angle,  real_angle,  gyro_X);
 	Turn_out = Turn_Loop(target_turn , gyro_Z);
 	
 	PWM_A = Vertical_out - Turn_out ;

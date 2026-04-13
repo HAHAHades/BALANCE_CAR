@@ -39,9 +39,3 @@
 .\objects\bsp_520motor.o: ..\Libraries\LED\bsp_led.h
 .\objects\bsp_520motor.o: ..\Libraries\UART\bsp_usart.h
 .\objects\bsp_520motor.o: ..\Libraries\MOTOR\bsp_sbv.h
-.\objects\bsp_520motor.o: ..\Libraries\NRF_CONTROLLER\nrf_controller.h
-.\objects\bsp_520motor.o: ..\Libraries\KEY\bsp_key.h
-.\objects\bsp_520motor.o: ..\Libraries\ADC\bsp_adc.h
-.\objects\bsp_520motor.o: ..\Libraries\NRF24L01P\nrf24l01p.h
-.\objects\bsp_520motor.o: ..\Libraries\SPI\bsp_spi.h
-.\objects\bsp_520motor.o: ..\Libraries\NRF_CONTROLLER\controller_decode.h

@@ -38,8 +38,4 @@
 .\objects\bsp_key.o: ..\Libraries\GPIO\bsp_gpio.h
 .\objects\bsp_key.o: ..\Libraries\LED\bsp_led.h
 .\objects\bsp_key.o: ..\Libraries\MOTOR\bsp_sbv.h
-.\objects\bsp_key.o: ..\Libraries\NRF_CONTROLLER\nrf_controller.h
-.\objects\bsp_key.o: ..\Libraries\NRF24L01P\nrf24l01p.h
-.\objects\bsp_key.o: ..\Libraries\SPI\bsp_spi.h
-.\objects\bsp_key.o: ..\Libraries\NRF_CONTROLLER\controller_decode.h
 .\objects\bsp_key.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h

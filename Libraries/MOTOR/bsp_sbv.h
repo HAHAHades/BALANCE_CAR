@@ -49,7 +49,7 @@ typedef struct
                                       .Tilt_Angle_Limit=45,\
                                       .TargetSpeed=0,\
                                       .TurnSpeed=0,\
-                                      .TurnErr=-50,\
+                                      .TurnErr=-0,\
                                       .CAR_ON=1,\
                                       .Ctroller_ON=0,\
                                       .CAR_Tilt=0}

@@ -36,11 +36,5 @@
 .\objects\bsp_usart.o: ..\Libraries\GPIO\bsp_gpio.h
 .\objects\bsp_usart.o: ..\Libraries\LED\bsp_led.h
 .\objects\bsp_usart.o: ..\Libraries\MOTOR\bsp_sbv.h
-.\objects\bsp_usart.o: ..\Libraries\NRF_CONTROLLER\nrf_controller.h
-.\objects\bsp_usart.o: ..\Libraries\KEY\bsp_key.h
-.\objects\bsp_usart.o: ..\Libraries\ADC\bsp_adc.h
-.\objects\bsp_usart.o: ..\Libraries\NRF24L01P\nrf24l01p.h
-.\objects\bsp_usart.o: ..\Libraries\SPI\bsp_spi.h
-.\objects\bsp_usart.o: ..\Libraries\NRF_CONTROLLER\controller_decode.h
 .\objects\bsp_usart.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 .\objects\bsp_usart.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

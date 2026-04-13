@@ -196,8 +196,8 @@ void CTRL_S_DECODE_ADJParam(uint8_t *Msg)
     G_NRF_CTRL_S_ACKMsg[0] = NRF_CTRL_CMD_CAHR;
     G_NRF_CTRL_S_ACKMsg[1] = snprintf((char*)(&G_NRF_CTRL_S_ACKMsg[2]), WRX_PAYLOAD_WIDTH-2, "adjp...%.5f",G_CTRL_TWSBV_Struct.KP_vert);
     float step = 1.0;//指示当前步距
-    uint8_t ParamFlag = 0;//指示当前所调参数,0-7分别为 直立环KP/KD、速度环KP/KI、转向环KP/KD、中值、转向偏置
-    uint8_t ParamFlagMAX = 7;//
+    uint8_t ParamFlag = 0;//指示当前所调参数,0-7分别为 直立环KP/KD、速度环KP/KI、转向环KP/KD、位置环KD/KI、中值、转向偏置
+    uint8_t ParamFlagMAX = 9;//
     float tmp_Param = 0;//参数
 
     uint32_t adjPeriod = 1000;//每1000ms只修改一次

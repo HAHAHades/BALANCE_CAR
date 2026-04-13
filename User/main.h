@@ -6,7 +6,7 @@
 #define BSP_USE_F103  //使用F103系列
 //#define BSP_USE_F401  //使用F401系列
 
-#define NRF_CTRL_M_ON 1 //是否编译为遥控器 会屏蔽其他配置
+#define NRF_CTRL_M_ON 0 //是否编译为遥控器 会屏蔽其他配置
 
 #define OLED_Display_ON  0
 #define OLED_SHOW_MPU 0 //OLED 显示mpu的信息

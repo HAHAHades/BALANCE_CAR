@@ -10,7 +10,7 @@
 /*基于NRF的遥控器*/
 
 /*******************************User Modified*******************************/
-#define NRF_CTRL_DEBUG_ON       1 //是否通过串口输出调试信息
+#define NRF_CTRL_DEBUG_ON       0 //是否通过串口输出调试信息
 #define NRF_CTRL_TICK_PERIOD  1  //定义心跳周期/ms
 #define NRF_CTRL_TICKDET_TIMEOUT 2000 //定义心跳检测超时时间/ms
 /****************************End Of User Modified****************************/

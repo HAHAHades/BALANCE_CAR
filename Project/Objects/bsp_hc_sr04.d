@@ -40,9 +40,3 @@
 .\objects\bsp_hc_sr04.o: ..\Libraries\LED\bsp_led.h
 .\objects\bsp_hc_sr04.o: ..\Libraries\UART\bsp_usart.h
 .\objects\bsp_hc_sr04.o: ..\Libraries\MOTOR\bsp_sbv.h
-.\objects\bsp_hc_sr04.o: ..\Libraries\NRF_CONTROLLER\nrf_controller.h
-.\objects\bsp_hc_sr04.o: ..\Libraries\KEY\bsp_key.h
-.\objects\bsp_hc_sr04.o: ..\Libraries\ADC\bsp_adc.h
-.\objects\bsp_hc_sr04.o: ..\Libraries\NRF24L01P\nrf24l01p.h
-.\objects\bsp_hc_sr04.o: ..\Libraries\SPI\bsp_spi.h
-.\objects\bsp_hc_sr04.o: ..\Libraries\NRF_CONTROLLER\controller_decode.h

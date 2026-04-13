@@ -74,7 +74,7 @@ void ADC_Test()
 
 
 /**
-  * @brief   获取ADC通道转换结果
+  * @brief   获取ADC通道转换结果(DMA)
   * @param   data[OUT]:转换结果
   * @param   i[IN]:通道转换顺序索引
   * @retval  
