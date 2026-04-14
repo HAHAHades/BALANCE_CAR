@@ -67,9 +67,7 @@ extern BSP_TIMx_TypeDef BSP_TIM3_Struct;
 #endif //TIMx_ENCODER_ON
 
 /****************** */
-#if BANLANCE_CAR_ON
-#include "bsp_sbv.h"
-#endif //BANLANCE_CAR_ON
+
 
 /******************* */
 #if (NRF_CTRL_ON||NRF_CTRL_M_ON)

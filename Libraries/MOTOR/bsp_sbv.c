@@ -112,17 +112,18 @@ void BSP_SBV_ParamInit(void)
 {
 	BSP_TWSBV_Typedef tmpStruct = BSP_TWSBV_Typedef_DefaultVal;
 	G_CTRL_TWSBV_Struct = tmpStruct;
-
-	// G_CTRL_TWSBV_Struct.KP_vert = SG_SBV_ParamBuff[0];
-	// G_CTRL_TWSBV_Struct.KD_vert = SG_SBV_ParamBuff[1];
-	// G_CTRL_TWSBV_Struct.KP_velo = SG_SBV_ParamBuff[2];
-	// G_CTRL_TWSBV_Struct.KI_velo = SG_SBV_ParamBuff[3];
-	// G_CTRL_TWSBV_Struct.KP_turn = SG_SBV_ParamBuff[4];
-	// G_CTRL_TWSBV_Struct.KD_turn = SG_SBV_ParamBuff[5];
-	// G_CTRL_TWSBV_Struct.KD_pos = SG_SBV_ParamBuff[6];
-	// G_CTRL_TWSBV_Struct.KI_pos = SG_SBV_ParamBuff[7];
-	// G_CTRL_TWSBV_Struct.Med = SG_SBV_ParamBuff[8];
-	// G_CTRL_TWSBV_Struct.TurnErr = SG_SBV_ParamBuff[9];
+	#if BSP_SBV_InitParamWithFlash
+	G_CTRL_TWSBV_Struct.KP_vert = SG_SBV_ParamBuff[0];
+	G_CTRL_TWSBV_Struct.KD_vert = SG_SBV_ParamBuff[1];
+	G_CTRL_TWSBV_Struct.KP_velo = SG_SBV_ParamBuff[2];
+	G_CTRL_TWSBV_Struct.KI_velo = SG_SBV_ParamBuff[3];
+	G_CTRL_TWSBV_Struct.KP_turn = SG_SBV_ParamBuff[4];
+	G_CTRL_TWSBV_Struct.KD_turn = SG_SBV_ParamBuff[5];
+	G_CTRL_TWSBV_Struct.KD_pos = SG_SBV_ParamBuff[6];
+	G_CTRL_TWSBV_Struct.KI_pos = SG_SBV_ParamBuff[7];
+	G_CTRL_TWSBV_Struct.Med = SG_SBV_ParamBuff[8];
+	G_CTRL_TWSBV_Struct.TurnErr = SG_SBV_ParamBuff[9];
+	#endif 
 }
 
 
