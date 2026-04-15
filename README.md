@@ -109,7 +109,7 @@ BSP_KEY_Pot_Register(3,  PotStruct);
 5、反向调节参数--------KEY2单击  
 
 在退出调参模式前无法控制小车运动，**无论是否调整了参数，退出时都会自动将参数写入Flash，写入Flash后小车会抽风，需及时关闭电源或复位小车**
-**调参时断开小车电源或复位小车，调节的参数将不会被保存**
+**调参时断开小车电源或复位小车，调节的参数将不会被保存**  
 通过置`bsp_sbv.h`的宏`BSP_SBV_InitParamWithFlash`为1，  
 可以选择小车初始化时使用flash里保存的参数  
 置`BSP_SBV_InitParamWithFlash`为0，  
