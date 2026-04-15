@@ -2,7 +2,8 @@
 
 ### 两轮直流平衡小车
 
-效果演示视频 `【平衡小车定坡效果演示】 https://www.bilibili.com/video/BV1LkQ4BcEwD/?share_source=copy_web&vd_source=5267dc22ccd7e09bd14fb3864f9dc9b0`
+`【平衡小车定坡效果演示】 https://www.bilibili.com/video/BV1LkQ4BcEwD/`  
+`【遥控调参功能演示】 https://www.bilibili.com/video/BV13gQ7BcEXu/`  
 
 采用JGB37-520减速电机(减速比30)，含AB相编码器(11脉冲每转)
 ![](picSource/电机.png)
