@@ -93,41 +93,14 @@ typedef struct
 
 /************************函数声明********************/
 void NRF_Controller_UsageDemo(void);
+void NRF_Controller_WaitForConnect(void);
 uint8_t NRF_Controller_Config(uint8_t mode);
 void NRF_Controller_Run(NRF_Controller_Run_Typedef* RunStruct);
-void NRF_Controller_WaitForConnect(void);
 uint32_t NRFCTR_GetTime(void);
-uint8_t NRF_CTRL_FIFO2MSG(KEY_FIFO_t* Keys, uint8_t keys_num, uint8_t* Msg);
-void NRF_Controller_RunOnce(void);
-
-uint8_t NRF_CTRL_ConnectionDetect(void);
-void NRF_CTRL_TickIncrease(void);
-void NRF_CTRL_TickDetect(uint32_t tic);
-uint8_t NRF_CTRL_SendTick(void);
 uint8_t NRF_CTRL_SendMsg(uint8_t* TXMsg, uint8_t* RXMsg);
 uint8_t NRF_CTRL_RecvMsg(uint8_t* TXMsg, uint8_t* RXMsg);
 void NRF_CTRL_PrintMsg(uint8_t* Msg);
 void NRF_CTRL_M_CopeRecv(uint8_t* recvM);
-
-
-#if NRF_CTRL_MASTER
-void NRF_CTRL_CheckKeyStatues(void);
-#if NRF_CTRL_USE_CTRLDECODE //使用控制端解码
-void NRF_CTRL_UpdataVirKeySendMsg(void);
-#endif // NRF_CTRL_USE_CTRLDECODE
-void NRF_CTRL_CopeMsg(uint8_t* Msg);
-void NRF_CTRL_CopeCmdKeyMsg(uint8_t* Keys, uint8_t keys_num);
-void NRF_CTRL_CopeData(uint8_t dataByte,  uint8_t* data);
-void NRF_CTRL_CopeREQ(uint8_t reqMode, uint8_t dataBytes, uint8_t reqObj,  uint8_t* data);
-#else
-void NRF_CTRL_CopeMsg(uint8_t* Msg);
-void NRF_CTRL_CopeCmdKeyMsg(uint8_t* Keys, uint8_t keys_num);
-void NRF_CTRL_CopeData(uint8_t dataByte,  uint8_t* data);
-void NRF_CTRL_CopeREQ(uint8_t reqMode, uint8_t dataBytes, uint8_t reqObj,  uint8_t* data);
-
-
-#endif //NRF_CTRL_MASTER
-
 
 #endif //_NRF_CONTROLLER_H
 

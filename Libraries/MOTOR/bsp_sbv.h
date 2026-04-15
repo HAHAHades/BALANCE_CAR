@@ -7,7 +7,7 @@
 #define BSP_SBV_DEBUG_ON 1 //是否输出调试信息
 
 
-#define BSP_SBV_InitParamWithFlash 1 //是否使用保存的参数初始化小车
+#define BSP_SBV_InitParamWithFlash 0 //是否使用保存的参数初始化小车
 #define BSP_SBV_PARAMADJ_ON 1 //是否开启调参功能
 #define BSP_SBV_PARAM_NUM 10 //需要调整的参数个数
 
